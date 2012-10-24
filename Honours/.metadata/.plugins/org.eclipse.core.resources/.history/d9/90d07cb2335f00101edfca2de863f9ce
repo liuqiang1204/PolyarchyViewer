@@ -1,0 +1,242 @@
+package connector;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+	
+/**
+ * This class is used to connect to a database 
+ * All of the information required to access the database is located in this file
+ * Any query to the database needs to use an object from this class
+ * Only java functions are used but still requires the mysql-connector to connect to the database
+ * @author Anthony Scata
+ * @version 2.0
+ */
+public class Java_Connector {
+	
+	/*VARIABLES*/
+	
+	/**
+	 * Let's note our database connection properties the JDBC driver we'll be using
+	 */
+	private final String driver = "com.mysql.jdbc.Driver";
+
+	/**
+	 * The Internet address of the database server
+	 */
+	private final String host = "localhost:3306";
+	//private final String host = "hewy.infotech.monash.edu.au:3306";
+
+	/**
+	 * The name of the database to connect to
+	 */
+	private final String database = "tableview";
+	
+	/**
+	 * The user name required to login to the database
+	 */
+	private final String user = "tableview";
+	
+	/**
+	 * The password required for login
+	 */
+	private final String password = "barry84";
+	
+	/**
+	 * Create a database connection object
+	 */
+	protected static Connection connection = null;
+	
+	/**
+	 * If the database has been connected to or not
+	 */
+	private boolean connected = false;
+
+	
+	/*CONSRUCTORS*/
+	
+	/**
+	 * The default constructor
+	 * Connects to the database
+	 */
+	public Java_Connector() {
+		connected = connect();
+	}
+	
+	/**
+	 * The constructor foe the connector class
+	 * This constructor takes an integer as an option
+	 * To be extended later
+	 * @param option - whether to connect or not
+	 */
+	public Java_Connector(int option) {
+		if(option == 1) {
+			connected = connect();
+		} 
+	}
+	
+	/*METHODS*/
+	
+	/**
+	 * This method connects the object to the database
+	 * Required before any queries can be executed on the database
+	 * @return - the result of the connection
+	 */
+	public boolean connect() {
+		
+		//Set the url needed to connect to the database
+		String url = "jdbc:mysql://"+host+"/"+database;
+
+		//Try and connect to the database
+        try {
+        	Class.forName(driver).newInstance();
+            connection = DriverManager.getConnection (url, user, password);
+        } catch (Exception e) {
+            return false;
+        }
+
+		return true;
+	}
+	
+	/**
+	 * Disconnect from the database
+	 * To be extended later
+	 * @return - the result of the disconnection
+	 */
+	public boolean disconnect() {
+		
+		//Only disconnect if we are connected or we might get an error
+		if (connection != null) {
+            try {
+                connection.close ();
+                System.out.println ("Database connection terminated");
+            } catch (Exception e) { /* ignore close errors */ }
+        }
+		
+		connected = false;
+		
+		return true;
+	}
+	
+	
+	/**
+	 * Run a specific SQL query on the database
+	 * Required for some composite or unique queries
+	 * @param query - the query to be executed
+	 * @return - the result set that contains the items returned by the query
+	 */
+	public ResultSet getMyQuery(String query) {
+		
+		//The variables that hold information for the query
+		Statement statement = null;
+		ResultSet result_set = null;
+		
+		//Try and execute the query
+		try {
+			statement = connection.createStatement();
+			result_set = statement.executeQuery(query);
+		} catch (SQLException e) {
+			System.err.println("Error executing query: " + query);
+			System.err.println("Error message: " + e.getMessage ());
+			System.err.println("Error number: " + e.getErrorCode ());
+		} catch (Exception e) {
+			System.err.println("The databse has dissconnected");
+		}
+		
+		//return the result of the query
+		return result_set;
+	}
+	
+	
+	/*GENERIC GET QUERIES*/
+	
+	/**
+	 * Get the top level for codes
+	 * @return - the set
+	 */
+	public ResultSet getTopLevelFor() {
+		String query = "SELECT * FROM for_codes " +
+					"WHERE FOR_Code LIKE '__0000'";
+		return getMyQuery(query);
+	}
+	
+	/**
+	 * Get the middle level for codes
+	 * @param parent - the parent of the for codes we want, pass with only two digits
+	 * @return - the set
+	 */
+	public ResultSet getMiddleLevelFor(String parent) {
+		String query = "SELECT * FROM for_codes " +
+					"WHERE FOR_Code LIKE '"+parent+"__00'" +
+					"AND FOR_Code NOT LIKE '"+parent+"0000'";
+		return getMyQuery(query);
+	}
+	
+	/**
+	 * Get the bottom level for codes
+	 * @param parent - the parent of the for codes we want, pass with only four digits
+	 * @return - the set
+	 */
+	public ResultSet getBottomLevelFor(String parent) {
+		String query = "SELECT * FROM for_codes " +
+					"WHERE FOR_Code LIKE '"+parent+"__' " +
+					"AND FOR_Code NOT LIKE '"+parent+"00'";
+		return getMyQuery(query);
+	}
+	
+	/**
+	 * Get all of the themes
+	 * @return - the set
+	 */
+	public ResultSet getThemes() {
+		String query = "SELECT * FROM `themes`";
+		return getMyQuery(query);
+	}
+	
+	/**
+	 * Get all of the faculties, removing some of the other elements in the table
+	 * @return - the set
+	 */
+	public ResultSet getFaculty() {
+		String query = "SELECT * " +
+				"FROM `facultys` " +
+				"WHERE `faculty_name` LIKE '%faculty%'";
+		return getMyQuery(query);
+	}
+	
+	/**
+	 * Get all of the departments in this faculty
+	 * @param parent - the faculty
+	 * @return - the set
+	 */
+	public ResultSet getDepartment(String parent) {
+		String query = "SELECT * FROM `departments` " +
+				"WHERE `faculty_id` = '"+parent+"' " +
+				"AND department_id != '"+parent+"' " +
+				"AND department_name NOT LIKE '%Ctr%'";
+		return getMyQuery(query);
+	}
+	
+	/**
+	 * Get all of the researchers in this department, or faculty depending on the code
+	 * @param parent - the department or faculty
+	 * @return - the set
+	 */
+	public ResultSet getResearcher(String parent) {
+		String query = "SELECT * FROM `researchers` " +
+					"WHERE `AOU_code` = '"+parent+"' " +
+					"AND `researcher_id` > '0' ORDER BY `last_name` ASC";
+		return getMyQuery(query);
+	}
+
+	/*GETTERS*/
+
+	/**
+	 * @return the connected status
+	 */
+	public boolean isConnected() {
+		return connected;
+	}
+}
