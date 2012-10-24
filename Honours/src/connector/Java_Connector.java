@@ -23,7 +23,7 @@ public class Java_Connector {
 	 * Let's note our database connection properties the JDBC driver we'll be
 	 * using
 	 */
-	private final String driver = "com.mysql.jdbc.Driver";
+	private final String driver = "com.mysql.jdbc.Driver";	
 
 	/**
 	 * The Internet address of the database server
@@ -54,7 +54,7 @@ public class Java_Connector {
 	 * If the database has been connected to or not
 	 */
 	private boolean connected = false;
-
+	
 	/* CONSRUCTORS */
 
 	/**
@@ -65,7 +65,6 @@ public class Java_Connector {
 		this.user = user;
 		this.password = new String(password);
 		this.database = database;
-
 		connected = connect();
 	}
 
@@ -94,9 +93,9 @@ public class Java_Connector {
 
 		// Set the url needed to connect to the database
 		String url = "jdbc:mysql://" + host + "/" + database;
-
+				
 		// Try and connect to the database
-		try {
+		try{
 			Class.forName(driver).newInstance();
 			connection = DriverManager.getConnection(url, user, password);
 

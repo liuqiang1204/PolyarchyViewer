@@ -15,6 +15,11 @@ import extensions.QueryView;
  * Dialog box to prompt for user id/password and the database to connect to.
  */
 
+/**
+ * add support to sqlite3
+ * @author Qiang Liu
+ *
+ */
 
 public class LoginScreen extends javax.swing.JDialog {
 
@@ -22,11 +27,13 @@ public class LoginScreen extends javax.swing.JDialog {
 	/**
 	 * The databases to connect to
 	 */
-	protected String[] databases = {"honours","movie_small","publication_small","sample","honours1","honours2"};
+	protected String[] databases = {"honours","movie_small","publication_small","sample"};
 	protected boolean isValid = false;
 	protected String dbName = "honours";
 	
 	JFrame frame = new JFrame("PasswordDemo");
+
+	
 	
   public LoginScreen() {
 	 
@@ -48,6 +55,7 @@ public class LoginScreen extends javax.swing.JDialog {
     JLabel3.setText("Database Name:");
     frame.getContentPane().add(JLabel3);
     JLabel3.setBounds(12, 72, 96,  24);
+    
    
     frame.getContentPane().add(_uid);    
     _uid.setBounds(110, 12, 200, 24);
@@ -79,12 +87,16 @@ public class LoginScreen extends javax.swing.JDialog {
     
     
     /**
+     * add support for sqlite3
      * Set some default values -- Qiang
      */
     frame.setResizable(false);
     frame.setLocationRelativeTo(null);
+    
+    
+    
     _ok.setBounds(40, 100, 100, 24);
-    _cancel.setBounds(180, 100, 100, 24);
+    _cancel.setBounds(180, 100, 100, 24);   
     frame.setSize(340, 170);
     //for test only
     _uid.setText("root");
@@ -115,6 +127,7 @@ public class LoginScreen extends javax.swing.JDialog {
   javax.swing.JLabel JLabel1 = new javax.swing.JLabel();
   javax.swing.JLabel JLabel2 = new javax.swing.JLabel();
   javax.swing.JLabel JLabel3 = new javax.swing.JLabel();
+  
   
   JComboBox dbList = new JComboBox(databases);
   
@@ -152,7 +165,6 @@ public class LoginScreen extends javax.swing.JDialog {
 	  
 	  String userName = _uid.getText();
 	  char[] password = _pwd.getPassword();
-	  
 
 		  frame.setVisible(false);
 		
