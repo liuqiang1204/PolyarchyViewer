@@ -74,3 +74,7 @@ ALTER TABLE `sample`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAU
 ALTER TABLE `publication_small`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
 ALTER TABLE `movie_small`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
 ALTER TABLE `honours`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
+
+Create index opt001 on  publications_forcodes(idhierarchy,weighted_sum);
+Create index opt002 on publications_themes(idhierarchy,weighted_sum);
+Create index opt003 on  publications_researchers(idhierarchy,weighted_sum);
