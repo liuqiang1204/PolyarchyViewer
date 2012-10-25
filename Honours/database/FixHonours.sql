@@ -69,3 +69,4 @@ from
     join `publications_forcodes` `g` ON ((`c`.`publicationid` = `g`.`publicationid`)));
 
 
+ALTER TABLE `honours`.`connection` RENAME TO  `honours`.`t_connection` ;
