@@ -231,7 +231,7 @@ public class View extends JFrame {
         
         /*HIERARCHY PANELS*/
         
-        String query = "select * from hierarchy;";
+        String query = "select * from hierarchy";
    
         ResultSet main_table = model.getMyQuery(query);
         

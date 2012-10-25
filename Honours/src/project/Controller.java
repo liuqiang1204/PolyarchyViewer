@@ -216,7 +216,7 @@ public class Controller {
 
 			// fetch the name of the column based on the linking table selected
 			// eg. for movies, column will be movieId, people -> peopleId
-			query1 = "select * from atom where name = '" + count_type + "'";
+			query1 = "select * from atom where t_name = '" + count_type.toLowerCase() + "'";
 			rs = m_model.getMyQuery(query1);
 			rs.next();
 			column = rs.getString(3);
@@ -1441,63 +1441,66 @@ public class Controller {
 				// use the 'join table' instead of join operation 
 				// --only for honours db
 				// should find a suitable way for all dbs --qiang
-				
-				// from p_r
-				if (linkTableName[toIndex]
-						.equalsIgnoreCase("publications_forcodes")
-						&& linkTableName[fromIndex]
-								.equalsIgnoreCase("publications_researchers")) {
-					queryO = "select id1, wsum from join_publications_forcodes_publications_researchers "
-							+ inputs.toString().replaceAll(
-									"<UnknownTable>.idhierarchy", "id2");
+				if(m_model.database.toLowerCase().endsWith("honours")){
+					queryO = "select id1, wsum from join_"
+						+ linkTableName[toIndex]+"_"+linkTableName[fromIndex] + " "
+						+ inputs.toString().replaceAll("<UnknownTable>.idhierarchy", "id2");
+//				// from p_r
+//				if (linkTableName[toIndex]
+//						.equalsIgnoreCase("publications_forcodes")
+//						&& linkTableName[fromIndex]
+//								.equalsIgnoreCase("publications_researchers")) {
+//					queryO = "select id1, wsum from join_publications_forcodes_publications_researchers "
+//							+ inputs.toString().replaceAll(
+//									"<UnknownTable>.idhierarchy", "id2");
+//				}
+//				if (linkTableName[toIndex]
+//						.equalsIgnoreCase("publications_themes")
+//						&& linkTableName[fromIndex]
+//								.equalsIgnoreCase("publications_researchers")) {
+//					queryO = "select id1, wsum from join_publications_themes_publications_researchers "
+//							+ inputs.toString().replaceAll(
+//									"<UnknownTable>.idhierarchy", "id2");
+//				}
+//				
+//				// from p_t
+//				if (linkTableName[toIndex]
+//						.equalsIgnoreCase("publications_forcodes")
+//						&& linkTableName[fromIndex]
+//								.equalsIgnoreCase("publications_themes")) {
+//					queryO = "select id1, wsum from join_publications_forcodes_publications_themes "
+//							+ inputs.toString().replaceAll(
+//									"<UnknownTable>.idhierarchy", "id2");
+//				}
+//				
+//				if (linkTableName[toIndex]
+//						.equalsIgnoreCase("publications_researchers")
+//						&& linkTableName[fromIndex]
+//								.equalsIgnoreCase("publications_themes")) {
+//					queryO = "select id1, wsum from join_publications_researchers_publications_themes "
+//							+ inputs.toString().replaceAll(
+//									"<UnknownTable>.idhierarchy", "id2");
+//				}
+//				
+//				// from p_f
+//				if (linkTableName[toIndex]
+//						.equalsIgnoreCase("publications_researchers")
+//						&& linkTableName[fromIndex]
+//								.equalsIgnoreCase("publications_forcodes")) {
+//					queryO = "select id1, wsum from join_publications_researchers_publications_forcodes "
+//							+ inputs.toString().replaceAll(
+//									"<UnknownTable>.idhierarchy", "id2");
+//				}
+//				
+//				if (linkTableName[toIndex]
+//						.equalsIgnoreCase("publications_themes")
+//						&& linkTableName[fromIndex]
+//								.equalsIgnoreCase("publications_forcodes")) {
+//					queryO = "select id1, wsum from join_publications_themes_publications_forcodes "
+//							+ inputs.toString().replaceAll(
+//									"<UnknownTable>.idhierarchy", "id2");
+//				}
 				}
-				if (linkTableName[toIndex]
-						.equalsIgnoreCase("publications_themes")
-						&& linkTableName[fromIndex]
-								.equalsIgnoreCase("publications_researchers")) {
-					queryO = "select id1, wsum from join_publications_themes_publications_researchers "
-							+ inputs.toString().replaceAll(
-									"<UnknownTable>.idhierarchy", "id2");
-				}
-				
-				// from p_t
-				if (linkTableName[toIndex]
-						.equalsIgnoreCase("publications_forcodes")
-						&& linkTableName[fromIndex]
-								.equalsIgnoreCase("publications_themes")) {
-					queryO = "select id1, wsum from join_publications_forcodes_publications_themes "
-							+ inputs.toString().replaceAll(
-									"<UnknownTable>.idhierarchy", "id2");
-				}
-				
-				if (linkTableName[toIndex]
-						.equalsIgnoreCase("publications_researchers")
-						&& linkTableName[fromIndex]
-								.equalsIgnoreCase("publications_themes")) {
-					queryO = "select id1, wsum from join_publications_researchers_publications_themes "
-							+ inputs.toString().replaceAll(
-									"<UnknownTable>.idhierarchy", "id2");
-				}
-				
-				// from p_f
-				if (linkTableName[toIndex]
-						.equalsIgnoreCase("publications_researchers")
-						&& linkTableName[fromIndex]
-								.equalsIgnoreCase("publications_forcodes")) {
-					queryO = "select id1, wsum from join_publications_researchers_publications_forcodes "
-							+ inputs.toString().replaceAll(
-									"<UnknownTable>.idhierarchy", "id2");
-				}
-				
-				if (linkTableName[toIndex]
-						.equalsIgnoreCase("publications_themes")
-						&& linkTableName[fromIndex]
-								.equalsIgnoreCase("publications_forcodes")) {
-					queryO = "select id1, wsum from join_publications_themes_publications_forcodes "
-							+ inputs.toString().replaceAll(
-									"<UnknownTable>.idhierarchy", "id2");
-				}
-
 				return new StringBuffer(queryO);
 
 			}

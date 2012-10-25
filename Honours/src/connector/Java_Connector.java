@@ -2,6 +2,7 @@ package connector;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,6 +15,12 @@ import java.sql.Statement;
  * 
  * @author Anthony Scata
  * @version 2.0
+ */
+
+/**
+ * Add support to derby database
+ * @author Qiang Liu
+ *
  */
 public class Java_Connector {
 
@@ -90,20 +97,35 @@ public class Java_Connector {
 	 * @return - the result of the connection
 	 */
 	public boolean connect() {
-
-		// Set the url needed to connect to the database
-		String url = "jdbc:mysql://" + host + "/" + database;
-				
-		// Try and connect to the database
-		try{
-			Class.forName(driver).newInstance();
-			connection = DriverManager.getConnection(url, user, password);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
+		//add support to derby --Qiang
+		if(this.database.startsWith("Derby:")){
+			//e.g. jdbc:derby:database/honours;create=true;user=root;password=admin
+			String url = "jdbc:derby:database/"+this.database.substring(6)
+					+ ";user=" + user + ";password="+password;
+			System.out.println(url);
+			try {
+				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+				connection = DriverManager.getConnection(url);
+			} catch (Exception e) {				
+				e.printStackTrace();
+				return false;
+			}
 		}
-
+		else
+		{
+			// Set the url needed to connect to the database
+			String url = "jdbc:mysql://" + host + "/" + database;
+	
+			// Try and connect to the database
+			try{
+				Class.forName(driver).newInstance();
+				connection = DriverManager.getConnection(url, user, password);
+	
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -138,11 +160,31 @@ public class Java_Connector {
 		Statement statement = null;
 
 		System.out.println("exeMyQuery:: " + query);
-
+		String sql = query;
+		
 		// Try and execute the query
 		try {
 			statement = connection.createStatement();
-			statement.execute(query);
+			//for derby create as select ... need end with "with no data" then insert data.
+			if(this.database.startsWith("Derby:")&&sql.toLowerCase().startsWith("create table"))
+			{
+				sql+=" with no data";
+				statement.execute(sql);
+				sql = query.substring(26,query.length()-1);
+				ResultSet rs = statement.executeQuery(sql);
+				PreparedStatement ps = connection.prepareStatement("Insert into tmpTable Values (?,?)");
+				connection.setAutoCommit(false);
+				while(rs.next()){
+					ps.setObject(1, rs.getObject(1));
+					ps.setObject(2, rs.getObject(2));
+					ps.addBatch();
+				}
+				ps.executeBatch();
+				connection.commit();
+				connection.setAutoCommit(true);
+			}
+			else
+				statement.execute(sql);
 		} catch (SQLException e) {
 			System.err.println("Error executing query: " + query);
 			System.err.println("Error message: " + e.getMessage());
@@ -172,7 +214,7 @@ public class Java_Connector {
 
 		// Try and execute the query
 		try {
-			statement = connection.createStatement();
+			statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			result_set = statement.executeQuery(query);
 		} catch (SQLException e) {
 			System.err.println("Error executing query: " + query);
@@ -198,8 +240,7 @@ public class Java_Connector {
 	public ResultSet getTopLevel(String tableName) {
 
 		String query = "select * from " + tableName + " where ParentID=0 "
-				+ " and origin_parent is not null  ; ";
-		// System.out.println("getTopLevel:: "+query);
+				+ " and origin_parent is not null";
 		return getMyQuery(query);
 	}
 
@@ -214,7 +255,6 @@ public class Java_Connector {
 
 		String query = "select * from " + tableName + " where "
 				+ " parentid = " + parent;
-		// System.out.println("getMiddleLevel:: "+query);
 
 		return getMyQuery(query);
 	}
