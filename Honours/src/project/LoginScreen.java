@@ -28,9 +28,10 @@ public class LoginScreen extends javax.swing.JDialog {
 	 * The databases to connect to
 	 */
 	protected String[] databases = 
-		{"honours","movie_small","publication_small","sample",
-			"Derby:honours","Derby:movie_small",
-			"Derby:publication_small","Derby:sample"};
+		{
+			"Derby:sample","Derby:movie_small",
+			"Derby:publication_small","Derby:honours",
+			"sample","movie_small","publication_small","honours"};
 	protected boolean isValid = false;
 	protected String dbName = "honours";
 	
@@ -104,6 +105,7 @@ public class LoginScreen extends javax.swing.JDialog {
     //for test only
     _uid.setText("root");
     _pwd.setText("admin");
+
   }
 
   

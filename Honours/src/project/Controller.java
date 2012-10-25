@@ -168,7 +168,7 @@ public class Controller {
 	 */
 	public Controller(Java_Connector model, View view, QueryView query) {
 
-		System.out.println("Controller::");
+		System.out.println("Controller running...");
 
 		// set the model and connect to the database
 		m_model = model;
@@ -291,22 +291,19 @@ public class Controller {
 		long startMemory = Runtime.getRuntime().totalMemory();
 		long startTime = System.currentTimeMillis();
 
-		System.out.println("Start adding contents at : " + startTime);
+		System.out.println("Start adding contents ...");
 
 		// Check the result with this variable
 		// double result = 0; //remove by Qiang
 
 		try {
 			// turn on the glass that prevents interaction while loading
-			System.out.println("Glass : " + System.currentTimeMillis());
 			m_view.startGlass(true);
 
 			// Firstly add the action listeners to all of the panel objects
-			System.out.println("Listener : " + System.currentTimeMillis());
 			add_listeners();
 
 			// increment the status bar
-			System.out.println("StatusBar : " + System.currentTimeMillis());
 			m_view.incrementWaiter(25);
 			int x = 25;
 
@@ -316,10 +313,7 @@ public class Controller {
 
 			// Add the table information into the correct hierarchy
 
-			System.out.println("Add table : " + System.currentTimeMillis());
 			while (hierarchy_num < 4) {
-				System.out.println(hierarchy_num + " : "
-						+ System.currentTimeMillis());
 				// call the main function to fill in the values into the screen
 				// result = Alpha_table(hierarchy_num);
 				Alpha_table(hierarchy_num);
@@ -447,7 +441,7 @@ public class Controller {
 		/**
 		 * add some code for test --Qiang
 		 */
-		System.out.println("Alpha_table : " + System.currentTimeMillis());
+//		System.out.println("Alpha_table : " + System.currentTimeMillis());
 
 		// Specify which level this is
 		int level = 1;
@@ -465,11 +459,9 @@ public class Controller {
 		int index = hierarchy_num - 1;
 
 		// call the largest function
-		System.out.println("largest : " + System.currentTimeMillis());
 		largest(index);
 
 		// First get all of the top level values
-		System.out.println("Get top level : " + System.currentTimeMillis());
 		ResultSet data = m_model.getTopLevel(tableName[index]);
 
 		// Loop through the results
@@ -617,8 +609,8 @@ public class Controller {
 
 		String query;
 
-		System.out.println("Largest:: The tablelevel for index=" + index
-				+ " is " + tableLevel[index]);
+//		System.out.println("Largest:: The tablelevel for index=" + index
+//				+ " is " + tableLevel[index]);
 
 		try {
 
@@ -703,8 +695,6 @@ public class Controller {
 						+ " where parentid = 0";
 				ResultSet top_data = m_model.getMyQuery(top_query);
 
-				System.out.println("Largest::tbl[3]::top_query:: " + top_query);
-
 				// Loop through the results
 				while (top_data.next()) {
 
@@ -714,9 +704,6 @@ public class Controller {
 					String middle_query = "select * from " + tableName[index]
 							+ " where parentid = " + id;
 					ResultSet middle_data = m_model.getMyQuery(middle_query);
-
-					System.out.println("Largest::tbl[3]::mid_query:: "
-							+ middle_query);
 
 					// Loop through the results
 					while (middle_data.next()) {
@@ -1099,7 +1086,7 @@ public class Controller {
 			HashSet<String> inputSet = new HashSet<String>();
 			HashSet<String> pids = new HashSet<String>();
 			
-			System.out.println("<<<<<<<<" + list.size());
+//			System.out.println("<<<<<<<<" + list.size());
 			
 			for (Iterator<Integer> i = list.iterator(); i.hasNext();) {
 
@@ -1107,8 +1094,8 @@ public class Controller {
 				AMLabel this_label = (AMLabel) h3.getInnerhierarchy()
 						.getComponent(tindex);
 
-				System.out.println(tindex + "-------> " + this_label.getLevel()
-						+ " tbl--->" + tableLevel[h3.getId() - 1]);
+//				System.out.println(tindex + "-------> " + this_label.getLevel()
+//						+ " tbl--->" + tableLevel[h3.getId() - 1]);
 
 				if (this_label.getLevel() == 2
 						&& tableLevel[h3.getId() - 1] == 3) {
@@ -1370,7 +1357,7 @@ public class Controller {
 		// 4.Still have some bugs. Need to analyze the processing formulas.
 		// 5.Change select in select to join
 
-		System.out.println("from_to (inputs): " + inputs);
+//		System.out.println("from_to (inputs): " + inputs);
 
 		if (!inputs.equals("")) {
 
@@ -1445,61 +1432,6 @@ public class Controller {
 					queryO = "select id1, wsum from join_"
 						+ linkTableName[toIndex]+"_"+linkTableName[fromIndex] + " "
 						+ inputs.toString().replaceAll("<UnknownTable>.idhierarchy", "id2");
-//				// from p_r
-//				if (linkTableName[toIndex]
-//						.equalsIgnoreCase("publications_forcodes")
-//						&& linkTableName[fromIndex]
-//								.equalsIgnoreCase("publications_researchers")) {
-//					queryO = "select id1, wsum from join_publications_forcodes_publications_researchers "
-//							+ inputs.toString().replaceAll(
-//									"<UnknownTable>.idhierarchy", "id2");
-//				}
-//				if (linkTableName[toIndex]
-//						.equalsIgnoreCase("publications_themes")
-//						&& linkTableName[fromIndex]
-//								.equalsIgnoreCase("publications_researchers")) {
-//					queryO = "select id1, wsum from join_publications_themes_publications_researchers "
-//							+ inputs.toString().replaceAll(
-//									"<UnknownTable>.idhierarchy", "id2");
-//				}
-//				
-//				// from p_t
-//				if (linkTableName[toIndex]
-//						.equalsIgnoreCase("publications_forcodes")
-//						&& linkTableName[fromIndex]
-//								.equalsIgnoreCase("publications_themes")) {
-//					queryO = "select id1, wsum from join_publications_forcodes_publications_themes "
-//							+ inputs.toString().replaceAll(
-//									"<UnknownTable>.idhierarchy", "id2");
-//				}
-//				
-//				if (linkTableName[toIndex]
-//						.equalsIgnoreCase("publications_researchers")
-//						&& linkTableName[fromIndex]
-//								.equalsIgnoreCase("publications_themes")) {
-//					queryO = "select id1, wsum from join_publications_researchers_publications_themes "
-//							+ inputs.toString().replaceAll(
-//									"<UnknownTable>.idhierarchy", "id2");
-//				}
-//				
-//				// from p_f
-//				if (linkTableName[toIndex]
-//						.equalsIgnoreCase("publications_researchers")
-//						&& linkTableName[fromIndex]
-//								.equalsIgnoreCase("publications_forcodes")) {
-//					queryO = "select id1, wsum from join_publications_researchers_publications_forcodes "
-//							+ inputs.toString().replaceAll(
-//									"<UnknownTable>.idhierarchy", "id2");
-//				}
-//				
-//				if (linkTableName[toIndex]
-//						.equalsIgnoreCase("publications_themes")
-//						&& linkTableName[fromIndex]
-//								.equalsIgnoreCase("publications_forcodes")) {
-//					queryO = "select id1, wsum from join_publications_themes_publications_forcodes "
-//							+ inputs.toString().replaceAll(
-//									"<UnknownTable>.idhierarchy", "id2");
-//				}
 				}
 				return new StringBuffer(queryO);
 
@@ -1657,8 +1589,8 @@ public class Controller {
 									data.getDouble(2), panel, map, false);
 						}
 					}
-					data.last();
-					System.out.println("Records num: " + data.getRow());
+//					data.last();
+//					System.out.println("Records num: " + data.getRow());
 
 				} catch (SQLException e) {
 					Custom_Messages
