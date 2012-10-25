@@ -70,3 +70,7 @@ from
 
 
 ALTER TABLE `honours`.`connection` RENAME TO  `honours`.`t_connection` ;
+ALTER TABLE `sample`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
+ALTER TABLE `publication_small`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
+ALTER TABLE `movie_small`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
+ALTER TABLE `honours`.`atom` CHANGE COLUMN `name` `t_name` VARCHAR(45) NULL DEFAULT NULL  ;
