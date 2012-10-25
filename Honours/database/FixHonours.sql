@@ -20,7 +20,7 @@ CREATE
 Table `join_publications_forcodes_publications_researchers` AS
     select 
         `c`.`idhierarchy` AS `id1`,
-        (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `sum`,
+        (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `wsum`,
         `g`.`idhierarchy` AS `id2`
     from
         (`publications_forcodes` `c`
@@ -30,7 +30,7 @@ CREATE
 Table `join_publications_themes_publications_researchers` AS
     select 
         `c`.`idhierarchy` AS `id1`,
-        (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `sum`,
+        (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `wsum`,
         `g`.`idhierarchy` AS `id2`
     from
         (`publications_themes` `c`
@@ -38,7 +38,7 @@ Table `join_publications_themes_publications_researchers` AS
 
 CREATE Table `join_publications_forcodes_publications_themes` 
 AS select `c`.`idhierarchy` AS `id1`,
-    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `sum`,
+    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `wsum`,
     `g`.`idhierarchy` AS `id2` 
 from
     (`publications_forcodes` `c`
@@ -46,7 +46,7 @@ from
 
 CREATE Table `join_publications_researchers_publications_themes` 
 AS select `c`.`idhierarchy` AS `id1`,
-    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `sum`,
+    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `wsum`,
     `g`.`idhierarchy` AS `id2` 
 from
     (`publications_researchers` `c`
@@ -54,7 +54,7 @@ from
 
 CREATE Table `join_publications_researchers_publications_forcodes` 
 AS select `c`.`idhierarchy` AS `id1`,
-    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `sum`,
+    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `wsum`,
     `g`.`idhierarchy` AS `id2` 
 from
     (`publications_researchers` `c`
@@ -62,7 +62,7 @@ from
 
 CREATE Table `join_publications_themes_publications_forcodes` 
 AS select `c`.`idhierarchy` AS `id1`,
-    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `sum`,
+    (`g`.`weighted_sum` * `c`.`weighted_sum`) AS `wsum`,
     `g`.`idhierarchy` AS `id2` 
 from
     (`publications_themes` `c`

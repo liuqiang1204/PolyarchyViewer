@@ -1447,7 +1447,7 @@ public class Controller {
 						.equalsIgnoreCase("publications_forcodes")
 						&& linkTableName[fromIndex]
 								.equalsIgnoreCase("publications_researchers")) {
-					queryO = "select id1, sum from join_publications_forcodes_publications_researchers "
+					queryO = "select id1, wsum from join_publications_forcodes_publications_researchers "
 							+ inputs.toString().replaceAll(
 									"<UnknownTable>.idhierarchy", "id2");
 				}
@@ -1455,7 +1455,7 @@ public class Controller {
 						.equalsIgnoreCase("publications_themes")
 						&& linkTableName[fromIndex]
 								.equalsIgnoreCase("publications_researchers")) {
-					queryO = "select id1, sum from join_publications_themes_publications_researchers "
+					queryO = "select id1, wsum from join_publications_themes_publications_researchers "
 							+ inputs.toString().replaceAll(
 									"<UnknownTable>.idhierarchy", "id2");
 				}
@@ -1465,7 +1465,7 @@ public class Controller {
 						.equalsIgnoreCase("publications_forcodes")
 						&& linkTableName[fromIndex]
 								.equalsIgnoreCase("publications_themes")) {
-					queryO = "select id1, sum from join_publications_forcodes_publications_themes "
+					queryO = "select id1, wsum from join_publications_forcodes_publications_themes "
 							+ inputs.toString().replaceAll(
 									"<UnknownTable>.idhierarchy", "id2");
 				}
@@ -1474,7 +1474,7 @@ public class Controller {
 						.equalsIgnoreCase("publications_researchers")
 						&& linkTableName[fromIndex]
 								.equalsIgnoreCase("publications_themes")) {
-					queryO = "select id1, sum from join_publications_researchers_publications_themes "
+					queryO = "select id1, wsum from join_publications_researchers_publications_themes "
 							+ inputs.toString().replaceAll(
 									"<UnknownTable>.idhierarchy", "id2");
 				}
@@ -1484,7 +1484,7 @@ public class Controller {
 						.equalsIgnoreCase("publications_researchers")
 						&& linkTableName[fromIndex]
 								.equalsIgnoreCase("publications_forcodes")) {
-					queryO = "select id1, sum from join_publications_researchers_publications_forcodes "
+					queryO = "select id1, wsum from join_publications_researchers_publications_forcodes "
 							+ inputs.toString().replaceAll(
 									"<UnknownTable>.idhierarchy", "id2");
 				}
@@ -1493,7 +1493,7 @@ public class Controller {
 						.equalsIgnoreCase("publications_themes")
 						&& linkTableName[fromIndex]
 								.equalsIgnoreCase("publications_forcodes")) {
-					queryO = "select id1, sum from join_publications_themes_publications_forcodes "
+					queryO = "select id1, wsum from join_publications_themes_publications_forcodes "
 							+ inputs.toString().replaceAll(
 									"<UnknownTable>.idhierarchy", "id2");
 				}
