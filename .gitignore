@@ -3,6 +3,6 @@
 *.war
 *.ear
 *.bak
+*.log
 
 .metadata/
-MySQL2Derby/
