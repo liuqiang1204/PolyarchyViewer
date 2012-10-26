@@ -410,6 +410,7 @@ public class AMLabel extends JLabel {
 					
 					//a bar of the correct width and height
 					g2.fillRect(0, 0, bar_width, bar_height);
+//					System.out.println(this.getText()+"--Bar Width:" + this.getBar_width());
 				} 
 		        
 		        //get metrics from the graphics
@@ -444,7 +445,9 @@ public class AMLabel extends JLabel {
 		        	if(sub_count >= count) {
 		        		percentage = 1;
 		        	} else {
-		        		percentage = (double)sub_count / (count + 1);
+		        		//??why count+1??? --qiang
+//		        		percentage = (double)sub_count / (count + 1);
+		        		percentage = (double)sub_count / count;
 		        	}
 		        }  else {
 		        	
@@ -460,6 +463,8 @@ public class AMLabel extends JLabel {
 			        
 		        	//Fill the label with a rectangle
 			        g2.fillRect(0, (bar_height/2), fill_width, bar_height);
+			        
+//			        System.out.println(this.getText()+"--Bar red width:" + fill_width);
 		        }
 		        
 	        }  else {

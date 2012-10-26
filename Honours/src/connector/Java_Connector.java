@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.swing.JOptionPane;
+
 /**
  * This class is used to connect to a database All of the information required
  * to access the database is located in this file Any query to the database
@@ -19,8 +21,9 @@ import java.sql.Statement;
 
 /**
  * Add support to derby database
+ * 
  * @author Qiang Liu
- *
+ * 
  */
 public class Java_Connector {
 
@@ -30,7 +33,7 @@ public class Java_Connector {
 	 * Let's note our database connection properties the JDBC driver we'll be
 	 * using
 	 */
-	private final String driver = "com.mysql.jdbc.Driver";	
+	private final String driver = "com.mysql.jdbc.Driver";
 
 	/**
 	 * The Internet address of the database server
@@ -61,7 +64,7 @@ public class Java_Connector {
 	 * If the database has been connected to or not
 	 */
 	private boolean connected = false;
-	
+
 	/* CONSRUCTORS */
 
 	/**
@@ -97,34 +100,34 @@ public class Java_Connector {
 	 * @return - the result of the connection
 	 */
 	public boolean connect() {
-		//add support to derby --Qiang
-		if(this.database.startsWith("Derby:")){
-			//e.g. jdbc:derby:database/honours;create=true;user=root;password=admin
-			String url = "jdbc:derby:database/"+this.database.substring(6)
-					+ ";user=" + user + ";password="+password;
-			System.out.println(url);
-			try {
-				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+		// add support to derby --Qiang
+		try {
+			if (this.database.startsWith("Derby:")) {
+				// e.g.
+				// jdbc:derby:database/honours;create=true;user=root;password=admin
+				String url = "jdbc:derby:database/"
+						+ this.database.substring(6) + ";user=" + user
+						+ ";password=" + password;
+				System.out.println(url);
+
+				Class.forName("org.apache.derby.jdbc.EmbeddedDriver")
+						.newInstance();
 				connection = DriverManager.getConnection(url);
-			} catch (Exception e) {				
-				e.printStackTrace();
-				return false;
-			}
-		}
-		else
-		{
-			// Set the url needed to connect to the database
-			String url = "jdbc:mysql://" + host + "/" + database;
-	
-			// Try and connect to the database
-			try{
+
+			} else {
+				// Set the url needed to connect to the database
+				String url = "jdbc:mysql://" + host + "/" + database;
+
+				// Try and connect to the database
 				Class.forName(driver).newInstance();
 				connection = DriverManager.getConnection(url, user, password);
-	
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
 			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Cannot connect to the database!", 
+					"Database connection error", JOptionPane.INFORMATION_MESSAGE);
+			e.printStackTrace();
+			System.exit(0);
+			return false;
 		}
 		return true;
 	}
@@ -161,20 +164,22 @@ public class Java_Connector {
 
 		System.out.println("exeMyQuery:: " + query);
 		String sql = query;
-		
+
 		// Try and execute the query
 		try {
 			statement = connection.createStatement();
-			//for derby create as select ... need end with "with no data" then insert data.
-			if(this.database.startsWith("Derby:")&&sql.toLowerCase().startsWith("create table"))
-			{
-				sql+=" with no data";
+			// for derby create as select ... need end with "with no data" then
+			// insert data.
+			if (this.database.startsWith("Derby:")
+					&& sql.toLowerCase().startsWith("create table")) {
+				sql += " with no data";
 				statement.execute(sql);
-				sql = query.substring(26,query.length()-1);
+				sql = query.substring(26, query.length() - 1);
 				ResultSet rs = statement.executeQuery(sql);
-				PreparedStatement ps = connection.prepareStatement("Insert into tmpTable Values (?,?)");
+				PreparedStatement ps = connection
+						.prepareStatement("Insert into tmpTable Values (?,?)");
 				connection.setAutoCommit(false);
-				while(rs.next()){
+				while (rs.next()) {
 					ps.setObject(1, rs.getObject(1));
 					ps.setObject(2, rs.getObject(2));
 					ps.addBatch();
@@ -182,8 +187,7 @@ public class Java_Connector {
 				ps.executeBatch();
 				connection.commit();
 				connection.setAutoCommit(true);
-			}
-			else
+			} else
 				statement.execute(sql);
 		} catch (SQLException e) {
 			System.err.println("Error executing query: " + query);
@@ -210,11 +214,13 @@ public class Java_Connector {
 		ResultSet result_set = null;
 
 		long st = System.currentTimeMillis();
-		System.out.println("getMyQuery:: " +  query);
+		System.out.println("getMyQuery:: " + query);
 
 		// Try and execute the query
 		try {
-			statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			statement = connection.createStatement(
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_UPDATABLE);
 			result_set = statement.executeQuery(query);
 		} catch (SQLException e) {
 			System.err.println("Error executing query: " + query);
@@ -226,7 +232,8 @@ public class Java_Connector {
 		}
 
 		// return the result of the query
-		System.out.println("Time use(ms) :: " + (System.currentTimeMillis()-st));
+		System.out.println("Time use(ms) :: "
+				+ (System.currentTimeMillis() - st));
 		return result_set;
 	}
 
