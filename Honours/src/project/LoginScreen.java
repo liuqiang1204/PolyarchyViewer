@@ -172,7 +172,7 @@ public class LoginScreen extends javax.swing.JDialog {
 	  char[] password = _pwd.getPassword();
 
 		  frame.setVisible(false);
-		
+		  dbName=this.dbList.getSelectedItem().toString();
 		  Java_Connector model	= new Java_Connector(userName, password, dbName);
       	  QueryView	query		= new QueryView();
       	  View		view		= new View(model);                   
