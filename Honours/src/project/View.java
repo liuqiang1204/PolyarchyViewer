@@ -766,13 +766,14 @@ public class View extends JFrame {
 			
 			largest_count = hierarchy.getLargest_top();
 			
+//			System.out.println("======>"+largest_count);
 			//how we are going to compare the count
 //			if(label.getLevel() == 1) {
 //				largest_count = hierarchy.getLargest_top();
 //			} else {
 //				largest_count = hierarchy.getLargest_rest();
 //			}	
-//			
+			
 			//get the constraints so we can place the label in the correct position
 			GridBagLayout layout = (GridBagLayout) panel.getLayout();
 			GridBagConstraints constraint = layout.getConstraints(bar_label);
@@ -788,7 +789,8 @@ public class View extends JFrame {
 
 			//set the external constraints and padding for this label with the required lengths
 			constraint.insets = decideSpace(count, largest_count, width, left_padding, bar_label);
-				
+			
+//			System.out.println("Bar_Label width : "+bar_label.getWidth()+ "  Panel Width: " + width);
 			//reset the constraints on this label with the new padding
 			layout.setConstraints(bar_label, constraint);
 		}
@@ -828,6 +830,7 @@ public class View extends JFrame {
 			//set the sizes of the bar
 			bar.setBar_width((int)size);
 			
+//			System.out.println("W: "+panel_width+" count:" + count + " Largest:" + largest + " Size:"+size);
 			//add this padding to the right hand side with a pixel on the bottom
 			return new Insets(0,left_padding,0,(int)padding);
 		}

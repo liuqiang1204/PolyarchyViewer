@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
@@ -112,6 +113,7 @@ public class AMLabel extends JLabel {
 	
 	/**
 	 * not available  = -1, collapsed = 0, tmp expanded = 1, expanded = 2
+	 * the image changed when 1 and 2 --qiang
 	 */
 	private int status = 0;
 	
@@ -171,6 +173,19 @@ public class AMLabel extends JLabel {
 	private String website = "";
 	
 	private boolean active = false;
+	
+	/**
+	 * Status control:
+	 * Behaviors: enter leave click doubleclick check 
+	 * status: Normal/expand selected/- checked/unchecked
+	 * Rewrite by Qiang
+	 */
+	//status controller --Qiang
+	public boolean is_selected = false;
+	public boolean is_checked = false;
+	public boolean is_expanded = false;
+	
+	private JCheckBox lbl_chk = new JCheckBox();
 	
 	
 	/*CONSTRUCTOR*/
@@ -329,7 +344,7 @@ public class AMLabel extends JLabel {
 	 * Set the count (total) and sub_count (comparison) before entering this method
 	 */
 	protected void paintComponent(Graphics g) {
-    	 
+    
 		//only paint after loaded to save time
 	   if(View.loaded) {
 		   super.paintComponent(g);
@@ -358,9 +373,11 @@ public class AMLabel extends JLabel {
 					
 				} else {
 					
-					if(status == 1) {
+//					System.out.println("img label status-->"+this.status);
+					
+					if(status == 1||status==2) {
 						
-						//If the status is 1 we want to open it
+						//If the status is 1 we want to open it (2???--qiang)
 						image = Roll_Images.getOpen();
 					
 					} else {
@@ -469,6 +486,7 @@ public class AMLabel extends JLabel {
 		        
 	        }  else {
 	        	
+	        	
 	        	//if clicked set the background to darker
 	        	//if not clicked set the background to transparent
 	        	
@@ -550,6 +568,18 @@ public class AMLabel extends JLabel {
 	        		setForeground(selectableColours.getOtherColor());
 	        	} else {
 	        		setForeground(selectableColours.getNormalColor());
+	        	}
+	        	
+	        	/**
+	        	 * add a check box for text lbl
+	        	 */
+	        	if(!getText().trim().equals("")){
+		        	FontMetrics metrics = g.getFontMetrics(getFont());
+		        	int adv = metrics.stringWidth(getText());
+		    		this.add(this.lbl_chk);	    		
+		    		this.lbl_chk.setBounds(adv+10,0, 20, 18);
+		    		this.lbl_chk.setVisible(true);
+		    		this.validate();
 	        	}
 	        }
 	   }

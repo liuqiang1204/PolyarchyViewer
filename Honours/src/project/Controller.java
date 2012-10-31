@@ -442,7 +442,7 @@ public class Controller {
 		/**
 		 * add some code for test --Qiang
 		 */
-//		System.out.println("Alpha_table : " + System.currentTimeMillis());
+		System.out.println("Alpha_table : " + hierarchy_num + " N: " + tableName[hierarchy_num-1]);
 
 		// Specify which level this is
 		int level = 1;
@@ -603,28 +603,22 @@ public class Controller {
 	 * levels the table has
 	 */
 	public void largest(int index) {
+		/**
+		 * rewrite by Qiang
+		 */
 
 		// Store the temporary largest
 		float largest_top = 0;
-		int largest_rest = 0;
 
 		String query;
-
-//		System.out.println("Largest:: The tablelevel for index=" + index
-//				+ " is " + tableLevel[index]);
 
 		try {
 
 			// Create a tmp table for optimization --Qiang
 			/**
-			 * Should use max() query instead of loops.!!!
+			 * Should use sum() query instead of loops.!!!
 			 */
 			m_model.exeMyQuery("Drop table tmpTable");
-//			String sql = "CREATE TABLE tmpTable AS (SELECT weighted_sum as t_sum,parentid FROM "
-//					+ linkTableName[index]
-//					+ " as t1 join "
-//					+ tableName[index]
-//					+ " as t2 on t2.idhierarchy=t1." + columnName[index] + ") ";
 			String sql = "CREATE TABLE tmpTable AS (SELECT sum(weighted_sum) as t_sum,parentid FROM "
 					+ linkTableName[index]
 					+ " as t1 join "
@@ -662,59 +656,22 @@ public class Controller {
 						+ " where parentid = 0";
 				ResultSet top_data = m_model.getMyQuery(top_query);
 				//use select max from a tmp table --qiang
-				String middle_query = "select max(t_sum) from tmpTable where parentid in (";
+				String middle_query = "select sum(t_sum) from tmpTable where parentid in (";
 				// Loop through the results to get parentids
 				while (top_data.next()) {
 					// get the columns we need
 					middle_query +=top_data.getString(1)+",";
 				}
 				middle_query = middle_query.substring(0, middle_query.length()-1)+")";
-				ResultSet middle_max = m_model.getMyQuery(middle_query);
+				ResultSet middle_sum = m_model.getMyQuery(middle_query);
 				float count = 0;
-				if(middle_max.next())count = middle_max.getFloat(1);
-				middle_max.close();
+				if(middle_sum.next())count = middle_sum.getFloat(1);
+				middle_sum.close();
 				// finding the max value of all
 				if (count > largest_top) {
 					largest_top = count;
 				}
 			}
-
-				
-//				// Loop through the results
-//				while (top_data.next()) {
-//
-//					// get the columns we need
-//					String id = top_data.getString(1);
-//
-//					// the second level
-//					// String middle_query = "select sum(weighted_sum) from " +
-//					// linkTableName[index] +
-//					// " where " + columnName[index] +
-//					// " in (select idhierarchy from " + tableName[index] +
-//					// " where parentid = " + id + ")";
-//					// String middle_query = " select sum(weighted_sum) from " +
-//					// linkTableName[index]
-//					// + " as t1 join " + tableName[index] +
-//					// " as t2 on t2.idhierarchy=t1." + columnName[index]
-//					// + " where parentid=" + id;
-//					String middle_query = "select t_sum from tmpTable where parentid="
-//							+ id;
-//
-//					ResultSet middle_data = m_model.getMyQuery(middle_query);
-//
-//					// get the sum(weighted_sum)
-//					
-//					float count = 0;
-//					if(middle_data.next())count = middle_data.getFloat(1);
-//					middle_data.close();
-//					
-//					// finding the max value of all
-//					if (count > largest_top) {
-//						largest_top = count;
-//					}
-//				}
-//			}
-
 			// if level=2, first find the parent, and for each parent find the
 			// child and for them find the max of sum(weighted_sum)
 			else if (tableLevel[index] == 3) {
@@ -733,8 +690,8 @@ public class Controller {
 							+ " where parentid = " + id;
 					ResultSet middle_data = m_model.getMyQuery(middle_query);
 					
-					//use select max in tmp table --qiang
-					String end_query = "select max(t_sum) from tmpTable where parentid in (";
+					//use select sum in tmp table --qiang
+					String end_query = "select sum(t_sum) from tmpTable where parentid in (";
 					// Loop through the results to get parentids
 					while (middle_data.next()) {
 						// get the columns we need
@@ -742,47 +699,16 @@ public class Controller {
 					}
 					middle_data.close();
 					end_query = end_query.substring(0, end_query.length()-1)+")";
-					ResultSet end_max = m_model.getMyQuery(end_query);
+					ResultSet end_sum = m_model.getMyQuery(end_query);
 					float count = 0;
-					if(end_max.next())count = end_max.getFloat(1);
-					end_max.close();
+					if(end_sum.next())count = end_sum.getFloat(1);
+					end_sum.close();
 					// finding the max value of all
 					if (count > largest_top) {
 						largest_top = count;
 					}
 				}
 
-//					// Loop through the results
-//					while (middle_data.next()) {
-//
-//						// get the columns we need
-//						String alpha_code_middle = middle_data.getString(1);
-//
-//						// create the final query
-//						// bug::middle_query should be end_query
-//						// String end_query = "select sum(weighted_sum) from " +
-//						// linkTableName[index] +
-//						// " where " + columnName[index] +
-//						// " in (select idhierarchy from " + tableName[index] +
-//						// " where parentid = " + alpha_code_middle + ")";
-//						// String end_query = "select sum(weighted_sum) from " +
-//						// linkTableName[index]
-//						// + " as t1 join " + tableName[index] +
-//						// " as t2 on t2.idhierarchy = t1." + columnName[index]
-//						// + " where parentid = " + alpha_code_middle;
-//						String end_query = "select t_sum from tmptable where parentid = "
-//								+ alpha_code_middle;
-//
-//						ResultSet end_data = m_model.getMyQuery(end_query);
-//						
-//						float count = 0;
-//						if(end_data.next())count = end_data.getFloat(1);
-//						end_data.close();
-//						if (count > largest_top) {
-//							largest_top = count;
-//						}
-//					}
-//				}
 			}
 		} catch (SQLException e) {
 			Custom_Messages.display_error(m_view, "Largest Code",
@@ -795,7 +721,8 @@ public class Controller {
 
 		// go and set the largest variables
 		hierachy.setLargest_top(largest_top);
-		hierachy.setLargest_rest(largest_rest);
+		
+//		System.out.println(index + " - largest : " + largest_top);
 
 	}
 
@@ -825,8 +752,8 @@ public class Controller {
 
 		id = id.substring(3);
 
-		// String query = "SELECT weighted_sum FROM  " + linkTableName[index]
-		// + " WHERE " + columnName[index] + " = " + id;
+//		 String query = "SELECT weighted_sum FROM  " + linkTableName[index]
+//		 + " WHERE " + columnName[index] + " = " + id;
 		String query = "SELECT sum(weighted_sum) FROM  " + linkTableName[index]
 				+ " WHERE " + columnName[index] + " = " + id;
 

@@ -171,7 +171,7 @@ public class Hierarchy extends JPanel {
     /**
      * The largest for the rest, used for comparison
      */
-    private int largest_rest;
+    private int largest_rest=0;
     
     /**
      * An index for the panels
@@ -522,32 +522,33 @@ public class Hierarchy extends JPanel {
 	 * @param is_left_up - if the event was caused by a left and up motion
 	 */
 	public void expand_collapse_decision(AMLabel original_label, AMLabel comparison_label, boolean entry, boolean hover, boolean is_left_up) {
-		
+		/**
+		 * rewrite by Qiang
+		 * NOT FINISHED!!!
+		 */
 		int comp_level = comparison_label.getLevel();
 		int orig_level = original_label.getLevel();
-		
-		boolean change_icon = false;
-	
-		//we only want to change the image on click and exit
-		if(!entry || !hover) {
-			change_icon = true;
-		} 
+//		
+		boolean change_icon = true;
+//	
+//		//we only want to change the image on click and exit
+//		if(!entry || !hover) {
+//			change_icon = true;
+//		} 
 		
 		boolean tmp_entry = entry;
 		
-		//The new label must be showable and the original be an image
 		if(original_label.isIs_image()) {		
 			
 			if(is_left_up && hover) {
 				entry = false;
-			} else if (!is_left_up && !entry) {
-				change_icon = true;
+			} else if (!is_left_up) {
 				entry = true;
 			}
 			
 
 			if(!hover) {
-				if(original_label.isClicked() || (original_label.isClicked() && original_label.getStatus() == 1)) {
+				if(original_label.isClicked()) {
 					if(comparison_label.isIs_image()) {
 						comparison_label.setClicked(true);
 					}
@@ -567,17 +568,9 @@ public class Hierarchy extends JPanel {
 				 * what happens on entry
 				 */
 					
-					//we don't want click to occur and now label isn't clicked, that is a collapse
-					if(comparison_label.isIs_bar()) {
-						
-						//its a bar
-						if(orig_level >= comp_level || orig_level + 1 == comp_level) {
-							comparison_label.change(true);
-						} else { 
-							comparison_label.change(false);
-						}
-					} else if(comparison_label.isIs_image()) {
-					
+					if(comparison_label.isIs_image()) {
+						System.out.println(change_icon);
+						System.out.println(orig_level + " " + comp_level);
 						//its an image
 						if(orig_level >= comp_level) {
 							comparison_label.status(change_icon, 1);
@@ -596,7 +589,7 @@ public class Hierarchy extends JPanel {
 					} else {
 						
 						//its anything else
-						if(orig_level >= comp_level || orig_level + 1 == comp_level) {				
+						if(orig_level >= comp_level-1) {				
 							comparison_label.change(true);
 						} else { 
 							comparison_label.change(false);
@@ -604,16 +597,7 @@ public class Hierarchy extends JPanel {
 					}
 
 			} else if(!entry) {
-				
-				if((!hover && !original_label.isClicked()) || (hover && !original_label.isClicked())) {
-					
-					if(comparison_label.isIs_bar()) {
-						if(comp_level <= orig_level)
-							comparison_label.change(true);
-						else {
-							comparison_label.change(false);
-						}
-					}
+				if(!original_label.isClicked()) {
 					if(comparison_label.isIs_image()) {
 						if(comp_level == orig_level) {
 							comparison_label.setStatus(0);
@@ -649,13 +633,145 @@ public class Hierarchy extends JPanel {
 				expand_collapse_decision(original_label, comparison_label.getIts_image(), entry, hover, is_left_up);
 			}
 			
-			//comparison_label.repaint();
 		} else if(comparison_label.isClicked() && comparison_label.isIs_image() && entry) {
 			comparison_label.setStatus(0);
 			comparison_label.setClicked(false);
 		}
-		
 		comparison_label.repaint();
+		
+//		int comp_level = comparison_label.getLevel();
+//		int orig_level = original_label.getLevel();
+//		
+//		boolean change_icon = false;
+//	
+//		//we only want to change the image on click and exit
+//		if(!entry || !hover) {
+//			change_icon = true;
+//		} 
+//		
+//		boolean tmp_entry = entry;
+//		
+//		//The new label must be showable and the original be an image
+//		if(original_label.isIs_image()) {		
+//			
+//			if(is_left_up && hover) {
+//				entry = false;
+//			} else if (!is_left_up && !entry) {
+//				change_icon = true;
+//				entry = true;
+//			}
+//			
+//
+//			if(!hover) {
+//				if(original_label.isClicked() || (original_label.isClicked() && original_label.getStatus() == 1)) {
+//					if(comparison_label.isIs_image()) {
+//						comparison_label.setClicked(true);
+//					}
+//					entry = true;
+//				} else if(!original_label.isClicked()){
+//					if(comparison_label.isIs_image()) {
+//						comparison_label.setClicked(false);
+//					}
+//					entry = false;
+//				}
+//			}
+//			
+//			if(entry && (comparison_label.getStatus() != 1 || comparison_label.isBullet())) {
+//			
+//				/*
+//				 * ENTRY EVENTS
+//				 * what happens on entry
+//				 */
+//					
+//					//we don't want click to occur and now label isn't clicked, that is a collapse
+//					if(comparison_label.isIs_bar()) {
+//						
+//						//its a bar
+//						if(orig_level >= comp_level || orig_level + 1 == comp_level) {
+//							comparison_label.change(true);
+//						} else { 
+//							comparison_label.change(false);
+//						}
+//					} else if(comparison_label.isIs_image()) {
+//						System.out.println(change_icon);
+//						System.out.println(orig_level + " " + comp_level);
+//						//its an image
+//						if(orig_level >= comp_level) {
+//							comparison_label.status(change_icon, 1);
+//							comparison_label.change(true);
+//						} else if(orig_level + 1 == comp_level) {
+//							if(comparison_label.isBullet()) {
+//								comparison_label.change(true);
+//							} else {
+//								comparison_label.status(change_icon, 0);
+//								comparison_label.change(true);
+//							}
+//						}else {
+//							comparison_label.status(change_icon, 1);
+//							comparison_label.change(false);
+//						}
+//					} else {
+//						
+//						//its anything else
+//						if(orig_level >= comp_level || orig_level + 1 == comp_level) {				
+//							comparison_label.change(true);
+//						} else { 
+//							comparison_label.change(false);
+//						}
+//					}
+//
+//			} else if(!entry) {
+//				//should remove hover!!!
+//				if((!hover && !original_label.isClicked()) || (hover && !original_label.isClicked())) {
+//					
+//					if(comparison_label.isIs_bar()) {
+//						if(comp_level <= orig_level)
+//							comparison_label.change(true);
+//						else {
+//							comparison_label.change(false);
+//						}
+//					}
+//					if(comparison_label.isIs_image()) {
+//						if(comp_level == orig_level) {
+//							comparison_label.setStatus(0);
+//							comparison_label.change(true);
+//						} else if(comp_level > orig_level) {
+//							comparison_label.setStatus(0);
+//							comparison_label.change(false);
+//						} else {//above, cannot assume this 
+//							comparison_label.setStatus(1);
+//							comparison_label.change(true);
+//						}
+//					} else {
+//						
+//						//any other plain label
+//						if(comp_level <= orig_level) {
+//							comparison_label.change(true);
+//						} else {
+//							comparison_label.change(false);
+//						}
+//					}
+//				}
+//			}
+//
+//			entry = tmp_entry;
+//					
+//			//if this label has a bar recursively call this method
+//			if(comparison_label.isHas_bar()) {
+//				expand_collapse_decision(original_label, comparison_label.getIts_bar(), entry, hover, is_left_up);
+//			} 
+//
+//			//if this label has an image then recursively call this method
+//			if(comparison_label.isHas_image()) {
+//				expand_collapse_decision(original_label, comparison_label.getIts_image(), entry, hover, is_left_up);
+//			}
+//			
+//			//comparison_label.repaint();
+//		} else if(comparison_label.isClicked() && comparison_label.isIs_image() && entry) {
+//			comparison_label.setStatus(0);
+//			comparison_label.setClicked(false);
+//		}
+//		comparison_label.repaint();
 	}
 	
 	/**

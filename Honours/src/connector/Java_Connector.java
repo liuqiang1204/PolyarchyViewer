@@ -213,7 +213,7 @@ public class Java_Connector {
 		Statement statement = null;
 		ResultSet result_set = null;
 
-		long st = System.currentTimeMillis();
+//		long st = System.currentTimeMillis();
 		System.out.println("getMyQuery:: " + query);
 
 		// Try and execute the query
@@ -232,8 +232,8 @@ public class Java_Connector {
 		}
 
 		// return the result of the query
-		System.out.println("Time use(ms) :: "
-				+ (System.currentTimeMillis() - st));
+//		System.out.println("Time use(ms) :: "
+//				+ (System.currentTimeMillis() - st));
 		return result_set;
 	}
 
