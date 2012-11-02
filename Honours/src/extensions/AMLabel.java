@@ -184,6 +184,7 @@ public class AMLabel extends JLabel {
 	public boolean is_selected = false;
 	public boolean is_checked = false;
 	public boolean is_expanded = false;
+	public boolean is_checkboxShowed = false;
 	
 	private JCheckBox lbl_chk = new JCheckBox();
 	
@@ -578,7 +579,7 @@ public class AMLabel extends JLabel {
 		        	int adv = metrics.stringWidth(getText());
 		    		this.add(this.lbl_chk);	    		
 		    		this.lbl_chk.setBounds(adv+10,0, 20, 18);
-		    		this.lbl_chk.setVisible(true);
+		    		this.lbl_chk.setVisible(is_checkboxShowed);
 		    		this.validate();
 	        	}
 	        }
@@ -1224,4 +1225,5 @@ public class AMLabel extends JLabel {
 	public String getWebsite() {
 		return website;
 	}
+
 }

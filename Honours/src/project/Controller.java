@@ -22,6 +22,7 @@ import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 //import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -30,6 +31,7 @@ import javax.swing.JViewport;
 import utilities.Custom_Messages;
 import connector.Java_Connector;
 import extensions.AMLabel;
+import extensions.Frame_Info;
 import extensions.Hierarchy;
 import extensions.QueryView;
 
@@ -1881,7 +1883,7 @@ public class Controller {
 				count_type = option;
 				count_type = count_type + "_linking";
 
-				String query1 = "select * from atom where name = '"
+				String query1 = "select * from atom where t_name = '"
 						+ count_type + "'";
 				ResultSet rs = m_model.getMyQuery(query1);
 				rs.next();
@@ -1970,7 +1972,8 @@ public class Controller {
 		 * Event when the mouse is pressed
 		 */
 		public void mousePressed(MouseEvent e) {
-
+			
+			
 			// interact with the label that was interacted with
 			interaction(false, true, false, (AMLabel) e.getComponent());
 		}
@@ -1991,7 +1994,7 @@ public class Controller {
 			// this stops events from firing when the user is moving across the
 			// screen
 			if (!e.isControlDown()) {
-
+				((AMLabel) e.getComponent()).is_checkboxShowed=true;
 				// now perform the interaction
 				interaction(true, true, false, (AMLabel) e.getComponent());
 			}
@@ -2008,7 +2011,7 @@ public class Controller {
 
 				// get the label that was interacted with
 				AMLabel label = (AMLabel) e.getComponent();
-
+				label.is_checkboxShowed =false;
 				// only perform an exit operation in an image that controls the
 				// collapsing and expanding
 				// otherwise do nothing
@@ -2055,7 +2058,14 @@ public class Controller {
 		 * Event for when the mouse is clicked??other buttons Not required yet
 		 */
 		public void mouseClicked(MouseEvent e) {
-		}
+			AMLabel label = (AMLabel) e.getComponent();
+
+			if(e.getClickCount()==2){
+				if(!(label.isIs_bar()||label.isIs_image())){
+					showItemInfo(label);
+				}
+			}
+		}	
 	}
 
 	/**
@@ -2289,5 +2299,82 @@ public class Controller {
 				m_view.endGlass(false);
 			}
 		}
+	}
+	
+	/**
+	 * This method is called when double clicked a label. It will display a
+	 * popup window to show the detailed infomation of the item.
+	 * @author Qiang Liu
+	 */
+	
+	public void showItemInfo(AMLabel lbl){
+		
+		String id = lbl.getUniqueID();
+		int index =m_view.findHierarchy(id).getId()-1;
+		String alpha_code = id.substring(3);
+		String mtable = count_type.substring(0, count_type.length()-8);
+
+		System.out.println("====?>" + index + "  "+ alpha_code + " " + tableName[index]);
+		System.out.println("====?>" + linkTableName[index]);
+		
+		//find all leaves of this branch
+		String query = "";
+
+		if (tableLevel[index] == lbl.getLevel())
+			query = "SELECT idhierarchy FROM " + tableName[index]
+					+ " WHERE idhierarchy = " + alpha_code + " ";
+		else{
+			int x = tableLevel[index] - lbl.getLevel();
+			query = "SELECT idhierarchy FROM " + tableName[index]
+					+ " WHERE parentid = " + alpha_code + " ";
+			for(int i=1;i<x;i++){
+				query = "Select idhierarchy from " + tableName[index] + " where parentid in ( " + query + " )";
+			}
+		}
+		//get column name
+		String query1 = "select * from " + count_type + " where name = '" + linkTableName[index] + "'";
+		ResultSet rs1 = m_model.getMyQuery(query1);
+		String cname = "";
+		try {
+			if(rs1.next()){
+				cname = rs1.getString(3);
+			}
+			
+			query = "select count(*) from " + linkTableName[index] + " where " + cname + " in (" + query + " ) ";
+			ResultSet rs = this.m_model.getMyQuery(query);
+			
+			if(rs.next()){
+				int n = rs.getInt(1);
+				Frame_Info fi = new Frame_Info();
+				fi.setValues("[" + mtable + "] of " + lbl.getText(), 
+						"The number of " + mtable + " -- "+lbl.getText()+ " is :\n" + n);
+			}
+			
+//			query = "select * from " + linkTableName[index] + " where " + cname + " in (" + query + " ) ";
+//			
+//			ResultSet rs = this.m_model.getMyQuery(query);
+//			ArrayList<String> ids = new ArrayList<String>();
+//			while(rs.next())ids.add(rs.getString(2));
+//			
+//			//a new query to get the names
+//			
+//			query = "select * from " + mtable + " where id"+mtable+ " in (";			
+//			for(String s:ids){
+//				query+=s+ ",";
+//			}
+//			query = query.substring(0,query.length()-1)+")";
+//			
+//			rs = this.m_model.getMyQuery(query);
+//			
+//			Frame_Info fi = new Frame_Info();
+//			fi.setValues("[" + mtable + "] of " + lbl.getText(), rs);
+
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		
 	}
 }
