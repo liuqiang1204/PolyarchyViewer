@@ -34,8 +34,18 @@ public class Controller_Images extends Abstract_Image {
 	 */
 	private static ImageIcon move_right = new ImageIcon(folder+"move_right.png");
 	
+	/**
+	 * Image for the delete icon in tables.
+	 */
 
+	private static ImageIcon btn_delete = new ImageIcon(folder+"delete_icon.png");
+	
 	/*GETTERS*/
+	
+	public static ImageIcon getBtnDelete() {
+		return btn_delete;
+	}
+	
 	
 	/**
 	 * @return the accept

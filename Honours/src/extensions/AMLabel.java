@@ -9,10 +9,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.text.DecimalFormat;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
@@ -114,6 +112,7 @@ public class AMLabel extends JLabel {
 	/**
 	 * not available  = -1, collapsed = 0, tmp expanded = 1, expanded = 2
 	 * the image changed when 1 and 2 --qiang
+	 * 5 - highlighted
 	 */
 	private int status = 0;
 	
@@ -184,9 +183,16 @@ public class AMLabel extends JLabel {
 	public boolean is_selected = false;
 	public boolean is_checked = false;
 	public boolean is_expanded = false;
-	public boolean is_checkboxShowed = false;
+	public AMLabel owner;
 	
-	private JCheckBox lbl_chk = new JCheckBox();
+//	public ArrayList<AMLabel> parents = new ArrayList<AMLabel>();
+//	public ArrayList<AMLabel> children = new ArrayList<AMLabel>();
+	
+//	public boolean is_checkboxShowed = false;
+	
+//	private JCheckBox lbl_chk = new JCheckBox();
+	
+//	public AMLabel its_parent=null;
 	
 	
 	/*CONSTRUCTOR*/
@@ -376,16 +382,19 @@ public class AMLabel extends JLabel {
 					
 //					System.out.println("img label status-->"+this.status);
 					
-					if(status == 1||status==2) {
-						
-						//If the status is 1 we want to open it (2???--qiang)
-						image = Roll_Images.getOpen();
-					
-					} else {
-						
-						//otherwise close it
-						image = Roll_Images.getClosed();
-					}
+//					if(status == 1||status==2) {
+//						
+//						//If the status is 1 we want to open it (2???--qiang)
+//						
+//						image = Roll_Images.getOpen();
+//					
+//					} else {
+//						
+//						//otherwise close it
+//						image = Roll_Images.getClosed();
+//					}
+					if(this.owner.is_expanded)image = Roll_Images.getOpen();
+					else image = Roll_Images.getClosed();
 				}
 				
 				//will always to opaque
@@ -524,7 +533,8 @@ public class AMLabel extends JLabel {
 	        	} else {
 	 
 	        		//we want a transparent background
-	    			setBackground(new Color(0, true));     
+	        		if(is_checked) setBackground(new Color(224,238,224));
+	        		else setBackground(new Color(0, true));     
 	    			
 					//The font depends on the level that the label is on
 					switch(getLevel()) {
@@ -574,14 +584,15 @@ public class AMLabel extends JLabel {
 	        	/**
 	        	 * add a check box for text lbl
 	        	 */
-	        	if(!getText().trim().equals("")){
-		        	FontMetrics metrics = g.getFontMetrics(getFont());
-		        	int adv = metrics.stringWidth(getText());
-		    		this.add(this.lbl_chk);	    		
-		    		this.lbl_chk.setBounds(adv+10,0, 20, 18);
-		    		this.lbl_chk.setVisible(is_checkboxShowed);
-		    		this.validate();
-	        	}
+//	        	if(!getText().trim().equals("")){
+//		        	FontMetrics metrics = g.getFontMetrics(getFont());
+//		        	int adv = metrics.stringWidth(getText());
+//		    		this.add(this.lbl_chk);	    		
+//		    		this.lbl_chk.setBounds(adv+10,0, 20, 18);
+//		    		this.lbl_chk.setVisible(is_checkboxShowed);
+//		    		this.lbl_chk.setVisible(true);
+//		    		this.validate();
+//	        	}
 	        }
 	   }
     }

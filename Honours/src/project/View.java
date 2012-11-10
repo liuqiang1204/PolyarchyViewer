@@ -505,6 +505,9 @@ public class View extends JFrame {
 		//set the image to be collapsed
 		image.setStatus(0);
 		
+		//set image parent
+		image.parent(label.getParent_id());
+		
 		//The bottom level is a bullet, the others are normal roll images
 		if(this_level != this_hierarchy.getMaxlevels()) { 
 		
@@ -520,6 +523,8 @@ public class View extends JFrame {
 		
 		//Add this image to the label for reference
 		label.image(image);
+		//specify the image label owner -- qiang
+		image.owner = label;
 		
 		//Add the image to the panel
 		panel.add(image, constraint);
@@ -565,6 +570,8 @@ public class View extends JFrame {
 		
 		//Add the bar to the label
 		label.bar(bar);
+		//specify the bar label owner -- qiang
+		bar.owner = label;
 		
 		//The bar will be added to the level below the label
 		constraint.gridy++;
