@@ -1,7 +1,5 @@
 package extensions;
 
-import images.Controller_Images;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -17,7 +15,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,8 +24,6 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -41,7 +36,6 @@ import javax.swing.JViewport;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -200,7 +194,7 @@ public class Hierarchy extends JPanel {
 	 * --Qiang
 	 */
 	private JTable searchingOpts;
-	// label,status(0-unselected 1-selected 3-tmp added 4-tmp highlight current)
+	// label,status(0-unselected 1-selected 3-tmp added)
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
 	/* CONSTRUCTORS */
@@ -539,8 +533,14 @@ public class Hierarchy extends JPanel {
 		MyTableModel tm = (MyTableModel) searchingOpts.getModel();
 		boolean ischecked = (Boolean) tm.getValueAt(row, 0);
 		AMLabel item = (AMLabel) tm.getValueAt(row, 2);
-		if(ischecked)searchingItems.put(item, 1);
-		else searchingItems.put(item, 0);
+		if(ischecked){
+			searchingItems.put(item, 1);
+			item.is_checked=true;
+		}
+		else {
+			searchingItems.put(item, 0);
+			item.is_checked=false;
+		}
 		System.out.println(">>>"+item.getText()+" -- "+ischecked);
 	}
 
@@ -568,9 +568,7 @@ public class Hierarchy extends JPanel {
 			case 3:
 				bc = Color.GREEN;
 				break;
-			case 4:
-				bc = Color.GREEN;
-				break;
+
 			default:
 				break;
 			}
@@ -622,7 +620,7 @@ public class Hierarchy extends JPanel {
 		text.add(clear);
 
 		information.setSize(200, 22);
-		information.add(clear);
+//		information.add(clear);
 
 		search.setSize(120, 50);
 		// search.add(text,BorderLayout.NORTH);

@@ -14,9 +14,11 @@ import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -565,7 +567,6 @@ public class Controller {
 
 				AMLabel label = addLabel(alpha_code, data.getString("label"),
 						hierarchy, level, parent_id);
-				
 
 				// now go and add the rest of the hierarchy to the visualisation
 				double sub_count;
@@ -1028,8 +1029,6 @@ public class Controller {
 	 */
 	public void connection(HashSet<Integer> list, Hierarchy h3) {
 
-		// bug : multiple 'inputs' remove, list?? --qiang
-
 		try {
 
 			m_view.setWaitCursor(true);
@@ -1125,7 +1124,7 @@ public class Controller {
 					} else
 						first = false;
 
-					inputs.append(i.next());
+					inputs.append(column + "=" + i.next());
 				}
 			}
 
@@ -1368,7 +1367,8 @@ public class Controller {
 						+ linkTableName[toIndex] + " as c join "
 						+ linkTableName[fromIndex] + " as g on c." + column
 						+ " = g." + column
-						+ inputs.toString().replaceAll("<UnknownTable>", "g");
+						+ inputs.toString().replaceAll("<UnknownTable>", "g")
+						+ " group by c." + columnName[toIndex];
 				// + "  group by g." + column + " ,c."+ columnName[toIndex];
 				// why use group by? there is no sum().
 
@@ -1516,8 +1516,9 @@ public class Controller {
 				// Get the results of the query
 				ResultSet data = m_model.getMyQuery(query);
 
-				System.out.println("loop::" + hierarchy.getId() + " :: "+query);
-				
+//				System.out.println("loop::" + hierarchy.getId() + " :: "
+//						+ query);
+
 				// The hashmap for this hierarchy
 				HashMap<String, Integer> map = hierarchy.getMap();
 
@@ -1632,14 +1633,22 @@ public class Controller {
 		String alpha_code = label.getUniqueID();
 		alpha_code = alpha_code.substring(3);
 		String query = "";
+		int c = tableLevel[index] - label.getLevel();
 
 		// changed by qiang
-		if (tableLevel[index] == label.getLevel())
+		if (c == 0)
 			query = "SELECT idhierarchy FROM " + tableName[index]
 					+ " WHERE idhierarchy = " + alpha_code + " ";
-		else
-			query = "SELECT idhierarchy FROM " + tableName[index]
-					+ " WHERE parentid = " + alpha_code + " ";
+		// else if (c == 1)
+		// query = "SELECT idhierarchy FROM " + tableName[index]
+		// + " WHERE parentid = " + alpha_code + " ";
+		else if (c > 0) {
+			query = alpha_code;
+			for (int i = 0; i < c; i++) {
+				query = "SELECT idhierarchy FROM " + tableName[index]
+						+ " WHERE parentid in (" + query + ") ";
+			}
+		}
 
 		// compact it --qiang
 		// if (tableLevel[index] == 1) {
@@ -1971,19 +1980,19 @@ public class Controller {
 
 		public void mouseClicked(MouseEvent e) {
 			AMLabel lbl = (AMLabel) e.getComponent();
-		
+
 			if (e.getClickCount() == 1) {
-				//left click
-				if(SwingUtilities.isLeftMouseButton(e))
+				// left click
+				if (SwingUtilities.isLeftMouseButton(e))
 					AMLabelInteractions(5, lbl);
-				//right click
-				if(SwingUtilities.isRightMouseButton(e))
+				// right click
+				if (SwingUtilities.isRightMouseButton(e))
 					AMLabelInteractions(6, lbl);
 			}
-			//double click
+			// double click
 			if (e.getClickCount() == 2) {
 				if (!(lbl.isIs_bar() || lbl.isIs_image())) {
-					AMLabelInteractions(7, lbl);					
+					AMLabelInteractions(7, lbl);
 				}
 			}
 		}
@@ -2000,80 +2009,83 @@ public class Controller {
 		// 3. enter 4. exit 5 left clicked 6right clicked
 		// 7. double clicked
 
-		//image and text should be same action
-		if(lbl.isIs_image()||lbl.isIs_bar())lbl = lbl.owner;
-		
+		// image and text should be same action
+		if (lbl.isIs_image() || lbl.isIs_bar())
+			lbl = lbl.owner;
+
 		String id = lbl.getUniqueID();
 		Hierarchy hierarchy = m_view.findHierarchy(id);
-		
-		//perform actions
+
+		// perform actions
 		lbl.change_text(false);
 
-		switch(status){
-			case 1: //press
-				break;
-			case 2: //release
-				break;
-			case 3: //enter
-				hierarchy.addSearchingItem(lbl, 3);
-				lbl.change_text(true);
-				
-				//get sub labels
-				String query = alpha_code(lbl, hierarchy.getId());
-				ResultSet data = m_model.getMyQuery(query);
-				HashMap<String, Integer> position_map = hierarchy.getMap();
-				HashSet<Integer> hovered_elements = new HashSet<Integer>();
-				try {
-					while (data.next()) {
-						ResultSetMetaData rsmd = data.getMetaData();
-						int NumOfCol = rsmd.getColumnCount();
-						for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
-							String key = data.getString(1).toString();
-							key = hierarchy.getId() + "00" + key;
-							if (position_map.containsKey(key)) {
-								int index = position_map.get(key);
-								Integer tmp_index = new Integer(index);
-								hovered_elements.add(tmp_index);
-							}
+		switch (status) {
+		case 1: // press
+			break;
+		case 2: // release
+			break;
+		case 3: // enter
+			hierarchy.addSearchingItem(lbl, 3);
+			lbl.change_text(true);
+
+			// get sub labels
+			String query = alpha_code(lbl, hierarchy.getId());
+			ResultSet data = m_model.getMyQuery(query);
+			HashMap<String, Integer> position_map = hierarchy.getMap();
+			HashSet<Integer> hovered_elements = new HashSet<Integer>();
+			try {
+				while (data.next()) {
+					ResultSetMetaData rsmd = data.getMetaData();
+					int NumOfCol = rsmd.getColumnCount();
+					for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
+						String key = data.getString(1).toString();
+						key = hierarchy.getId() + "00" + key;
+						if (position_map.containsKey(key)) {
+							int index = position_map.get(key);
+							Integer tmp_index = new Integer(index);
+							hovered_elements.add(tmp_index);
 						}
 					}
-				} catch (SQLException e) {
-					e.printStackTrace();
 				}
-				
-				connection(hovered_elements,hierarchy);
-				break;
-			case 4: //exit
-				hierarchy.removeTempSearchingItem(lbl);
-				connection(new HashSet<Integer>(),hierarchy);
-				break;
-			case 5: //left clicked
-				//!!!!!!!!!!!consider multilevels 
-				if(lbl.is_expanded)	{
-					lbl.is_expanded = false;					
-				}
-				else{
-					lbl.is_expanded=true;
-				}
-				expand_collapse_label(hierarchy,lbl);
-				break;
-			case 6: //right clicked
-				hierarchy.addSearchingItem(lbl, 1);
-				break;
-			case 7: //double clicked
-				showItemInfo(lbl);
-				break;
-			default:
-				break;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+//			connection(hovered_elements, hierarchy);
+			perform_searching();
+			break;
+		case 4: // exit
+			hierarchy.removeTempSearchingItem(lbl);
+			connection(new HashSet<Integer>(), hierarchy);
+			perform_searching();
+
+			break;
+		case 5: // left clicked
+			// !!!!!!!!!!!consider multilevels
+			if (lbl.is_expanded) {
+				lbl.is_expanded = false;
+			} else {
+				lbl.is_expanded = true;
+			}
+			expand_collapse_label(hierarchy, lbl);
+			break;
+		case 6: // right clicked
+			hierarchy.addSearchingItem(lbl, 1);
+			break;
+		case 7: // double clicked
+			showItemInfo(lbl);
+			perform_searching();
+			break;
+		default:
+			break;
 		}
-		
-		perform_searching();
+
 	}
 
-	public void expand_collapse_label(Hierarchy hierarchy,AMLabel lbl){
-		String query = "SELECT idhierarchy FROM " + tableName[hierarchy.getId()-1]
-				+ " WHERE parentid = " + lbl.getUniqueID().substring(3) + " "; 
-		System.out.println("C:::"+query);
+	public void expand_collapse_label(Hierarchy hierarchy, AMLabel lbl) {
+		String query = "SELECT idhierarchy FROM "
+				+ tableName[hierarchy.getId() - 1] + " WHERE parentid = "
+				+ lbl.getUniqueID().substring(3) + " ";
 		ResultSet data = m_model.getMyQuery(query);
 		HashMap<String, Integer> position_map = hierarchy.getMap();
 		HashSet<Integer> list = new HashSet<Integer>();
@@ -2094,36 +2106,139 @@ public class Controller {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		for (Iterator<Integer> i = list.iterator(); i.hasNext();) {
 			Integer tindex = i.next();
 			AMLabel this_label = (AMLabel) hierarchy.getInnerhierarchy()
-				.getComponent(tindex);
+					.getComponent(tindex);
 			this_label.change(lbl.is_expanded);
-			if(this_label.isHas_image())this_label.getIts_image().change(lbl.is_expanded);
-			if(this_label.isHas_bar())this_label.getIts_bar().change(lbl.is_expanded);
-			if(!lbl.is_expanded&&lbl!=this_label){
-				System.out.println("C:::"+lbl.getText() + " :: "+this_label.getText());
-				this_label.is_expanded=false;
+			if (this_label.isHas_image())
+				this_label.getIts_image().change(lbl.is_expanded);
+			if (this_label.isHas_bar())
+				this_label.getIts_bar().change(lbl.is_expanded);
+			if (!lbl.is_expanded && lbl != this_label) {
+//				System.out.println("C:::" + lbl.getText() + " :: "
+//						+ this_label.getText());
+				this_label.is_expanded = false;
 				this.expand_collapse_label(hierarchy, this_label);
 			}
-		}		
+		}
+	}
+
+	public ArrayList<String> intersectionOf(ArrayList<String> a,ArrayList<String> b){
+		ArrayList<String> r = new ArrayList<String>();
+		for(String s:a){
+			if(b.contains(s))r.add(s);
+		}
+		return r;
 	}
 	
-	public void perform_searching(){
-		//1
-		for(int i=0;i<tableName.length;i++){
-			System.out.println("Searching>>>"+tableName[i]);
+	public void perform_searching() {
+		
+		ArrayList<Hierarchy> hs = new ArrayList<Hierarchy>();
+		hs.add(m_view.getHierarchy1());
+		hs.add(m_view.getHierarchy2());
+		hs.add(m_view.getHierarchy3());
+		
+		ArrayList<HashSet<Integer> > scode = new ArrayList<HashSet<Integer> >();
+
+		System.out.println("--Count type:" + this.count_type + " --linktable:"
+				+ linkTableName[0] + " --coloumn:" + column);
+
+		ArrayList<String> itemids = new ArrayList<String>();
+		boolean has = false;
+		for (Hierarchy h : hs) {
+			// clear the hierarchies
+			h.clearCount();
+			
+			HashSet<Integer> sset = new HashSet<Integer>();
+			scode.add(sset);
+			//not visible or do not have any condition
+			if (!h.isVisible() || h.searchingItems.size() == 0) {
+				continue;
+			}
+			//get the ids
+			ArrayList<String> lst = new ArrayList<String>();
+			for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
+				if (item.getValue() != 0) {
+					AMLabel lbl = item.getKey();
+					String str = alpha_code(lbl, h.getId());					
+					lst.add(str);
+					
+					ResultSet trs = m_model.getMyQuery(str);
+					try {
+						while(trs.next())
+								sset.add(trs.getInt(1));
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			String sql = "select " + this.column + " from "
+					+ linkTableName[h.getId() - 1] + " where 1=1 ";
+			for (String s : lst) {
+				sql += " and " + columnName[h.getId() - 1] + " in (" + s + ") ";
+			}
+			sql+= " group by " + this.column;
+			ResultSet rs = this.m_model.getMyQuery(sql);
+			ArrayList<String> newids = new ArrayList<String>();
+			try {
+				while (rs.next()) {
+					newids.add(rs.getString(1));
+				}
+				if(has){
+					itemids = intersectionOf(itemids,newids);
+				}
+				else{					
+					has = true;
+					itemids = newids;
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		for(int i=0;i<linkTableName.length;i++){
-			System.out.println("Searching>>>"+linkTableName[i]);
+		
+		String inputs = " Where ";
+		if(itemids.isEmpty()) inputs += " 1<>1 ";
+		else{
+			inputs += column + " in (";
+			for(String id:itemids){
+				inputs+=id+",";
+			}
+			inputs = inputs.substring(0, inputs.length()-1) + ")";
 		}
 		
-		//2
+		ArrayList<String> sstr = new ArrayList<String>();
+		int idx = 0;
+		for(HashSet<Integer> s : scode){
+			String ss = "";
+			for(int x : s){
+				ss+=x + ",";
+			}
+			if(ss!=""){
+				ss = ss.substring(0,ss.length()-1)+")";
+				ss = " and " + columnName[idx] + " in ("+ss;
+			}
+			idx++;
+			sstr.add(ss);
+		}
+
+		System.out.println("--->MyInputs:: " + inputs);
 		
-		//3
-		
+		for(Hierarchy h:hs){
+			int index = h.getId()-1;
+			String queryN = "select c." + columnName[index]
+					+ ", sum(c.weighted_sum) " + " from  "
+					+ linkTableName[index] + " as c"
+					+ inputs
+					+ sstr.get(index)
+					+ " group by  " + columnName[index];
+			looper(h, queryN);
+		}
 	}
+
 	// class Interaction_Mouse_Listener extends MouseAdapter {
 	//
 	// /**
