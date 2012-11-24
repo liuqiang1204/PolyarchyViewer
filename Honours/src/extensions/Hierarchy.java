@@ -197,6 +197,8 @@ public class Hierarchy extends JPanel {
 	// label,status(0-unselected 1-selected 3-tmp added)
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
+	public JCheckBox isWeighted = new JCheckBox("Weighted");
+	
 	/* CONSTRUCTORS */
 
 	/**
@@ -343,6 +345,20 @@ public class Hierarchy extends JPanel {
 	 * @return
 	 */
 
+	public class btn_clear_clicked implements ActionListener {
+
+		/**
+		 * Perform the action when the button is clicked
+		 */
+		public void actionPerformed(ActionEvent ae) {
+			for(AMLabel l:searchingItems.keySet())l.is_checked = false;
+			searchingItems.clear();
+			refreshSearchingTable();
+			innerhierarchy.setVisible(false);
+			innerhierarchy.setVisible(true);
+		}
+	}
+	
 	static class MyTableModel extends DefaultTableModel {
 
 		private static final long serialVersionUID = 1L;
@@ -517,6 +533,9 @@ public class Hierarchy extends JPanel {
 		lbl.is_checked = false;
 		lbl.getIts_image().is_checked = false;
 		refreshSearchingTable();
+		this.innerhierarchy.setVisible(false);
+		this.innerhierarchy.setVisible(true);
+
 	}
 
 	public void removeTempSearchingItem(AMLabel lbl) {
@@ -536,10 +555,14 @@ public class Hierarchy extends JPanel {
 		if(ischecked){
 			searchingItems.put(item, 1);
 			item.is_checked=true;
+			item.setVisible(false);
+			item.setVisible(true);
 		}
 		else {
 			searchingItems.put(item, 0);
 			item.is_checked=false;
+			item.setVisible(false);
+			item.setVisible(true);
 		}
 		System.out.println(">>>"+item.getText()+" -- "+ischecked);
 	}
@@ -609,21 +632,25 @@ public class Hierarchy extends JPanel {
 
 		information = new JPanel();
 
-		JPanel text = new JPanel();
-		searchLabel = new JLabel("Search:");
-		searchText = new JTextField(20);
+//		JPanel text = new JPanel();
+//		searchLabel = new JLabel("Search:");
+//		searchText = new JTextField(20);
+		
 		clear = new JButton("Clear");
+		clear.addActionListener(new btn_clear_clicked());
 		// clear.setIcon(Controller_Images.getBtnDelete());
 
-		text.add(searchLabel);
-		text.add(searchText);
-		text.add(clear);
+//		text.add(searchLabel);
+//		text.add(searchText);
+//		text.add(clear);
 
 		information.setSize(200, 22);
-//		information.add(clear);
+		isWeighted.setSelected(true);
+		information.add(isWeighted);
+		information.add(clear);
 
 		search.setSize(120, 50);
-		// search.add(text,BorderLayout.NORTH);
+//		 search.add(text,BorderLayout.NORTH);
 		search.add(jsp, BorderLayout.CENTER);
 		search.add(information, BorderLayout.NORTH);
 
@@ -694,10 +721,10 @@ public class Hierarchy extends JPanel {
 				scroll_listener);
 
 		// Clear button listener, perform action on click
-		getClear().addActionListener(clear_button_listener);
+//		getClear().addActionListener(clear_button_listener);
 
 		// Key event listener for when text is typed into the box
-		getSearchText().addKeyListener(keypress_listener);
+//		getSearchText().addKeyListener(keypress_listener);
 	}
 
 	/**
