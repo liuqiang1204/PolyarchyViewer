@@ -2277,22 +2277,16 @@ public class Controller {
 		HashSet<Integer> h2ItemIds = new HashSet<Integer>();
 		HashSet<Integer> h3ItemIds = new HashSet<Integer>();
 
-		String s1 = "";
-		String s2 = "";
-		String s3 = "";
 		//clear bars
 		h1.clearCount();
 		h2.clearCount();
 		h3.clearCount();
 
-		try {
+
 			boolean has=false;
 			if (h1.isVisible()&&!h1.searchingItems.isEmpty()) {
-				s1 = getSearchingString(h1, h1ItemIds);
-				ResultSet rs1 = m_model.getMyQuery(s1);
-				while (rs1.next()) {
-					h1CountIds.add(rs1.getInt(1));
-				}
+
+				h1CountIds = getSearchingCountIdsForHierarchy(h1,h1ItemIds);
 				if(!has){
 					intersectionOfCountIds = h1CountIds;
 					has=true;
@@ -2303,11 +2297,7 @@ public class Controller {
 			}
 
 			if (h2.isVisible()&&!h2.searchingItems.isEmpty()) {
-				s2 = getSearchingString(h2, h2ItemIds);
-				ResultSet rs2 = m_model.getMyQuery(s2);
-				while (rs2.next()) {
-					h2CountIds.add(rs2.getInt(1));
-				}
+				h2CountIds = getSearchingCountIdsForHierarchy(h2,h2ItemIds);
 				if(!has){
 					intersectionOfCountIds = h2CountIds;
 					has=true;
@@ -2318,11 +2308,7 @@ public class Controller {
 			}
 
 			if (h3.isVisible()&&!h3.searchingItems.isEmpty()) {
-				s3 = getSearchingString(h3, h3ItemIds);
-				ResultSet rs3 = m_model.getMyQuery(s3);
-				while (rs3.next()) {
-					h3CountIds.add(rs3.getInt(1));
-				}
+				h3CountIds = getSearchingCountIdsForHierarchy(h3,h3ItemIds);
 				if(!has){
 					intersectionOfCountIds = h3CountIds;
 					has=true;
@@ -2331,22 +2317,12 @@ public class Controller {
 					intersectionOfCountIds = intersectionOf(intersectionOfCountIds,h3CountIds);
 				}
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		System.out.println(h1ItemIds.size() + " -- " + s1);
-		System.out.println(h2ItemIds.size() + " -- " + s2);
-		System.out.println(h3ItemIds.size() + " -- " + s3);
-
-		
+	
 		//none intersection ids
 		if(intersectionOfCountIds.isEmpty())return;
 		//none selected item
 		if(h1ItemIds.isEmpty()&&h2ItemIds.isEmpty()&&h3ItemIds.isEmpty())
 			return;
-		
 
 		// to record the publication(people) ids with the total weighted value
 		HashMap<Integer, Double> h1Total = new HashMap<Integer, Double>();
@@ -2417,12 +2393,11 @@ public class Controller {
 			e.printStackTrace();
 		}
 	}
-	
 	//Base on the selections of Hierarchy entries,
 	//get the searching string and selected entry ids
-	public String getSearchingString(Hierarchy h, HashSet<Integer> itemids) {
+	public HashSet<Integer> getSearchingCountIdsForHierarchy(Hierarchy h, HashSet<Integer> itemids){
+		HashSet<Integer> cids = new HashSet<Integer>();
 		
-	
 		ArrayList<String> lst = new ArrayList<String>();
 		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
 			System.out.println(item.getKey().getText() + " : " + item.getValue());
@@ -2444,11 +2419,29 @@ public class Controller {
 
 		String sql = "select " + this.column + " from "
 				+ linkTableName[h.getId() - 1] + " where 1=1 ";
+		boolean has=false;
 		for (String s : lst) {
-			sql += " and " + columnName[h.getId() - 1] + " in (" + s + ") ";
+			String msql = sql + " and " + columnName[h.getId() - 1] + " in (" + s + ") ";
+			ResultSet mrs = m_model.getMyQuery(msql);
+			HashSet<Integer> rowcids = new HashSet<Integer>();
+			try {
+				while(mrs.next())rowcids.add(mrs.getInt(1));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(has){
+				cids = intersectionOf(cids,rowcids);
+			}
+			else{
+				cids = rowcids;
+				has=true;
+			}
 		}
 
-		return sql;
+
+		
+		return cids;
 	}
 
 	public HashMap<Integer, Double> getTotalWeightedValue(Hierarchy h,String idstr,HashSet<Integer> itemids){
