@@ -283,6 +283,27 @@ public class Controller {
 		m_view.getHierarchy1().isWeighted.addActionListener(al);
 		m_view.getHierarchy2().isWeighted.addActionListener(al);
 		m_view.getHierarchy3().isWeighted.addActionListener(al);
+		m_view.getHierarchy1().getClear().addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				Hierarchy.btn_clear_clicked(m_view.getHierarchy1());
+				perform_connection();
+			}
+		});
+		m_view.getHierarchy2().getClear().addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				Hierarchy.btn_clear_clicked(m_view.getHierarchy2());
+				perform_connection();
+			}
+		});
+		m_view.getHierarchy3().getClear().addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				Hierarchy.btn_clear_clicked(m_view.getHierarchy3());
+				perform_connection();
+			}
+		});
 		
 		// make sure that we re pack the view because it will have changed now
 		// all of the elements have been loaded

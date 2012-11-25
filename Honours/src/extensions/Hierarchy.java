@@ -198,7 +198,7 @@ public class Hierarchy extends JPanel {
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
 	public JCheckBox isWeighted = new JCheckBox("Weighted");
-	
+
 	/* CONSTRUCTORS */
 
 	/**
@@ -345,20 +345,18 @@ public class Hierarchy extends JPanel {
 	 * @return
 	 */
 
-	public class btn_clear_clicked implements ActionListener {
-
-		/**
-		 * Perform the action when the button is clicked
-		 */
-		public void actionPerformed(ActionEvent ae) {
-			for(AMLabel l:searchingItems.keySet())l.is_checked = false;
-			searchingItems.clear();
-			refreshSearchingTable();
-			innerhierarchy.setVisible(false);
-			innerhierarchy.setVisible(true);
-		}
+	/**
+	 * Perform the action when the clear button is clicked
+	 */
+	public static void btn_clear_clicked(Hierarchy h) {
+		for (AMLabel l : h.searchingItems.keySet())
+			l.is_checked = false;
+		h.searchingItems.clear();
+		h.refreshSearchingTable();
+		h.innerhierarchy.setVisible(false);
+		h.innerhierarchy.setVisible(true);
 	}
-	
+
 	static class MyTableModel extends DefaultTableModel {
 
 		private static final long serialVersionUID = 1L;
@@ -456,11 +454,12 @@ public class Hierarchy extends JPanel {
 		}
 	}
 
-	class ButtonRenderer extends AbstractCellEditor implements TableCellRenderer,TableCellEditor, ActionListener {
+	class ButtonRenderer extends AbstractCellEditor implements
+			TableCellRenderer, TableCellEditor, ActionListener {
 		private static final long serialVersionUID = 1L;
-		
-	    JButton renderButton;
-	    JButton editButton;
+
+		JButton renderButton;
+		JButton editButton;
 
 		private AMLabel owner = null;
 
@@ -469,15 +468,15 @@ public class Hierarchy extends JPanel {
 		}
 
 		public ButtonRenderer() {
-	        renderButton = new JButton();
-	        editButton = new JButton();
-	        
+			renderButton = new JButton();
+			editButton = new JButton();
+
 			renderButton.setOpaque(true);
 			renderButton.setText("Delete");
-//			this.setIcon(Controller_Images.getBtnDelete());
-			
-			editButton.setFocusPainted( false );
-	        editButton.addActionListener(this);
+			// this.setIcon(Controller_Images.getBtnDelete());
+
+			editButton.setFocusPainted(false);
+			editButton.addActionListener(this);
 		}
 
 		public Component getTableCellRendererComponent(final JTable table,
@@ -503,23 +502,21 @@ public class Hierarchy extends JPanel {
 				Object value, boolean isSelected, int row, int column) {
 			owner = (AMLabel) value;
 			editButton.setText("delete");
-	        return editButton;
+			return editButton;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			System.out.println("removeSearchingItem");
 			removeSearchingItem(owner);
-//			innerhierarchy.repaint();
+			// innerhierarchy.repaint();
 		}
 	}
-
-	  
 
 	public void addSearchingItem(AMLabel lbl, int status) {
 		if (status == 3 && searchingItems.containsKey(lbl)) {
 		} else {
-			if(status==1){
+			if (status == 1) {
 				lbl.is_checked = true;
 				lbl.getIts_image().is_checked = true;
 			}
@@ -547,24 +544,23 @@ public class Hierarchy extends JPanel {
 			refreshSearchingTable();
 		}
 	}
-	
-	public void checkboxClicked(int row){
+
+	public void checkboxClicked(int row) {
 		MyTableModel tm = (MyTableModel) searchingOpts.getModel();
 		boolean ischecked = (Boolean) tm.getValueAt(row, 0);
 		AMLabel item = (AMLabel) tm.getValueAt(row, 2);
-		if(ischecked){
+		if (ischecked) {
 			searchingItems.put(item, 1);
-			item.is_checked=true;
+			item.is_checked = true;
 			item.setVisible(false);
 			item.setVisible(true);
-		}
-		else {
+		} else {
 			searchingItems.put(item, 0);
-			item.is_checked=false;
+			item.is_checked = false;
 			item.setVisible(false);
 			item.setVisible(true);
 		}
-		System.out.println(">>>"+item.getText()+" -- "+ischecked);
+		System.out.println(">>>" + item.getText() + " -- " + ischecked);
 	}
 
 	public void refreshSearchingTable() {
@@ -573,8 +569,10 @@ public class Hierarchy extends JPanel {
 		searchingOpts.setDefaultRenderer(Object.class,
 				new MyTableCellRenderer());
 		searchingOpts.setDefaultRenderer(Boolean.class, new BooleanRenderer());
-		searchingOpts.setDefaultRenderer(ButtonRenderer.class, new ButtonRenderer());
-		searchingOpts.getColumnModel().getColumn(2).setCellEditor(new ButtonRenderer());
+		searchingOpts.setDefaultRenderer(ButtonRenderer.class,
+				new ButtonRenderer());
+		searchingOpts.getColumnModel().getColumn(2)
+				.setCellEditor(new ButtonRenderer());
 		searchingOpts.setShowGrid(true);
 		// System.out.println("-----"+tm.getColumnClass(0));
 		for (Map.Entry<AMLabel, Integer> entry : searchingItems.entrySet()) {
@@ -604,8 +602,7 @@ public class Hierarchy extends JPanel {
 			row[2] = key;
 			tm.addRow(row, bc);
 		}
-		
-		
+
 	}
 
 	public JPanel addSearch() {
@@ -613,15 +610,14 @@ public class Hierarchy extends JPanel {
 		search.setLayout(new BorderLayout());
 
 		searchingOpts = new JTable();
-		
+
 		MouseAdapter adapter = new MouseAdapter() {
-	        public void mouseClicked(MouseEvent e) {
-	             int row=searchingOpts.getSelectedRow();  
-	            if(searchingOpts.getSelectedColumn()==0)
-	            {
-	            	checkboxClicked(row);
-	            }
-	        }
+			public void mouseClicked(MouseEvent e) {
+				int row = searchingOpts.getSelectedRow();
+				if (searchingOpts.getSelectedColumn() == 0) {
+					checkboxClicked(row);
+				}
+			}
 		};
 		searchingOpts.addMouseListener(adapter);
 
@@ -632,17 +628,17 @@ public class Hierarchy extends JPanel {
 
 		information = new JPanel();
 
-//		JPanel text = new JPanel();
-//		searchLabel = new JLabel("Search:");
-//		searchText = new JTextField(20);
-		
+		// JPanel text = new JPanel();
+		// searchLabel = new JLabel("Search:");
+		// searchText = new JTextField(20);
+
 		clear = new JButton("Clear");
-		clear.addActionListener(new btn_clear_clicked());
+		// clear.addActionListener(new btn_clear_clicked());
 		// clear.setIcon(Controller_Images.getBtnDelete());
 
-//		text.add(searchLabel);
-//		text.add(searchText);
-//		text.add(clear);
+		// text.add(searchLabel);
+		// text.add(searchText);
+		// text.add(clear);
 
 		information.setSize(200, 22);
 		isWeighted.setSelected(true);
@@ -650,7 +646,7 @@ public class Hierarchy extends JPanel {
 		information.add(clear);
 
 		search.setSize(120, 50);
-//		 search.add(text,BorderLayout.NORTH);
+		// search.add(text,BorderLayout.NORTH);
 		search.add(jsp, BorderLayout.CENTER);
 		search.add(information, BorderLayout.NORTH);
 
@@ -721,10 +717,10 @@ public class Hierarchy extends JPanel {
 				scroll_listener);
 
 		// Clear button listener, perform action on click
-//		getClear().addActionListener(clear_button_listener);
+		// getClear().addActionListener(clear_button_listener);
 
 		// Key event listener for when text is typed into the box
-//		getSearchText().addKeyListener(keypress_listener);
+		// getSearchText().addKeyListener(keypress_listener);
 	}
 
 	/**
