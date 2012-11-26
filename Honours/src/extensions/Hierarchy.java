@@ -536,12 +536,14 @@ public class Hierarchy extends JPanel {
 	}
 
 	public void removeTempSearchingItem(AMLabel lbl) {
-		int status = searchingItems.get(lbl);
-		if (status == 3) {
-			searchingItems.remove(lbl);
-			lbl.is_checked = false;
-			lbl.getIts_image().is_checked = false;
-			refreshSearchingTable();
+		if(searchingItems.containsKey(lbl)){
+			int status = searchingItems.get(lbl);
+			if (status == 3) {
+				searchingItems.remove(lbl);
+				lbl.is_checked = false;
+				lbl.getIts_image().is_checked = false;
+				refreshSearchingTable();
+			}
 		}
 	}
 

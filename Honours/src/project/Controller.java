@@ -1612,6 +1612,7 @@ public class Controller {
 	 */
 	public void increment_count(AMLabel label, Double value, JPanel panel,
 			HashMap<String, Integer> map, boolean colour_only) {
+		
 
 		try {
 			// Get the labels bar
@@ -1648,6 +1649,7 @@ public class Controller {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 
 	/**
@@ -2061,32 +2063,31 @@ public class Controller {
 		case 3: // enter
 			hierarchy.addSearchingItem(lbl, 3);
 			lbl.change_text(true);
-
-			// get sub labels
-			String query = alpha_code(lbl, hierarchy.getId());
-			ResultSet data = m_model.getMyQuery(query);
-			HashMap<String, Integer> position_map = hierarchy.getMap();
-			HashSet<Integer> hovered_elements = new HashSet<Integer>();
-			try {
-				while (data.next()) {
-					ResultSetMetaData rsmd = data.getMetaData();
-					int NumOfCol = rsmd.getColumnCount();
-					for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
-						String key = data.getString(1).toString();
-						key = hierarchy.getId() + "00" + key;
-						if (position_map.containsKey(key)) {
-							int index = position_map.get(key);
-							Integer tmp_index = new Integer(index);
-							hovered_elements.add(tmp_index);
-						}
-					}
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+//
+//			// get sub labels
+//			String query = alpha_code(lbl, hierarchy.getId());
+//			ResultSet data = m_model.getMyQuery(query);
+//			HashMap<String, Integer> position_map = hierarchy.getMap();
+//			HashSet<Integer> hovered_elements = new HashSet<Integer>();
+//			try {
+//				while (data.next()) {
+//					ResultSetMetaData rsmd = data.getMetaData();
+//					int NumOfCol = rsmd.getColumnCount();
+//					for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
+//						String key = data.getString(1).toString();
+//						key = hierarchy.getId() + "00" + key;
+//						if (position_map.containsKey(key)) {
+//							int index = position_map.get(key);
+//							Integer tmp_index = new Integer(index);
+//							hovered_elements.add(tmp_index);
+//						}
+//					}
+//				}
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
 
 			// connection(hovered_elements, hierarchy);
-//			perform_searching();
 			perform_connection();
 			break;
 		case 4: // exit
@@ -2106,7 +2107,11 @@ public class Controller {
 			expand_collapse_label(hierarchy, lbl);
 			break;
 		case 6: // right clicked
-			hierarchy.addSearchingItem(lbl, 1);
+			int ls = 3;
+			if(hierarchy.searchingItems.containsKey(lbl))
+				ls = hierarchy.searchingItems.get(lbl);
+			if(ls!=3)hierarchy.removeSearchingItem(lbl);
+			else hierarchy.addSearchingItem(lbl, 1);
 			break;
 		case 7: // double clicked
 			showItemInfo(lbl);
@@ -2169,6 +2174,7 @@ public class Controller {
 		}
 		return r;
 	}
+
 	public HashSet<Integer> intersectionOf(HashSet<Integer> a,
 			HashSet<Integer> b) {
 		HashSet<Integer> r = new HashSet<Integer>();
@@ -2177,110 +2183,6 @@ public class Controller {
 				r.add(s);
 		}
 		return r;
-	}
-
-	public void perform_searching() {
-
-		ArrayList<Hierarchy> hs = new ArrayList<Hierarchy>();
-		hs.add(m_view.getHierarchy1());
-		hs.add(m_view.getHierarchy2());
-		hs.add(m_view.getHierarchy3());
-
-		ArrayList<HashSet<Integer>> scode = new ArrayList<HashSet<Integer>>();
-
-		System.out.println("--Count type:" + this.count_type + " --linktable:"
-				+ linkTableName[0] + " --coloumn:" + column);
-
-		ArrayList<String> itemids = new ArrayList<String>();
-		boolean has = false;
-		for (Hierarchy h : hs) {
-			// clear the hierarchies
-			h.clearCount();
-
-			HashSet<Integer> sset = new HashSet<Integer>();
-			scode.add(sset);
-			// not visible or do not have any condition
-			if (!h.isVisible() || h.searchingItems.size() == 0) {
-				continue;
-			}
-			// get the ids
-			ArrayList<String> lst = new ArrayList<String>();
-			for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
-				if (item.getValue() != 0) {
-					AMLabel lbl = item.getKey();
-					String str = alpha_code(lbl, h.getId());
-					lst.add(str);
-
-					ResultSet trs = m_model.getMyQuery(str);
-					try {
-						while (trs.next())
-							sset.add(trs.getInt(1));
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-			String sql = "select " + this.column + " from "
-					+ linkTableName[h.getId() - 1] + " where 1=1 ";
-			for (String s : lst) {
-				sql += " and " + columnName[h.getId() - 1] + " in (" + s + ") ";
-			}
-			sql += " group by " + this.column;
-			ResultSet rs = this.m_model.getMyQuery(sql);
-			ArrayList<String> newids = new ArrayList<String>();
-			try {
-				while (rs.next()) {
-					newids.add(rs.getString(1));
-				}
-				if (has) {
-					itemids = intersectionOf(itemids, newids);
-				} else {
-					has = true;
-					itemids = newids;
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		String inputs = " Where ";
-		if (itemids.isEmpty())
-			inputs += " 1<>1 ";
-		else {
-			inputs += column + " in (";
-			for (String id : itemids) {
-				inputs += id + ",";
-			}
-			inputs = inputs.substring(0, inputs.length() - 1) + ")";
-		}
-
-		ArrayList<String> sstr = new ArrayList<String>();
-		int idx = 0;
-		for (HashSet<Integer> s : scode) {
-			String ss = "";
-			for (int x : s) {
-				ss += x + ",";
-			}
-			if (ss != "") {
-				ss = ss.substring(0, ss.length() - 1) + ")";
-				ss = " and " + columnName[idx] + " in (" + ss;
-			}
-			idx++;
-			sstr.add(ss);
-		}
-
-		System.out.println("--->MyInputs:: " + inputs);
-
-		for (Hierarchy h : hs) {
-			int index = h.getId() - 1;
-			String queryN = "select c." + columnName[index]
-					+ ", sum(c.weighted_sum) " + " from  "
-					+ linkTableName[index] + " as c" + inputs + sstr.get(index)
-					+ " group by  " + columnName[index];
-			looper(h, queryN);
-		}
 	}
 
 	public void perform_connection() {

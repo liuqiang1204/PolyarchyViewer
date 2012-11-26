@@ -352,6 +352,8 @@ public class AMLabel extends JLabel {
 	 */
 	protected void paintComponent(Graphics g) {
     
+		//update tooltip --Qiang
+		this.updateTooltip();
 		//only paint after loaded to save time
 	   if(View.loaded) {
 		   super.paintComponent(g);
@@ -1236,5 +1238,20 @@ public class AMLabel extends JLabel {
 	public String getWebsite() {
 		return website;
 	}
-
+	
+	/**
+	 * Update tool-tips for the label
+	 * @author Qiang Liu
+	 */
+	public void updateTooltip(){
+		DecimalFormat df = new DecimalFormat("#.###");
+		if(this.has_bar){
+			double sub = this.getIts_bar().getSub_count();
+			double total = this.getIts_bar().getCount();
+			String s=df.format(sub)+ " / " +df.format(total);
+			this.setToolTipText(s);
+			this.getIts_bar().setToolTipText(s);
+			if(this.has_image)this.getIts_image().setToolTipText(s);
+		}
+	}
 }
