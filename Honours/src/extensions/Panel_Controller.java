@@ -120,13 +120,13 @@ public class Panel_Controller extends JPanel {
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 	    this.add(hide_show_option = new JLabel(Controller_Images.getHide()));
-	    hide_show_option.setName("hide " + name);
+	    hide_show_option.setName("hide - " + name);
 	    
 	    this.add(move_left = new JLabel(Controller_Images.getMove_left()));
-	    move_left.setName("move left " + name);
+	    move_left.setName("move left - " + name);
 	    
 	    this.add(move_right = new JLabel(Controller_Images.getMove_right()));
-	    move_right.setName("move right " + name);
+	    move_right.setName("move right - " + name);
 	}
 	
 	/**
@@ -185,7 +185,7 @@ public class Panel_Controller extends JPanel {
 		
 			//if visible then the icon is hide
 			icon = Controller_Images.getHide();
-			text = "hide " + name;
+			text = "hide - " + name;
 			
 			//set the orientation to vertical
 			orientation = 1;
@@ -193,7 +193,7 @@ public class Panel_Controller extends JPanel {
 			
 			//if not visible then the icon is show
 			icon = Controller_Images.getShow();
-			text = "show " + name;
+			text = "show - " + name;
 			
 			//set the orientation to horizontal
 			orientation = 0;

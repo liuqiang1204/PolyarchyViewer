@@ -274,40 +274,65 @@ public class Controller {
 		/**
 		 * Add some new listeners
 		 */
-		ActionListener al = new ActionListener(){
+		ActionListener al = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
 				perform_connection();
-			}			
+			}
 		};
-		m_view.getHierarchy1().isWeighted.addActionListener(al);
-		m_view.getHierarchy2().isWeighted.addActionListener(al);
-		m_view.getHierarchy3().isWeighted.addActionListener(al);
-		m_view.getHierarchy1().getClear().addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				Hierarchy.btn_clear_clicked(m_view.getHierarchy1());
-				perform_connection();
-			}
-		});
-		m_view.getHierarchy2().getClear().addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				Hierarchy.btn_clear_clicked(m_view.getHierarchy2());
-				perform_connection();
-			}
-		});
-		m_view.getHierarchy3().getClear().addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				Hierarchy.btn_clear_clicked(m_view.getHierarchy3());
-				perform_connection();
-			}
-		});
-		
+
+		for (Hierarchy h : m_view.hierarchies) {
+			h.isWeighted.addActionListener(al);
+			h.getClear().addActionListener(new Btn_clear_Listener(h));
+		}
+		// m_view.getHierarchy1().isWeighted.addActionListener(al);
+		// m_view.getHierarchy2().isWeighted.addActionListener(al);
+		// m_view.getHierarchy3().isWeighted.addActionListener(al);
+		// m_view.getHierarchy1().getClear().addActionListener(new
+		// ActionListener(){
+		// @Override
+		// public void actionPerformed(ActionEvent ae) {
+		// Hierarchy.btn_clear_clicked(m_view.getHierarchy1());
+		// perform_connection();
+		// }
+		// });
+		// m_view.getHierarchy2().getClear().addActionListener(new
+		// ActionListener(){
+		// @Override
+		// public void actionPerformed(ActionEvent ae) {
+		// Hierarchy.btn_clear_clicked(m_view.getHierarchy2());
+		// perform_connection();
+		// }
+		// });
+		// m_view.getHierarchy3().getClear().addActionListener(new
+		// ActionListener(){
+		// @Override
+		// public void actionPerformed(ActionEvent ae) {
+		// Hierarchy.btn_clear_clicked(m_view.getHierarchy3());
+		// perform_connection();
+		// }
+		// });
+
 		// make sure that we re pack the view because it will have changed now
 		// all of the elements have been loaded
 		m_view.pack();
+	}
+
+	public class Btn_clear_Listener implements ActionListener {
+
+		Hierarchy btn_owner;
+
+		public Btn_clear_Listener(Hierarchy h) {
+			super();
+			btn_owner = h;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Hierarchy.btn_clear_clicked(btn_owner);
+			perform_connection();
+		}
+
 	}
 
 	/* ADDING CONTENTS */
@@ -343,24 +368,28 @@ public class Controller {
 
 			// increment the status bar
 			m_view.incrementWaiter(25);
-			int x = 25;
+			int x = 100 / m_view.hierarchies.size();
+			int inc = x;
 
-			// The value to decide which hierarchy we are adding the next set of
-			// objects to
-			int hierarchy_num = 1;
-
-			// Add the table information into the correct hierarchy
-
-			while (hierarchy_num < 4) {
-				// call the main function to fill in the values into the screen
-				// result = Alpha_table(hierarchy_num);
-				Alpha_table(hierarchy_num);
-
-				m_view.incrementWaiter(x += 25);
-
-				// increment the hierarchy
-				hierarchy_num++;
+			for (int i = 0; i < m_view.hierarchies.size(); i++) {
+				Alpha_table(i + 1);
+				m_view.incrementWaiter(x += inc);
 			}
+			// // The value to decide which hierarchy we are adding the next set
+			// of
+			// // objects to
+			// int hierarchy_num = 1;
+			// // Add the table information into the correct hierarchy
+			// while (hierarchy_num < 4) {
+			// // call the main function to fill in the values into the screen
+			// // result = Alpha_table(hierarchy_num);
+			// Alpha_table(hierarchy_num);
+			//
+			// m_view.incrementWaiter(x += 25);
+			//
+			// // increment the hierarchy
+			// hierarchy_num++;
+			// }
 
 			long endTime = System.currentTimeMillis();
 			long endMemory = Runtime.getRuntime().totalMemory();
@@ -1612,7 +1641,6 @@ public class Controller {
 	 */
 	public void increment_count(AMLabel label, Double value, JPanel panel,
 			HashMap<String, Integer> map, boolean colour_only) {
-		
 
 		try {
 			// Get the labels bar
@@ -1649,7 +1677,7 @@ public class Controller {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	/**
@@ -2063,37 +2091,38 @@ public class Controller {
 		case 3: // enter
 			hierarchy.addSearchingItem(lbl, 3);
 			lbl.change_text(true);
-//
-//			// get sub labels
-//			String query = alpha_code(lbl, hierarchy.getId());
-//			ResultSet data = m_model.getMyQuery(query);
-//			HashMap<String, Integer> position_map = hierarchy.getMap();
-//			HashSet<Integer> hovered_elements = new HashSet<Integer>();
-//			try {
-//				while (data.next()) {
-//					ResultSetMetaData rsmd = data.getMetaData();
-//					int NumOfCol = rsmd.getColumnCount();
-//					for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
-//						String key = data.getString(1).toString();
-//						key = hierarchy.getId() + "00" + key;
-//						if (position_map.containsKey(key)) {
-//							int index = position_map.get(key);
-//							Integer tmp_index = new Integer(index);
-//							hovered_elements.add(tmp_index);
-//						}
-//					}
-//				}
-//			} catch (SQLException e) {
-//				e.printStackTrace();
-//			}
+			//
+			// // get sub labels
+			// String query = alpha_code(lbl, hierarchy.getId());
+			// ResultSet data = m_model.getMyQuery(query);
+			// HashMap<String, Integer> position_map = hierarchy.getMap();
+			// HashSet<Integer> hovered_elements = new HashSet<Integer>();
+			// try {
+			// while (data.next()) {
+			// ResultSetMetaData rsmd = data.getMetaData();
+			// int NumOfCol = rsmd.getColumnCount();
+			// for (int column_rows = 1; column_rows <= NumOfCol; column_rows++)
+			// {
+			// String key = data.getString(1).toString();
+			// key = hierarchy.getId() + "00" + key;
+			// if (position_map.containsKey(key)) {
+			// int index = position_map.get(key);
+			// Integer tmp_index = new Integer(index);
+			// hovered_elements.add(tmp_index);
+			// }
+			// }
+			// }
+			// } catch (SQLException e) {
+			// e.printStackTrace();
+			// }
 
 			// connection(hovered_elements, hierarchy);
 			perform_connection();
 			break;
 		case 4: // exit
 			hierarchy.removeTempSearchingItem(lbl);
-//			connection(new HashSet<Integer>(), hierarchy);
-//			perform_searching();
+			// connection(new HashSet<Integer>(), hierarchy);
+			// perform_searching();
 			perform_connection();
 
 			break;
@@ -2108,10 +2137,12 @@ public class Controller {
 			break;
 		case 6: // right clicked
 			int ls = 3;
-			if(hierarchy.searchingItems.containsKey(lbl))
+			if (hierarchy.searchingItems.containsKey(lbl))
 				ls = hierarchy.searchingItems.get(lbl);
-			if(ls!=3)hierarchy.removeSearchingItem(lbl);
-			else hierarchy.addSearchingItem(lbl, 1);
+			if (ls != 3)
+				hierarchy.removeSearchingItem(lbl);
+			else
+				hierarchy.addSearchingItem(lbl, 1);
 			break;
 		case 7: // double clicked
 			showItemInfo(lbl);
@@ -2186,128 +2217,101 @@ public class Controller {
 	}
 
 	public void perform_connection() {
+		// step 0:clear count, reserved ids, etc.
+		for (Hierarchy h : m_view.hierarchies) {
+			h.intersectionOfCountIds.clear();
+			h.selectedItemIds.clear();
+			h.totalWeightedValue.clear();
+			h.clearCount();
+		}
 		// step 1: get the intersection of publictions and ids
-		Hierarchy h1 = m_view.getHierarchy1();
-		Hierarchy h2 = m_view.getHierarchy2();
-		Hierarchy h3 = m_view.getHierarchy3();
-		// get the intersections
+		boolean has = false;
 		HashSet<Integer> intersectionOfCountIds = new HashSet<Integer>();
-		HashSet<Integer> h1CountIds = new HashSet<Integer>();
-		HashSet<Integer> h2CountIds = new HashSet<Integer>();
-		HashSet<Integer> h3CountIds = new HashSet<Integer>();
-
-		HashSet<Integer> h1ItemIds = new HashSet<Integer>();
-		HashSet<Integer> h2ItemIds = new HashSet<Integer>();
-		HashSet<Integer> h3ItemIds = new HashSet<Integer>();
-
-		//clear bars
-		h1.clearCount();
-		h2.clearCount();
-		h3.clearCount();
-
-
-			boolean has=false;
-			if (h1.isVisible()&&!h1.searchingItems.isEmpty()) {
-
-				h1CountIds = getSearchingCountIdsForHierarchy(h1,h1ItemIds);
-				if(!has){
-					intersectionOfCountIds = h1CountIds;
-					has=true;
-				}
-				else{
-					intersectionOfCountIds = intersectionOf(intersectionOfCountIds,h1CountIds);
+		for (Hierarchy h : m_view.hierarchies) {
+			if (h.isVisible() && !h.searchingItems.isEmpty()) {
+				h.intersectionOfCountIds = getSearchingCountIdsForHierarchy(h,
+						h.selectedItemIds);
+				if (!has) {
+					intersectionOfCountIds.addAll(h.intersectionOfCountIds);
+					has = true;
+				} else {
+					intersectionOfCountIds = intersectionOf(
+							intersectionOfCountIds, h.intersectionOfCountIds);
 				}
 			}
-
-			if (h2.isVisible()&&!h2.searchingItems.isEmpty()) {
-				h2CountIds = getSearchingCountIdsForHierarchy(h2,h2ItemIds);
-				if(!has){
-					intersectionOfCountIds = h2CountIds;
-					has=true;
-				}
-				else{
-					intersectionOfCountIds = intersectionOf(intersectionOfCountIds,h2CountIds);
-				}
-			}
-
-			if (h3.isVisible()&&!h3.searchingItems.isEmpty()) {
-				h3CountIds = getSearchingCountIdsForHierarchy(h3,h3ItemIds);
-				if(!has){
-					intersectionOfCountIds = h3CountIds;
-					has=true;
-				}
-				else{
-					intersectionOfCountIds = intersectionOf(intersectionOfCountIds,h3CountIds);
-				}
-			}
-	
-		//none intersection ids
-		if(intersectionOfCountIds.isEmpty())return;
-		//none selected item
-		if(h1ItemIds.isEmpty()&&h2ItemIds.isEmpty()&&h3ItemIds.isEmpty())
-			return;
-
-		// to record the publication(people) ids with the total weighted value
-		HashMap<Integer, Double> h1Total = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> h2Total = new HashMap<Integer, Double>();
-		HashMap<Integer, Double> h3Total = new HashMap<Integer, Double>();
-		
-		String idStr="";
-		if(!intersectionOfCountIds.isEmpty()){
-			idStr+= " and " + this.column + " in (";
-			for(Integer i:intersectionOfCountIds)
-				idStr+=i+",";
-			idStr=idStr.substring(0, idStr.length()-1)+")";
 		}
 
-		System.out.println("IDSTR:" + idStr);
-		
-		if(h1.isVisible()&&!h1ItemIds.isEmpty())
-			h1Total = getTotalWeightedValue(h1,idStr,h1ItemIds);
-		if(h2.isVisible()&&!h2ItemIds.isEmpty())
-			h2Total = getTotalWeightedValue(h2,idStr,h2ItemIds);
-		if(h3.isVisible()&&!h3ItemIds.isEmpty())
-			h3Total = getTotalWeightedValue(h3,idStr,h3ItemIds);
-		
-		//compute and display each entry
-		computeEntry(h1,idStr,h2Total,h3Total);
-		computeEntry(h2,idStr,h1Total,h3Total);
-		computeEntry(h3,idStr,h1Total,h2Total);
+		// none intersection ids
+		if (intersectionOfCountIds.isEmpty())
+			return;
+		// none selected item
+		boolean allempty = true;
+		for (Hierarchy h : m_view.hierarchies) {
+			if (!h.searchingItems.isEmpty()) {
+				allempty = false;
+				break;
+			}
+		}
+		if (allempty)
+			return;
+
+		// step 2: compute total weighted value for each hierarchy and each
+		// count
+		String idStr = "";
+		if (!intersectionOfCountIds.isEmpty()) {
+			idStr += " and " + this.column + " in (";
+			for (Integer i : intersectionOfCountIds)
+				idStr += i + ",";
+			idStr = idStr.substring(0, idStr.length() - 1) + ")";
+		}
+
+		for (Hierarchy h : m_view.hierarchies) {
+			if (h.isVisible() && !h.selectedItemIds.isEmpty())
+				h.totalWeightedValue = getTotalWeightedValue(h, idStr,
+						h.selectedItemIds);
+		}
+
+		// compute and display each entry
+		for (Hierarchy h : m_view.hierarchies)
+			computeEntry(h,idStr,m_view.hierarchies);
 	}
 
-	public void computeEntry(Hierarchy h,String idstr,HashMap<Integer, Double> ta,HashMap<Integer, Double> tb){
+	public void computeEntry(Hierarchy h, String idstr,
+			ArrayList<Hierarchy> hlist) {
 		int index = h.getId() - 1;
-		String sql = "select " + this.column + ","+columnName[index] + ",weighted_sum from " 
-				+ linkTableName[index] + " where 1=1 " + idstr;
-		
+		String sql = "select " + this.column + "," + columnName[index]
+				+ ",weighted_sum from " + linkTableName[index] + " where 1=1 "
+				+ idstr;
+
 		// The hashmap for this hierarchy
 		HashMap<String, Integer> map = h.getMap();
 		// Get the inner panel that contains the elements
 		JPanel panel = h.getInnerhierarchy();
 		String idpre = h.getId() + "00";
-		
+
 		ResultSet rs = m_model.getMyQuery(sql);
 		try {
-			while(rs.next()){
+			while (rs.next()) {
 				int cid = rs.getInt(1);
 				String eid = rs.getString(2);
-				double va = 1.0;				
-				double vb = 1.0;
-				double value = rs.getDouble(3);
-				if(ta.containsKey(cid)) va = ta.get(cid);
-				if(tb.containsKey(cid)) vb = tb.get(cid);
+				double value;
+				if(h.isWeighted.isSelected())value = rs.getDouble(3);
+				else value = 1.0;
 				
-				value = value * va * vb;
-				System.out.println(rs.getDouble(3)+ " * " + va + " * " + vb + " = " + value  );
+				for(Hierarchy t:hlist){
+					double x = 1.0;
+					if(t.totalWeightedValue.containsKey(cid))
+						x=t.totalWeightedValue.get(cid);
+					else x = 1.0;
+					value = value*x;
+				}
 
-				
 				String lblid = idpre + eid;
 				if (map.containsKey(lblid)) {
 					// find the index for this unique ID
 					int lblidx = map.get(lblid);
 					// increment the count
-					increment_count(
-							(AMLabel) panel.getComponent(lblidx),
+					increment_count((AMLabel) panel.getComponent(lblidx),
 							value, panel, map, false);
 				}
 			}
@@ -2316,14 +2320,18 @@ public class Controller {
 			e.printStackTrace();
 		}
 	}
-	//Base on the selections of Hierarchy entries,
-	//get the searching string and selected entry ids
-	public HashSet<Integer> getSearchingCountIdsForHierarchy(Hierarchy h, HashSet<Integer> itemids){
+
+	
+	// Base on the selections of Hierarchy entries,
+	// get the searching string and selected entry ids
+	public HashSet<Integer> getSearchingCountIdsForHierarchy(Hierarchy h,
+			HashSet<Integer> itemids) {
 		HashSet<Integer> cids = new HashSet<Integer>();
-		
+
 		ArrayList<String> lst = new ArrayList<String>();
 		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
-			System.out.println(item.getKey().getText() + " : " + item.getValue());
+			System.out.println(item.getKey().getText() + " : "
+					+ item.getValue());
 			if (item.getValue() != 0) {
 				AMLabel lbl = item.getKey();
 				String str = alpha_code(lbl, h.getId());
@@ -2342,72 +2350,73 @@ public class Controller {
 
 		String sql = "select " + this.column + " from "
 				+ linkTableName[h.getId() - 1] + " where 1=1 ";
-		boolean has=false;
+		boolean has = false;
 		for (String s : lst) {
-			String msql = sql + " and " + columnName[h.getId() - 1] + " in (" + s + ") ";
+			String msql = sql + " and " + columnName[h.getId() - 1] + " in ("
+					+ s + ") ";
 			ResultSet mrs = m_model.getMyQuery(msql);
 			HashSet<Integer> rowcids = new HashSet<Integer>();
 			try {
-				while(mrs.next())rowcids.add(mrs.getInt(1));
+				while (mrs.next())
+					rowcids.add(mrs.getInt(1));
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(has){
-				cids = intersectionOf(cids,rowcids);
-			}
-			else{
+			if (has) {
+				cids = intersectionOf(cids, rowcids);
+			} else {
 				cids = rowcids;
-				has=true;
+				has = true;
 			}
 		}
 
-
-		
 		return cids;
 	}
 
-	public HashMap<Integer, Double> getTotalWeightedValue(Hierarchy h,String idstr,HashSet<Integer> itemids){
+	public HashMap<Integer, Double> getTotalWeightedValue(Hierarchy h,
+			String idstr, HashSet<Integer> itemids) {
 		HashMap<Integer, Double> r = new HashMap<Integer, Double>();
 		int index = h.getId() - 1;
-		//if it is not weighted then return. use 1.0 for the later computing.
-		if(!h.isWeighted.isSelected()) return r;
-	
-		//weighted
-		String inputs="where 1=1 ";
-		if(idstr.equals("")) return r;
-		else inputs+= idstr;
-		
-		if(itemids.size()>0){
-			inputs+= " and " + this.columnName[index] + " in (";
-			for(Integer i:itemids)
-				inputs+=i+",";
-			inputs=inputs.substring(0, inputs.length()-1)+")";
-		}
-		else return r;
-		
-		System.out.println("idstr -- "+idstr);
-		System.out.println("My ip -- "+inputs);
-		
-		String sql="select c." + column
-				+ ", sum(c.weighted_sum) " + " from  "
-				+ linkTableName[index] + " as c " + inputs
+		// if it is not weighted then return. use 1.0 for the later computing.
+		if (!h.isWeighted.isSelected())
+			return r;
+
+		// weighted
+		String inputs = "where 1=1 ";
+		if (idstr.equals(""))
+			return r;
+		else
+			inputs += idstr;
+
+		if (itemids.size() > 0) {
+			inputs += " and " + this.columnName[index] + " in (";
+			for (Integer i : itemids)
+				inputs += i + ",";
+			inputs = inputs.substring(0, inputs.length() - 1) + ")";
+		} else
+			return r;
+
+		System.out.println("idstr -- " + idstr);
+		System.out.println("My ip -- " + inputs);
+
+		String sql = "select c." + column + ", sum(c.weighted_sum) "
+				+ " from  " + linkTableName[index] + " as c " + inputs
 				+ " group by  " + column;
 		ResultSet rs = m_model.getMyQuery(sql);
 		try {
-			while(rs.next()){
+			while (rs.next()) {
 				r.put(rs.getInt(1), rs.getDouble(2));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return r;
-		
+
 	}
-	
-	
+
 	// class Interaction_Mouse_Listener extends MouseAdapter {
 	//
 	// /**
@@ -2596,14 +2605,20 @@ public class Controller {
 			Hierarchy hierarchy = null;
 
 			// Get the objects depending on what text box was interacted with
-			if (e.getSource().equals(m_view.getHierarchy1().getSearchText())) {
-				hierarchy = m_view.getHierarchy1();
-			} else if (e.getSource().equals(
-					m_view.getHierarchy2().getSearchText())) {
-				hierarchy = m_view.getHierarchy2();
-			} else if (e.getSource().equals(
-					m_view.getHierarchy3().getSearchText())) {
-				hierarchy = m_view.getHierarchy3();
+//			if (e.getSource().equals(m_view.getHierarchy1().getSearchText())) {
+//				hierarchy = m_view.getHierarchy1();
+//			} else if (e.getSource().equals(
+//					m_view.getHierarchy2().getSearchText())) {
+//				hierarchy = m_view.getHierarchy2();
+//			} else if (e.getSource().equals(
+//					m_view.getHierarchy3().getSearchText())) {
+//				hierarchy = m_view.getHierarchy3();
+//			}
+			for(Hierarchy h:m_view.hierarchies){
+				if(e.getSource().equals(h.getSearchText())){
+					hierarchy = h;
+					break;
+				}					
 			}
 
 			// if we have pressed on of the up or down buttons on the keypad

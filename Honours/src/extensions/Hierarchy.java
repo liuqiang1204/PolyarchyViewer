@@ -198,6 +198,20 @@ public class Hierarchy extends JPanel {
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
 	public JCheckBox isWeighted = new JCheckBox("Weighted");
+	
+	//the position in the panel
+	public int zorder =0;
+
+	/**
+	 * for connection computing
+	 * @author Qiang Liu
+	 */
+	//the intersection of selected count ids
+	public HashSet<Integer> intersectionOfCountIds = new HashSet<Integer>();
+	//the selected entry ids (the last level)
+	public HashSet<Integer> selectedItemIds = new HashSet<Integer>();
+	// to record the publication(people) ids with the total weighted value (countid,value)
+	public HashMap<Integer, Double> totalWeightedValue = new HashMap<Integer, Double>();
 
 	/* CONSTRUCTORS */
 
