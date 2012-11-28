@@ -2302,10 +2302,12 @@ public class Controller {
 				
 				for(Hierarchy t:hlist){
 					double x = 1.0;
-					if(t.totalWeightedValue.containsKey(cid))
-						x=t.totalWeightedValue.get(cid);
-					else x = 1.0;
-					value = value*x;
+					if(t!=h){
+						if(t.totalWeightedValue.containsKey(cid))
+							x=t.totalWeightedValue.get(cid);
+						else x = 1.0;
+						value = value*x;
+					}
 				}
 
 				String lblid = idpre + eid;
