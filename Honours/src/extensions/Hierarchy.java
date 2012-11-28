@@ -34,8 +34,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -267,8 +265,8 @@ public class Hierarchy extends JPanel {
 		// Create the heading for the panel
 		panelHeading = new JLabel(heading);
 		panelHeading.setFont(headingFont);
-		panelHeading.setBorder(new CompoundBorder(BorderFactory
-				.createTitledBorder(""), new EmptyBorder(0, 0, 0, 0)));
+//		panelHeading.setBorder(new CompoundBorder(BorderFactory
+//				.createTitledBorder(""), new EmptyBorder(0, 0, 0, 0)));
 
 		// Create panel to place this in
 		panel_heading = new JPanel();
@@ -278,11 +276,12 @@ public class Hierarchy extends JPanel {
 
 		// The options for the panel
 		panel_controller = new Panel_Controller(id + "", 1);
+		panel_controller.setToolTipText(panelHeading.getText());
 
 		// add the heading
 		panel_heading.add(panelHeading);
 
-		panel_heading.add(Box.createRigidArea(new Dimension(10, 0)));
+		panel_heading.add(Box.createRigidArea(new Dimension(5, 0)));
 
 		panel_heading.add(panel_controller);
 
@@ -299,9 +298,10 @@ public class Hierarchy extends JPanel {
 		// this allows the panel to be scrolled as it will become too large
 		hierarchyScroll = new AMScrollPane(innerhierarchy);
 
-		// no horizontal scrolling
+		// scrolling
 		hierarchyScroll
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		hierarchyScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 		// set the scrolling constants
 		hierarchyScroll.getVerticalScrollBar().setUnitIncrement(unitInc);
@@ -309,7 +309,7 @@ public class Hierarchy extends JPanel {
 
 		// The options for the hierarchy
 		hierarchy_options = new JPanel();
-
+		
 		// add the contents
 		hierarchy = new JSplitPane(JSplitPane.VERTICAL_SPLIT, hierarchyScroll,
 				hierarchy_options);
@@ -1172,9 +1172,9 @@ public class Hierarchy extends JPanel {
 	public void setDimensions(Dimension screenSize) {
 
 		// Get the height of the view
-		int height = (int) (screenSize.height * .7);
+		int height = (int) (screenSize.height * .5);
 
-		hierarchyScroll.setPreferredSize(new Dimension(50, height));
+		hierarchyScroll.setPreferredSize(new Dimension(30, height));
 	}
 
 	/* PANEL BUFFER TO PUSH EVERYTHING UP */
@@ -1309,6 +1309,7 @@ public class Hierarchy extends JPanel {
 		// set the alignment
 		panel_heading.setLayout(new BoxLayout(panel_heading, BoxLayout.X_AXIS));
 
+		this.panelHeading.setVisible(visible);
 		// change the icon
 		panel_controller.change_icon(visible);
 	}

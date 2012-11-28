@@ -43,7 +43,7 @@ public class Panel_Controller extends JPanel {
 	private JLabel move_right;
 	
 	/**
-	 * The string id for this panel, corresponds to its position
+	 * The string id for this panel, corresponds to its position	 * 
 	 */
 	private String name;
 	
@@ -180,13 +180,11 @@ public class Panel_Controller extends JPanel {
 		
 		//The new text
 		String text = "";
-	
 		if(visible) {
 		
 			//if visible then the icon is hide
 			icon = Controller_Images.getHide();
 			text = "hide - " + name;
-			
 			//set the orientation to vertical
 			orientation = 1;
 		} else {
@@ -194,15 +192,15 @@ public class Panel_Controller extends JPanel {
 			//if not visible then the icon is show
 			icon = Controller_Images.getShow();
 			text = "show - " + name;
-			
 			//set the orientation to horizontal
 			orientation = 0;
 		}
 		
 		//set the variables
 		hide_show_option.setName(text);
-		hide_show_option.setIcon(icon);
 		
+		hide_show_option.setIcon(icon);
+			
 		repaint();
 	}
 
@@ -249,5 +247,17 @@ public class Panel_Controller extends JPanel {
 	 */
 	public int getOrientation() {
 		return orientation;
+	}
+	
+	/**
+	 * Set Tooltips
+	 * @author Qiang Liu
+	 */
+	public void setTooltips(String heading){
+		this.setTooltips(heading);
+		this.hide_show_option.setToolTipText("H/S - "+heading);
+		this.move_left.setToolTipText("Move left - " + heading);
+		this.move_right.setToolTipText("Move right - " +heading);
+		
 	}
 }

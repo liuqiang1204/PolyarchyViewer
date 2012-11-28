@@ -246,8 +246,7 @@ public class Java_Connector {
 	 */
 	public ResultSet getTopLevel(String tableName) {
 
-		String query = "select * from " + tableName + " where ParentID=0 "
-				+ " and origin_parent is not null";
+		String query = "select * from " + tableName + " where ParentID=0 ";
 		return getMyQuery(query);
 	}
 

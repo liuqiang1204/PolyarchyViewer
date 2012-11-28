@@ -20,7 +20,7 @@ public class converter {
 	String mysqlUrl = "jdbc:mysql://localhost:3306/honours?user=root&password=admin";
 	String derbyUrl = "jdbc:derby:database/honours;create=true;user=root;password=admin";	
 	
-	String d_path;
+//	String d_path;
 	public converter(){
 		try {
 			Class.forName(MySQLDriver).newInstance();
@@ -50,6 +50,7 @@ public class converter {
 		System.out.println("2 - " + this.mysqlUrl.replaceAll("honours", "sample"));
 		System.out.println("3 - " + this.mysqlUrl.replaceAll("honours", "movie_small"));
 		System.out.println("4 - " + this.mysqlUrl.replaceAll("honours", "publication_small"));
+		System.out.println("5 - " + this.mysqlUrl.replaceAll("honours", "IMDB"));
 		
 		String is = br.readLine().trim();
 		if(is.equals("2")){
@@ -63,6 +64,10 @@ public class converter {
 		else if(is.equals("4")){
 			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "publication_small");
 			this.derbyUrl = this.derbyUrl.replaceAll("honours", "publication_small");
+		}
+		else if(is.equals("5")){
+			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "IMDB");
+			this.derbyUrl = this.derbyUrl.replaceAll("honours", "IMDB");
 		}
 		else if(is.equals("1")||is.equals("")){
 			

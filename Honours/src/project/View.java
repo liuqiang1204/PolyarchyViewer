@@ -16,7 +16,6 @@ import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 import javax.swing.BorderFactory;
@@ -224,14 +223,13 @@ public class View extends JFrame {
 
 		// Create the main panel
 		main_panel = new JPanel();
-		main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.X_AXIS));
-		window.setLeftComponent(main_panel);
+
 
 		// Create the global options panel
 		global_options = new JPanel();
 		global_options
 				.setLayout(new BoxLayout(global_options, BoxLayout.Y_AXIS));
-		global_options.setPreferredSize(new Dimension(1400, 30));
+		global_options.setPreferredSize(new Dimension(1366, 30));
 		window.setRightComponent(global_options);
 
 		JPanel interaction_options = new JPanel();
@@ -273,6 +271,11 @@ public class View extends JFrame {
 		// main_panel.add(hierarchy1);
 		// main_panel.add(hierarchy2);
 		// main_panel.add(hierarchy3);
+		
+		main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.X_AXIS));
+//		main_panel.setLayout(new GridLayout(1,hierarchies.size()));
+		window.setLeftComponent(main_panel);
+		
 		for (Hierarchy h : this.hierarchies){
 			main_panel.add(h);
 			main_panel.setComponentZOrder(h, h.zorder-1);

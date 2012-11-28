@@ -521,10 +521,12 @@ public class Controller {
 		int left_padding = 15;
 
 		// get the hierarchy that we will be adding it to
-		Hierarchy hierachy = m_view.decide_hierarchy(hierarchy_num);
-
+		Hierarchy hierarchy = m_view.decide_hierarchy(hierarchy_num);		
+		
 		// get the index value used to fetch the correct tableName
 		int index = hierarchy_num - 1;
+		
+		hierarchy.setMaxlevels(tableLevel[index]);
 
 		// call the largest function
 		largest(index);
@@ -549,7 +551,7 @@ public class Controller {
 
 				// add the label
 				AMLabel label = addLabel(alpha_code, data.getString("label"),
-						hierachy, level, "");
+						hierarchy, level, "");
 
 				// now go and add the rest of the hierarchy to the visualisation
 				double sub_count;
@@ -557,7 +559,7 @@ public class Controller {
 				if (level < tableLevel[index]) {
 					// if there is another level, call function
 					// alpha_codes_middle to fill the rest of the values
-					sub_count = alpha_codes_middle(hierachy, level + 1,
+					sub_count = alpha_codes_middle(hierarchy, level + 1,
 							alpha_code, left_padding + 15, index);
 				} else {
 					// if this the last level, call the count method
@@ -567,7 +569,7 @@ public class Controller {
 				}
 
 				// go an edit this labels bar
-				m_view.bar_edit(sub_count, hierachy, label);
+				m_view.bar_edit(sub_count, hierarchy, label);
 
 				// the overall count needs to be updated
 				overal_count += sub_count;

@@ -31,7 +31,7 @@ public class LoginScreen extends javax.swing.JDialog {
 		{
 			"Derby:sample","Derby:movie_small",
 			"Derby:publication_small","Derby:honours",
-			"sample","movie_small","publication_small","honours"};
+			"sample","movie_small","publication_small","honours","IMDB"};
 	protected boolean isValid = false;
 	protected String dbName = "honours";
 	
