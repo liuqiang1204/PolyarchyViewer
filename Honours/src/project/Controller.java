@@ -292,10 +292,11 @@ public class Controller {
 				perform_connection();
 			}
 		};
-
+		
 		for (Hierarchy h : m_view.hierarchies) {
-			h.isWeighted.addActionListener(al);
+			h.isWeighted.addActionListener(al);			
 			h.getClear().addActionListener(new Btn_clear_Listener(h));
+			
 		}
 		
 		this.m_view.cbx_showInfo.addActionListener(new ActionListener(){
@@ -307,6 +308,7 @@ public class Controller {
 			}
 			
 		});
+		
 		// m_view.getHierarchy1().isWeighted.addActionListener(al);
 		// m_view.getHierarchy2().isWeighted.addActionListener(al);
 		// m_view.getHierarchy3().isWeighted.addActionListener(al);
@@ -395,6 +397,7 @@ public class Controller {
 
 			for (int i = 0; i < m_view.hierarchies.size(); i++) {
 				Alpha_table(i + 1);
+				m_view.hierarchies.get(i).setSliderBarListener();
 				m_view.incrementWaiter(x += inc);
 			}
 			// // The value to decide which hierarchy we are adding the next set
@@ -818,6 +821,8 @@ public class Controller {
 
 		// go and set the largest variables
 		hierachy.setLargest_top(largest_top);
+		int ml = (int)Math.ceil(largest_top);
+		hierachy.setSliderBarRange(ml);
 
 		// System.out.println(index + " - largest : " + largest_top);
 
@@ -2344,7 +2349,7 @@ public class Controller {
 					// increment the count
 					increment_count((AMLabel) panel.getComponent(lblidx),
 							value, panel, map, false);
-				}
+				}								
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

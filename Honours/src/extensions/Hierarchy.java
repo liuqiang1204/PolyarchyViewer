@@ -12,6 +12,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -24,16 +26,19 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -196,7 +201,7 @@ public class Hierarchy extends JPanel {
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
 	public JCheckBox isWeighted = new JCheckBox("Weighted");
-	
+	public JScrollBar jsb_filter = new JScrollBar();
 	public JCheckBox cbx_visible;
 	
 	//the position in the panel
@@ -598,6 +603,33 @@ public class Hierarchy extends JPanel {
 		}
 		System.out.println(">>>" + item.getText() + " -- " + ischecked);
 	}
+	
+	public void setSliderBarRange(int max){
+		jsb_filter.setModel(new DefaultBoundedRangeModel(0,1,0,max));
+		
+	}
+	
+	public void setSliderBarListener(){
+		jsb_filter.addAdjustmentListener(new AdjustmentListener(){
+
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				JScrollBar js = (JScrollBar) e.getSource();
+				js.setToolTipText(e.getValue()+"");
+				AMPanel ih = getInnerhierarchy();
+				HashMap<String,Integer> im = getMap();
+				for(int id:im.values()){
+					AMLabel l = (AMLabel)ih.getComponent(id);
+					l.limitSize = e.getValue();
+					l.getIts_bar().limitSize = l.limitSize;
+					l.getIts_image().limitSize = l.limitSize;
+				}
+				ih.setVisible(false);
+				ih.setVisible(true);
+			}
+			
+		});
+	}
 
 	public void refreshSearchingTable() {
 		MyTableModel tm = new MyTableModel();
@@ -661,7 +693,6 @@ public class Hierarchy extends JPanel {
 		searchingOpts.setModel(tm);
 
 		JScrollPane jsp = new JScrollPane(searchingOpts);
-
 		information = new JPanel();
 
 		// JPanel text = new JPanel();
@@ -677,7 +708,15 @@ public class Hierarchy extends JPanel {
 		// text.add(clear);
 
 		information.setSize(200, 22);
+		information.setBorder(new EmptyBorder(0, 20, 0, 20));
+		information.setLayout(new BoxLayout(information,BoxLayout.X_AXIS));
 		isWeighted.setSelected(true);
+		
+		jsb_filter.setOrientation(JScrollBar.HORIZONTAL);
+		jsb_filter.setPreferredSize(new Dimension(100,18));
+		jsb_filter.setSize(100, 20);
+		jsb_filter.setToolTipText("0");
+		information.add(jsb_filter);
 		information.add(isWeighted);
 		information.add(clear);
 

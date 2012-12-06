@@ -184,6 +184,7 @@ public class AMLabel extends JLabel {
 	public boolean is_checked = false;
 	public boolean is_expanded = false;
 	public AMLabel owner;
+	public int limitSize=0;
 	
 //	public ArrayList<AMLabel> parents = new ArrayList<AMLabel>();
 //	public ArrayList<AMLabel> children = new ArrayList<AMLabel>();
@@ -352,6 +353,20 @@ public class AMLabel extends JLabel {
 	 */
 	protected void paintComponent(Graphics g) {
     
+		if(this.has_bar){
+			this.sub_count = this.getIts_bar().sub_count;
+			this.count = this.getIts_bar().count;
+			this.its_image.count = count;
+			this.its_image.sub_count = sub_count;
+		}
+		
+		if(this.count<this.limitSize){
+			this.setVisible(false);
+			return;
+		}
+		else{
+			this.setVisible(true);
+		}
 		//update tooltip --Qiang
 		this.updateTooltip();
 		//only paint after loaded to save time
