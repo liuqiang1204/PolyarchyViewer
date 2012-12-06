@@ -27,6 +27,7 @@ public class Frame_Info extends JFrame {
 	private JLabel lbl_title = new JLabel();
 	private JTable tbl_info = new JTable();
 	private JScrollPane jsp_middle;
+	private JScrollPane jsp_middle1;
 	private JTextArea txa_msg = new JTextArea();
 
 	public Frame_Info() {
@@ -38,27 +39,35 @@ public class Frame_Info extends JFrame {
 		lbl_title.setHorizontalAlignment(JLabel.CENTER);
 	
 		jsp_middle = new JScrollPane(tbl_info);
-
+		jsp_middle1 = new JScrollPane(txa_msg);
 		this.add(lbl_title, BorderLayout.NORTH);
 		this.add(jsp_middle, BorderLayout.CENTER);
-
+		this.add(jsp_middle1,BorderLayout.CENTER);
+		txa_msg.setLineWrap(true);
+		txa_msg.setWrapStyleWord(true);
+		txa_msg.setEditable(false);
+		jsp_middle1.setVisible(false);
+		
 		this.setLocationRelativeTo(null);
-		this.setResizable(false);
+//		this.setResizable(false);
 		this.setAlwaysOnTop(true);
-		this.setVisible(true);
+		this.setVisible(false);
 
 	}
 	
 	public void setValues(String title, ResultSet rs){
 		this.lbl_title.setText(title);
 		tbl_info.setModel(DbUtils.resultSetToTableModel(rs));
+		jsp_middle.setVisible(true);
+		jsp_middle1.setVisible(false);
+		this.add(jsp_middle,BorderLayout.CENTER);
 	}
 	
 	public void setValues(String title, String msg){
 		this.lbl_title.setText(title);
-		this.remove(jsp_middle);
-		this.add(txa_msg,BorderLayout.CENTER);
-		txa_msg.setEditable(false);
+		this.jsp_middle.setVisible(false);
+		jsp_middle1.setVisible(true);		
 		txa_msg.setText(msg);
+		this.add(jsp_middle1,BorderLayout.CENTER);
 	}
 }

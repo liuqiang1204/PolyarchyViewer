@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 //import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -78,6 +79,12 @@ public class Controller {
 	 * The view that shows the information to the user
 	 */
 	private View m_view;
+	
+	/**
+	 * the info window
+	 * @author Qiang Liu
+	 */
+	public Frame_Info m_info = new Frame_Info();
 
 	/**
 	 * The advanced query view that the user can use
@@ -290,6 +297,16 @@ public class Controller {
 			h.isWeighted.addActionListener(al);
 			h.getClear().addActionListener(new Btn_clear_Listener(h));
 		}
+		
+		this.m_view.cbx_showInfo.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				JCheckBox cb = (JCheckBox)ae.getSource();
+				m_info.setVisible(cb.isSelected());
+			}
+			
+		});
 		// m_view.getHierarchy1().isWeighted.addActionListener(al);
 		// m_view.getHierarchy2().isWeighted.addActionListener(al);
 		// m_view.getHierarchy3().isWeighted.addActionListener(al);
@@ -2152,7 +2169,7 @@ public class Controller {
 				hierarchy.addSearchingItem(lbl, 1);
 			break;
 		case 7: // double clicked
-			showItemInfo(lbl);
+//			showItemInfo(lbl);
 			break;
 		default:
 			break;
@@ -2248,6 +2265,11 @@ public class Controller {
 			}
 		}
 
+		//store the ids
+		this.incIds.clear();
+		this.incIds.addAll(intersectionOfCountIds);
+		this.updateInfo();
+		
 		// none intersection ids
 		if (intersectionOfCountIds.isEmpty())
 			return;
@@ -2821,6 +2843,35 @@ public class Controller {
 	 * @author Qiang Liu
 	 */
 
+	public void updateInfo(){	
+		String ct = this.count_type.substring(0,count_type.length()-8);
+		String title = "Intersection of " + ct;
+		
+		//not IMDB
+		if(!ct.equalsIgnoreCase("films")){
+			String msg = "Number of " + ct + " : "+incIds.size() + "\nIDs : ";
+			for(int i:incIds)msg+=i+", ";
+			msg=msg.substring(0,msg.length()-1);
+			m_info.setValues(title, msg);
+			return;
+		}
+		
+		//IMDB		
+		if(this.incIds.isEmpty()){
+			m_info.setValues(title, "None!");
+			return;
+		}		
+
+		String sql = "select * from " + ct + " where "+ this.column + " in (";
+		for(int id : this.incIds){
+			sql+=id+",";
+		}
+		sql = sql.substring(0,sql.length()-1)+")";
+		
+		ResultSet rs = m_model.getMyQuery(sql);
+		m_info.setValues(title+" : "+incIds.size(), rs);
+	}
+	
 	public void showItemInfo(AMLabel lbl) {
 
 		String id = lbl.getUniqueID();
