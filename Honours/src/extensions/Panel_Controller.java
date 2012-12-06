@@ -127,6 +127,8 @@ public class Panel_Controller extends JPanel {
 	    
 	    this.add(move_right = new JLabel(Controller_Images.getMove_right()));
 	    move_right.setName("move right - " + name);
+	    
+	    hide_show_option.setVisible(false);
 	}
 	
 	/**

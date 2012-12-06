@@ -2,15 +2,19 @@ package project;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
@@ -21,6 +25,7 @@ import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,6 +34,7 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.TitledBorder;
 
 import project.Controller.Clear_Button_Action;
 import project.Controller.ComboBox_Action;
@@ -64,7 +70,7 @@ public class View extends JFrame {
 	/**
 	 * The split pane that is the top most panel
 	 */
-	private JSplitPane window;
+//	private JSplitPane window;
 
 	/**
 	 * The transparent glass that is sometimes on top of the window
@@ -112,6 +118,7 @@ public class View extends JFrame {
 
 	public ArrayList<Hierarchy> hierarchies=new ArrayList<Hierarchy>();
 	public ArrayList<Integer> zorders = new ArrayList<Integer>();
+	public JPanel topPanel;
 
 	// /**
 	// * The first hierarchy
@@ -207,12 +214,12 @@ public class View extends JFrame {
 
 		/* THE TOP MOST ELEMENT */
 
-		window = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		window.setOneTouchExpandable(true);
-		window.setResizeWeight(0.98);
+//		window = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//		window.setOneTouchExpandable(true);
+//		window.setResizeWeight(0.98);
 
 		// Add the panel to the frame
-		getContentPane().add(window, BorderLayout.CENTER);
+//		getContentPane().add(window, BorderLayout.CENTER);
 
 		/* GLASS PANE EXTRAS */
 
@@ -229,14 +236,15 @@ public class View extends JFrame {
 		global_options = new JPanel();
 		global_options
 				.setLayout(new BoxLayout(global_options, BoxLayout.Y_AXIS));
-		global_options.setPreferredSize(new Dimension(1366, 30));
-		window.setRightComponent(global_options);
+		global_options.setPreferredSize(new Dimension(1366, 25));
+
+//		window.setRightComponent(global_options);
 
 		JPanel interaction_options = new JPanel();
 		interaction_options.setLayout(new GridBagLayout());
 
 		/* HIERARCHY PANELS */
-
+		
 		String query = "select * from hierarchy";
 
 		ResultSet main_table = model.getMyQuery(query);
@@ -254,9 +262,13 @@ public class View extends JFrame {
 			// hierarchy3 = new Hierarchy(main_table.getInt(1),
 			// main_table.getString(2));
 			// }
+			
 			while (main_table.next()) {
 				Hierarchy h = new Hierarchy(main_table.getInt(1),
 						main_table.getString(2));
+				h.cbx_visible = new JCheckBox(main_table.getString(2));
+				h.cbx_visible.setSelected(true);
+				h.add_cbx_visible_actionListener();
 				hierarchies.add(h);
 				h.zorder = hierarchies.size();
 			}			
@@ -274,11 +286,20 @@ public class View extends JFrame {
 		
 		main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.X_AXIS));
 //		main_panel.setLayout(new GridLayout(1,hierarchies.size()));
-		window.setLeftComponent(main_panel);
+//		window.setLeftComponent(main_panel);
 		
+		topPanel=new JPanel();
+//		topPanel.setLayout(new GridLayout(1,hierarchies.size()));
+		topPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		
+		this.setLayout(new BorderLayout());
+		this.add(topPanel,BorderLayout.NORTH);
+		this.add(global_options,BorderLayout.SOUTH);
+		this.add(main_panel,BorderLayout.CENTER);
 		for (Hierarchy h : this.hierarchies){
 			main_panel.add(h);
 			main_panel.setComponentZOrder(h, h.zorder-1);
+			topPanel.add(h.cbx_visible);
 		}
 
 		/* ELEMENTS INSIDE OF GLOBAL OPTIONS */
@@ -896,6 +917,9 @@ public class View extends JFrame {
 	 * @param bar
 	 *            - The bar itself
 	 * @return - the inset that has the padding added to it
+	 * -------
+	 * Change to log(length+1)
+	 * @author Qiang Liu
 	 */
 	public Insets decideSpace(double count, float largest, float panel_width,
 			int left_padding, AMLabel bar) {
@@ -910,7 +934,8 @@ public class View extends JFrame {
 
 			// find the width of this bar compared to the largest, this is a
 			// percentage
-			double this_width_per = count / largest;
+//			double this_width_per = count / largest;
+			double this_width_per = Math.log(count+1) / Math.log(largest+1);
 
 			// we don't want the label to exceed the size of the panel with the
 			// left padding being added
@@ -1355,7 +1380,7 @@ public class View extends JFrame {
 			if (new_label_position.y != old_label_position.y
 					|| new_label_position.x != old_label_position.x) {
 				robot.mouseMove(new_label_position.x + width,
-						new_label_position.y + 2);
+						new_label_position.y + 2);				
 			}
 		}
 	}

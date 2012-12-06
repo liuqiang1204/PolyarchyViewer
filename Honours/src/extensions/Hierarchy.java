@@ -197,6 +197,8 @@ public class Hierarchy extends JPanel {
 
 	public JCheckBox isWeighted = new JCheckBox("Weighted");
 	
+	public JCheckBox cbx_visible;
+	
 	//the position in the panel
 	public int zorder =0;
 
@@ -287,6 +289,8 @@ public class Hierarchy extends JPanel {
 
 		panel_heading.add(Box.createHorizontalGlue());
 
+		panel_heading.setToolTipText(panelHeading.getText());
+
 		this.add(panel_heading);
 
 		/* INNER PANELS */
@@ -359,6 +363,22 @@ public class Hierarchy extends JPanel {
 	 * @return
 	 */
 
+	/**
+	 * add a listener for cbx_visible
+	 */
+	public void add_cbx_visible_actionListener(){
+		final Hierarchy h = this;
+		this.cbx_visible.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource()==cbx_visible){
+					h.setVisible(cbx_visible.isSelected());
+				}
+			}
+			
+		});
+	}
 	/**
 	 * Perform the action when the clear button is clicked
 	 */

@@ -409,7 +409,7 @@ public class AMLabel extends JLabel {
 	    		
 	    		//Cast the graphic to be a 2d graphic
 		        Graphics2D g2 = (Graphics2D)g;
-		        	             
+		        int bw = bar_width;
 		        if(count_option.equals("numerical")) {
 		        	
 		        	//set the height
@@ -424,7 +424,7 @@ public class AMLabel extends JLabel {
 		    		g2.setColor(selectableColours.getBorderBar());
 		    		
 		    		//add our own border, its better optimised this way
-		    		g2.drawRect(0, 0, bar_width-1, bar_height-1);
+		    		g2.drawRect(0, 0, bw, bar_height-1);
 		    		
 				} else {
 					
@@ -438,7 +438,7 @@ public class AMLabel extends JLabel {
 					g2.setColor(selectableColours.getWholeBar());
 					
 					//a bar of the correct width and height
-					g2.fillRect(0, 0, bar_width, bar_height);
+					g2.fillRect(0, 0, bw, bar_height);
 //					System.out.println(this.getText()+"--Bar Width:" + this.getBar_width());
 				} 
 		        
@@ -476,7 +476,11 @@ public class AMLabel extends JLabel {
 		        	} else {
 		        		//??why count+1??? --qiang
 //		        		percentage = (double)sub_count / (count + 1);
-		        		percentage = (double)sub_count / count;
+
+//		        		percentage = (double)sub_count / count;
+		        		
+		        		//change to log(length+1)
+		        		percentage = Math.log(sub_count+1) / Math.log(count+1);
 		        	}
 		        }  else {
 		        	

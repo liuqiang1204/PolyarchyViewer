@@ -30,7 +30,7 @@ public class LoginScreen extends javax.swing.JDialog {
 	protected String[] databases = 
 		{
 			"Derby:sample","Derby:movie_small",
-			"Derby:publication_small","Derby:honours",
+			"Derby:publication_small","Derby:honours","Derby:IMDB",
 			"sample","movie_small","publication_small","honours","IMDB"};
 	protected boolean isValid = false;
 	protected String dbName = "honours";

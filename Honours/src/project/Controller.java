@@ -119,6 +119,11 @@ public class Controller {
 	private String column;
 
 	/**
+	 * store current intersection of ids
+	 * @author Qiang Liu
+	 */
+	private HashSet<Integer> incIds = new HashSet<Integer>();
+	/**
 	 * String array to store names of the table from the 'Hierarchy' table
 	 * (fetched from the database)
 	 */
@@ -2333,6 +2338,7 @@ public class Controller {
 		HashSet<Integer> cids = new HashSet<Integer>();
 
 		ArrayList<String> lst = new ArrayList<String>();
+		ArrayList<HashSet<Integer> > rowids = new ArrayList<HashSet<Integer> >();
 		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
 			System.out.println(item.getKey().getText() + " : "
 					+ item.getValue());
@@ -2340,11 +2346,15 @@ public class Controller {
 				AMLabel lbl = item.getKey();
 				String str = alpha_code(lbl, h.getId());
 				lst.add(str);
+				HashSet<Integer> row = new HashSet<Integer>();
+				rowids.add(row);
 
 				ResultSet trs = m_model.getMyQuery(str);
 				try {
-					while (trs.next())
+					while (trs.next()){
 						itemids.add(trs.getInt(1));
+						row.add(trs.getInt(1));
+					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -2355,9 +2365,32 @@ public class Controller {
 		String sql = "select " + this.column + " from "
 				+ linkTableName[h.getId() - 1] + " where 1=1 ";
 		boolean has = false;
-		for (String s : lst) {
-			String msql = sql + " and " + columnName[h.getId() - 1] + " in ("
-					+ s + ") ";
+//		for (String s : lst) {
+//			String msql = sql + " and " + columnName[h.getId() - 1] + " in ("
+//					+ s + ") ";
+//			ResultSet mrs = m_model.getMyQuery(msql);
+//			HashSet<Integer> rowcids = new HashSet<Integer>();
+//			try {
+//				while (mrs.next())
+//					rowcids.add(mrs.getInt(1));
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			if (has) {
+//				cids = intersectionOf(cids, rowcids);
+//			} else {
+//				cids = rowcids;
+//				has = true;
+//			}
+//		}
+		for (HashSet<Integer> row : rowids) {
+			if(row.size()==0)continue;
+			String msql = sql + " and " + columnName[h.getId() - 1] + " in (";
+			for(int i:row){
+				msql+=i+",";
+			}
+			msql = msql.substring(0, msql.length()-1)+")";
 			ResultSet mrs = m_model.getMyQuery(msql);
 			HashSet<Integer> rowcids = new HashSet<Integer>();
 			try {
@@ -2374,6 +2407,7 @@ public class Controller {
 				has = true;
 			}
 		}
+
 
 		return cids;
 	}
@@ -2814,7 +2848,7 @@ public class Controller {
 			}
 		}
 		// get column name
-		String query1 = "select * from " + count_type + " where name = '"
+		String query1 = "select * from " + count_type + " where t_name = '"
 				+ linkTableName[index] + "'";
 		ResultSet rs1 = m_model.getMyQuery(query1);
 		String cname = "";
