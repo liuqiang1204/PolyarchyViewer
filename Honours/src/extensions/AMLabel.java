@@ -353,6 +353,8 @@ public class AMLabel extends JLabel {
 	 */
 	protected void paintComponent(Graphics g) {
     
+		super.paintComponent(g);
+		
 		if(this.has_bar){
 			this.sub_count = this.getIts_bar().sub_count;
 			this.count = this.getIts_bar().count;
@@ -364,14 +366,14 @@ public class AMLabel extends JLabel {
 			this.setVisible(false);
 			return;
 		}
-		else{
+		if(this.count>=this.limitSize){
 			this.setVisible(true);
 		}
 		//update tooltip --Qiang
 		this.updateTooltip();
 		//only paint after loaded to save time
 	   if(View.loaded) {
-		   super.paintComponent(g);
+//		   super.paintComponent(g);
 		   
 		   setHorizontalAlignment(JLabel.LEFT);
 		   

@@ -824,7 +824,7 @@ public class Controller {
 		int ml = (int)Math.ceil(largest_top);
 		hierachy.setSliderBarRange(ml);
 
-		// System.out.println(index + " - largest : " + largest_top);
+		 System.out.println(index + " - largest : " + largest_top);
 
 	}
 

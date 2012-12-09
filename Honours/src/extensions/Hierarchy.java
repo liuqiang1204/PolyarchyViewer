@@ -58,6 +58,8 @@ import selectors.selectableFonts;
  * 
  * @author Anthony Scata
  * @version 5.4
+ * @author Qiang Liu
+ * @version n0.23
  * 
  */
 public class Hierarchy extends JPanel {
@@ -623,6 +625,17 @@ public class Hierarchy extends JPanel {
 					l.limitSize = e.getValue();
 					l.getIts_bar().limitSize = l.limitSize;
 					l.getIts_image().limitSize = l.limitSize;
+					
+					if(l.getCount()>=l.limitSize&&l.isEnabled()){
+						l.setVisible(true);
+						l.getIts_bar().setVisible(true);
+						l.getIts_image().setVisible(true);
+					}
+					else{
+						l.setVisible(false);
+						l.getIts_bar().setVisible(false);
+						l.getIts_image().setVisible(false);
+					}
 				}
 				ih.setVisible(false);
 				ih.setVisible(true);
@@ -708,13 +721,13 @@ public class Hierarchy extends JPanel {
 		// text.add(clear);
 
 		information.setSize(200, 22);
-		information.setBorder(new EmptyBorder(0, 20, 0, 20));
+		information.setBorder(new EmptyBorder(0, 40, 0, 40));
 		information.setLayout(new BoxLayout(information,BoxLayout.X_AXIS));
 		isWeighted.setSelected(true);
 		
 		jsb_filter.setOrientation(JScrollBar.HORIZONTAL);
-		jsb_filter.setPreferredSize(new Dimension(100,18));
-		jsb_filter.setSize(100, 20);
+		jsb_filter.setPreferredSize(new Dimension(60,18));
+		jsb_filter.setSize(60, 18);
 		jsb_filter.setToolTipText("0");
 		information.add(jsb_filter);
 		information.add(isWeighted);
