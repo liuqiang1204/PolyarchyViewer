@@ -352,28 +352,32 @@ public class AMLabel extends JLabel {
 	 * Set the count (total) and sub_count (comparison) before entering this method
 	 */
 	protected void paintComponent(Graphics g) {
-    
-		super.paintComponent(g);
-		
-		if(this.has_bar){
-			this.sub_count = this.getIts_bar().sub_count;
-			this.count = this.getIts_bar().count;
-			this.its_image.count = count;
-			this.its_image.sub_count = sub_count;
-		}
-		
-		if(this.count<this.limitSize){
-			this.setVisible(false);
-			return;
-		}
-		if(this.count>=this.limitSize){
-			this.setVisible(true);
-		}
+
+		/**
+		 * removed for the sliderbar
+		 * @author Qiang Liu
+		 */
+//		super.paintComponent(g);
+//		
+//		if(this.has_bar){
+//			this.sub_count = this.getIts_bar().sub_count;
+//			this.count = this.getIts_bar().count;
+//			this.its_image.count = count;
+//			this.its_image.sub_count = sub_count;
+//		}
+//		
+//		if(this.count<this.limitSize){
+//			this.setVisible(false);
+//			return;
+//		}
+//		if(this.count>=this.limitSize){
+//			this.setVisible(true);
+//		}
 		//update tooltip --Qiang
 		this.updateTooltip();
 		//only paint after loaded to save time
 	   if(View.loaded) {
-//		   super.paintComponent(g);
+		   super.paintComponent(g);
 		   
 		   setHorizontalAlignment(JLabel.LEFT);
 		   
@@ -494,10 +498,10 @@ public class AMLabel extends JLabel {
 		        		//??why count+1??? --qiang
 //		        		percentage = (double)sub_count / (count + 1);
 
-//		        		percentage = (double)sub_count / count;
+		        		percentage = (double)sub_count / count;
 		        		
-		        		//change to log(length+1)
-		        		percentage = Math.log(sub_count+1) / Math.log(count+1);
+//		        		//change to log(length+1)
+//		        		percentage = Math.log(sub_count+1) / Math.log(count+1);
 		        	}
 		        }  else {
 		        	

@@ -12,8 +12,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -26,12 +24,10 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -203,7 +199,7 @@ public class Hierarchy extends JPanel {
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
 	public JCheckBox isWeighted = new JCheckBox("Weighted");
-	public JScrollBar jsb_filter = new JScrollBar();
+//	public JScrollBar jsb_filter = new JScrollBar();
 	public JCheckBox cbx_visible;
 	
 	//the position in the panel
@@ -260,7 +256,7 @@ public class Hierarchy extends JPanel {
 	public void add_elements(String heading) {
 
 		// Get the font to be used for the heading
-		Font headingFont = selectableFonts.getHeading1Font();
+		Font headingFont = selectableFonts.getLargeFontClick();
 
 		// Set the layout for the panel to be a box that lays out elements on
 		// the y axis
@@ -606,43 +602,43 @@ public class Hierarchy extends JPanel {
 		System.out.println(">>>" + item.getText() + " -- " + ischecked);
 	}
 	
-	public void setSliderBarRange(int max){
-		jsb_filter.setModel(new DefaultBoundedRangeModel(0,1,0,max));
-		
-	}
-	
-	public void setSliderBarListener(){
-		jsb_filter.addAdjustmentListener(new AdjustmentListener(){
-
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				JScrollBar js = (JScrollBar) e.getSource();
-				js.setToolTipText(e.getValue()+"");
-				AMPanel ih = getInnerhierarchy();
-				HashMap<String,Integer> im = getMap();
-				for(int id:im.values()){
-					AMLabel l = (AMLabel)ih.getComponent(id);
-					l.limitSize = e.getValue();
-					l.getIts_bar().limitSize = l.limitSize;
-					l.getIts_image().limitSize = l.limitSize;
-					
-					if(l.getCount()>=l.limitSize&&l.isEnabled()){
-						l.setVisible(true);
-						l.getIts_bar().setVisible(true);
-						l.getIts_image().setVisible(true);
-					}
-					else{
-						l.setVisible(false);
-						l.getIts_bar().setVisible(false);
-						l.getIts_image().setVisible(false);
-					}
-				}
-				ih.setVisible(false);
-				ih.setVisible(true);
-			}
-			
-		});
-	}
+//	public void setSliderBarRange(int max){
+//		jsb_filter.setModel(new DefaultBoundedRangeModel(0,1,0,max));
+//		
+//	}
+//	
+//	public void setSliderBarListener(){
+//		jsb_filter.addAdjustmentListener(new AdjustmentListener(){
+//
+//			@Override
+//			public void adjustmentValueChanged(AdjustmentEvent e) {
+//				JScrollBar js = (JScrollBar) e.getSource();
+//				js.setToolTipText(e.getValue()+"");
+//				AMPanel ih = getInnerhierarchy();
+//				HashMap<String,Integer> im = getMap();
+//				for(int id:im.values()){
+//					AMLabel l = (AMLabel)ih.getComponent(id);
+//					l.limitSize = e.getValue();
+//					l.getIts_bar().limitSize = l.limitSize;
+//					l.getIts_image().limitSize = l.limitSize;
+//					
+//					if(l.getCount()>=l.limitSize&&l.isEnabled()){
+//						l.setVisible(true);
+//						l.getIts_bar().setVisible(true);
+//						l.getIts_image().setVisible(true);
+//					}
+//					else{
+//						l.setVisible(false);
+//						l.getIts_bar().setVisible(false);
+//						l.getIts_image().setVisible(false);
+//					}
+//				}
+//				ih.setVisible(false);
+//				ih.setVisible(true);
+//			}
+//			
+//		});
+//	}
 
 	public void refreshSearchingTable() {
 		MyTableModel tm = new MyTableModel();
@@ -720,16 +716,15 @@ public class Hierarchy extends JPanel {
 		// text.add(searchText);
 		// text.add(clear);
 
-		information.setSize(200, 22);
+		information.setSize(200, 20);
 		information.setBorder(new EmptyBorder(0, 40, 0, 40));
-		information.setLayout(new BoxLayout(information,BoxLayout.X_AXIS));
 		isWeighted.setSelected(true);
 		
-		jsb_filter.setOrientation(JScrollBar.HORIZONTAL);
-		jsb_filter.setPreferredSize(new Dimension(60,18));
-		jsb_filter.setSize(60, 18);
-		jsb_filter.setToolTipText("0");
-		information.add(jsb_filter);
+//		jsb_filter.setOrientation(JScrollBar.HORIZONTAL);
+//		jsb_filter.setPreferredSize(new Dimension(60,18));
+//		jsb_filter.setSize(60, 18);
+//		jsb_filter.setToolTipText("0");
+//		information.add(jsb_filter);
 		information.add(isWeighted);
 		information.add(clear);
 

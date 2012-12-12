@@ -260,9 +260,12 @@ public class View extends JFrame {
 			// }
 			
 			while (main_table.next()) {
+				//change "XXX_hierarchy" to XXX
+				String hd = main_table.getString(2);
+				hd=hd.toLowerCase().replaceAll("_hierarchy", "");
 				Hierarchy h = new Hierarchy(main_table.getInt(1),
-						main_table.getString(2));
-				h.cbx_visible = new JCheckBox(main_table.getString(2));
+						hd);
+				h.cbx_visible = new JCheckBox(hd);
 				h.cbx_visible.setSelected(true);
 				h.add_cbx_visible_actionListener();
 				hierarchies.add(h);
@@ -349,8 +352,10 @@ public class View extends JFrame {
 		interaction_options.add(bar_options);
 		interaction_options.add(new JLabel(" Look options: "));
 		interaction_options.add(look_options);
-		interaction_options.add(new JLabel(" Connection options: "));
-		interaction_options.add(connection_options);
+		
+		//removed --qiang
+//		interaction_options.add(new JLabel(" Connection options: "));
+//		interaction_options.add(connection_options);
 
 		// add this to the options panel
 		global_options.add(interaction_options);
@@ -917,7 +922,7 @@ public class View extends JFrame {
 	 *            - The bar itself
 	 * @return - the inset that has the padding added to it
 	 * -------
-	 * Change to log(length+1)
+	 * Change to log(length+1) --removed
 	 * @author Qiang Liu
 	 */
 	public Insets decideSpace(double count, float largest, float panel_width,
@@ -933,8 +938,8 @@ public class View extends JFrame {
 
 			// find the width of this bar compared to the largest, this is a
 			// percentage
-//			double this_width_per = count / largest;
-			double this_width_per = Math.log(count+1) / Math.log(largest+1);
+			double this_width_per = count / largest;
+//			double this_width_per = Math.log(count+1) / Math.log(largest+1);
 
 			// we don't want the label to exceed the size of the panel with the
 			// left padding being added

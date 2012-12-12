@@ -7,6 +7,7 @@ import java.awt.Insets;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JSlider;
 
 import connector.Java_Connector;
 import extensions.QueryView;
@@ -105,6 +106,16 @@ public class LoginScreen extends javax.swing.JDialog {
     //for test only
     _uid.setText("root");
     _pwd.setText("admin");
+    
+//    frame.setSize(600, 550);
+//    JSlider slider1 = new JSlider();
+//    slider1.setBounds(20, 140, 200, 40);
+//    slider1.setMajorTickSpacing(20);
+//    slider1.setMinorTickSpacing(5);
+//    slider1.setPaintTicks(true);
+//    slider1.setPaintLabels(true);
+//    
+//    frame.getContentPane().add(slider1);
 
   }
 
