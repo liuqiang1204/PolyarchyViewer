@@ -22,7 +22,6 @@ import java.util.Random;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -205,6 +204,8 @@ public class Hierarchy extends JPanel {
 	//the position in the panel
 	public int zorder =0;
 
+	//slider bar to controll the scale
+	public CustomSlider m_slider;
 	/**
 	 * for connection computing
 	 * @author Qiang Liu
@@ -270,27 +271,34 @@ public class Hierarchy extends JPanel {
 		// Create the heading for the panel
 		panelHeading = new JLabel(heading);
 		panelHeading.setFont(headingFont);
-//		panelHeading.setBorder(new CompoundBorder(BorderFactory
-//				.createTitledBorder(""), new EmptyBorder(0, 0, 0, 0)));
-
-		// Create panel to place this in
-		panel_heading = new JPanel();
-		panel_heading.setLayout(new BoxLayout(panel_heading, BoxLayout.X_AXIS));
-
-		panel_heading.add(Box.createHorizontalGlue());
-
-		// The options for the panel
+		
 		panel_controller = new Panel_Controller(id + "", 1);
 		panel_controller.setToolTipText(panelHeading.getText());
+		
+		JPanel tpane = new JPanel();
+//		tpane.setLayout(new BoxLayout(tpane, BoxLayout.X_AXIS));
+		tpane.add(panelHeading);
+		tpane.add(panel_controller);
 
-		// add the heading
-		panel_heading.add(panelHeading);
+		panel_heading = new JPanel();
+		panel_heading.setLayout(new BorderLayout());
+		
+		panel_heading.add(tpane,BorderLayout.NORTH);
+		
 
-		panel_heading.add(Box.createRigidArea(new Dimension(5, 0)));
+//		panel_heading.add(Box.createHorizontalGlue());
 
-		panel_heading.add(panel_controller);
+		// The options for the panel
+		
 
-		panel_heading.add(Box.createHorizontalGlue());
+//		// add the heading
+//		panel_heading.add(panelHeading);
+//
+//		panel_heading.add(Box.createRigidArea(new Dimension(5, 0)));
+//
+//		panel_heading.add(panel_controller);
+
+//		panel_heading.add(Box.createHorizontalGlue());
 
 		panel_heading.setToolTipText(panelHeading.getText());
 
@@ -352,7 +360,11 @@ public class Hierarchy extends JPanel {
 		// align the panel so that they fill the entire panel
 		panel_controller.setAlignmentX((float) 0.0);
 		panel_heading.setAlignmentX((float) 0.0);
-		panel_controller.setAlignmentX((float) 0.0);
+//		panel_controller.setAlignmentX((float) 0.0);
+		
+		//add a custom slider bar to control the scale
+		this.m_slider = new CustomSlider(0,this.largest_top,this);
+		panel_heading.add(m_slider,BorderLayout.SOUTH);
 	}
 
 	/**
@@ -602,43 +614,68 @@ public class Hierarchy extends JPanel {
 		System.out.println(">>>" + item.getText() + " -- " + ischecked);
 	}
 	
-//	public void setSliderBarRange(int max){
-//		jsb_filter.setModel(new DefaultBoundedRangeModel(0,1,0,max));
-//		
-//	}
-//	
-//	public void setSliderBarListener(){
-//		jsb_filter.addAdjustmentListener(new AdjustmentListener(){
-//
-//			@Override
-//			public void adjustmentValueChanged(AdjustmentEvent e) {
-//				JScrollBar js = (JScrollBar) e.getSource();
-//				js.setToolTipText(e.getValue()+"");
-//				AMPanel ih = getInnerhierarchy();
-//				HashMap<String,Integer> im = getMap();
-//				for(int id:im.values()){
-//					AMLabel l = (AMLabel)ih.getComponent(id);
-//					l.limitSize = e.getValue();
-//					l.getIts_bar().limitSize = l.limitSize;
-//					l.getIts_image().limitSize = l.limitSize;
-//					
-//					if(l.getCount()>=l.limitSize&&l.isEnabled()){
-//						l.setVisible(true);
-//						l.getIts_bar().setVisible(true);
-//						l.getIts_image().setVisible(true);
-//					}
-//					else{
-//						l.setVisible(false);
-//						l.getIts_bar().setVisible(false);
-//						l.getIts_image().setVisible(false);
-//					}
-//				}
-//				ih.setVisible(false);
-//				ih.setVisible(true);
-//			}
-//			
-//		});
-//	}
+	public void setScaleRange(double min, double max){
+		AMPanel ih = getInnerhierarchy();
+		HashMap<String,Integer> im = getMap();
+		for(int id:im.values()){
+			AMLabel l = (AMLabel)ih.getComponent(id);
+			l.min_limit = min-0.01;
+			l.getIts_bar().min_limit = l.min_limit;
+			l.getIts_image().min_limit = l.min_limit;
+			
+			l.max_limit = max+0.01;
+			l.getIts_bar().max_limit = l.max_limit;
+			l.getIts_image().max_limit = l.max_limit;
+			
+			if(l.getCount()>=l.min_limit&&l.getCount()<=l.max_limit&&l.isEnabled()){
+				l.setVisible(true);
+				l.getIts_bar().setVisible(true);
+				l.getIts_image().setVisible(true);
+			}
+			else{
+				l.setVisible(false);
+				l.getIts_bar().setVisible(false);
+				l.getIts_image().setVisible(false);
+			}
+			
+			int left_padding = l.getLeft_padding();
+			int width = getHierarchyScroll().getWidth();
+			AMLabel bar = l.getIts_bar();
+			GridBagLayout layout = (GridBagLayout) ih.getLayout();
+			GridBagConstraints constraint = layout.getConstraints(bar);
+			
+			constraint.insets = decideSpace(l.getCount(), l.min_limit,l.max_limit, width,
+					left_padding, bar);
+
+			layout.setConstraints(bar, constraint);
+		}
+		ih.setVisible(false);
+		ih.setVisible(true);
+	}
+	public Insets decideSpace(double count, double min_limit, double max_limit, float panel_width,
+			int left_padding, AMLabel bar) {
+
+		//--qiang ??? how to compute
+		
+		if (bar.isIs_bar()) {
+			panel_width -= (left_padding * 1.5);
+			double this_width_per = (count-min_limit) / (max_limit-min_limit);
+
+			double size = (panel_width * this_width_per);
+
+			// find the correct amount of right padding
+			double padding = panel_width - size;
+
+			// set the sizes of the bar
+			bar.setBar_width((int) size);
+
+			return new Insets(0, left_padding, 0, (int) padding);
+		}
+
+		// if it is not a bar then return a constant rather than null
+		return new Insets(0, 0, 0, 0);
+	}
+
 
 	public void refreshSearchingTable() {
 		MyTableModel tm = new MyTableModel();
@@ -1600,6 +1637,8 @@ public class Hierarchy extends JPanel {
 	 */
 	public void setLargest_top(float largest_top) {
 		this.largest_top = largest_top;
+		this.m_slider.setScaleValue(0,largest_top);
+		this.setScaleRange(0, largest_top);
 	}
 
 	/**

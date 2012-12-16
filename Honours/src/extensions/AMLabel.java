@@ -184,7 +184,8 @@ public class AMLabel extends JLabel {
 	public boolean is_checked = false;
 	public boolean is_expanded = false;
 	public AMLabel owner;
-	public int limitSize=0;
+	public double min_limit=0;
+	public double max_limit=9999999;
 	
 //	public ArrayList<AMLabel> parents = new ArrayList<AMLabel>();
 //	public ArrayList<AMLabel> children = new ArrayList<AMLabel>();
@@ -357,14 +358,22 @@ public class AMLabel extends JLabel {
 		 * removed for the sliderbar
 		 * @author Qiang Liu
 		 */
-//		super.paintComponent(g);
-//		
-//		if(this.has_bar){
-//			this.sub_count = this.getIts_bar().sub_count;
-//			this.count = this.getIts_bar().count;
-//			this.its_image.count = count;
-//			this.its_image.sub_count = sub_count;
-//		}
+	
+		if(this.has_bar){
+			this.sub_count = this.getIts_bar().sub_count;
+			this.count = this.getIts_bar().count;
+			this.its_image.count = count;
+			this.its_image.sub_count = sub_count;
+		}
+		
+		if(this.count>=this.min_limit&&this.count<=this.max_limit){
+			this.setVisible(true);
+		}
+		else{
+			this.setVisible(false);
+			super.paintComponent(g);
+			return;
+		}
 //		
 //		if(this.count<this.limitSize){
 //			this.setVisible(false);

@@ -7,8 +7,6 @@ import java.awt.Insets;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JSlider;
-
 import connector.Java_Connector;
 import extensions.QueryView;
 

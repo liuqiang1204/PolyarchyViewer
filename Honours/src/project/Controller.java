@@ -2005,9 +2005,11 @@ public class Controller {
 
 				// count the globals here
 
-				largest(0);
-				largest(1);
-				largest(2);
+//				largest(0);
+//				largest(1);
+//				largest(2);
+				for(int i1=0;i1<m_view.hierarchies.size();i1++)
+					largest(i1);
 
 				m_view.incrementWaiter(25);
 
