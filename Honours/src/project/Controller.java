@@ -280,16 +280,9 @@ public class Controller {
 		/**
 		 * Add some new listeners
 		 */
-		ActionListener al = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent ae) {	
-				refresh_all();
-				perform_connection();
-			}
-		};
 
 		for (Hierarchy h : m_view.hierarchies) {
-			h.isWeighted.addActionListener(al);
+			h.isWeighted.addActionListener(new cbx_isWeighted_Listener(h));
 			h.getClear().addActionListener(new Btn_clear_Listener(h));
 
 		}
@@ -309,6 +302,30 @@ public class Controller {
 		m_view.pack();
 	}
 
+	public class cbx_isWeighted_Listener implements ActionListener {
+
+		Hierarchy owner;
+
+		public cbx_isWeighted_Listener(Hierarchy h) {
+			super();
+			owner = h;
+		}
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			Hierarchy h=owner;
+			h.searchingItems.clear();
+			h.refreshSearchingTable();
+			Alpha_table(m_view.hierarchies.indexOf(h)+1);
+			h.m_slider.c_min=0;
+			h.m_slider.c_max=100;
+			h.setScaleRange(0, h.getLargest_top());
+			h.setVisible(false);
+			h.setVisible(true);
+			perform_connection();			
+		}
+		
+	}
+	
 	public class Btn_clear_Listener implements ActionListener {
 
 		Hierarchy btn_owner;
