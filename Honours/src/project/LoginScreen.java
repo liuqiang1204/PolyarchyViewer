@@ -187,8 +187,7 @@ public class LoginScreen extends javax.swing.JDialog {
       	  View		view		= new View(model);                   
       	 
 		  @SuppressWarnings("unused")
-		  Controller	controller	= new Controller(model, view, query);
-	    
+		  Controller	controller	= new Controller(model, view, query);		  
   }
 
   /**

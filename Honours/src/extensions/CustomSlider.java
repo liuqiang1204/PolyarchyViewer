@@ -2,12 +2,15 @@ package extensions;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Polygon;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputListener;
 
@@ -17,6 +20,7 @@ public class CustomSlider extends JPanel{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
 	public double c_min = 0.0;
 	public double c_max = 100.0;
 	
@@ -49,7 +53,7 @@ public class CustomSlider extends JPanel{
 		this.setPreferredSize(new Dimension(60,50));
 		this.setSize(60,50);
 		this.setBorder(new EmptyBorder(40, 0, 0, 0));
-		this.owner_hierarchy = h;
+		this.owner_hierarchy = h;		
 	}
 	
 	public void setScaleValue(double minx,double maxx){
@@ -70,14 +74,17 @@ public class CustomSlider extends JPanel{
 		super.paint(g);
 		
 		DecimalFormat df = new DecimalFormat("#.##");
+		Font f = this.getFont();
+		FontMetrics fm = this.getFontMetrics(f);
 		
 		//draw line at center
-		xpos_start = 5;
-		xpos_end = (int) (getWidth()*0.98 - xpos_start);
+		xpos_start = 25;
+		xpos_end = this.getWidth()-xpos_start+3;
 		line_length = xpos_end-xpos_start; 
 		line1_ypos = (int) (this.getHeight()*0.5)-10;
 		line2_ypos = line1_ypos+20;
 		
+
 		g.drawLine(xpos_start, line1_ypos, xpos_end, line1_ypos);
 		g.fillRect(xpos_start, line1_ypos-2, 4, 4);
 		g.fillRect(xpos_end-2, line1_ypos-2, 4, 4);
@@ -87,7 +94,8 @@ public class CustomSlider extends JPanel{
 		g.drawChars(str.toCharArray(), 0, str.length(), xpos_start, line1_ypos-5);
 		
 		str = df.format(max_scalevalue);
-		g.drawChars(str.toCharArray(), 0, str.length(), xpos_end-15, line1_ypos-5);
+		int strl = SwingUtilities.computeStringWidth(fm, str);
+		g.drawChars(str.toCharArray(), 0, str.length(), xpos_end-strl, line1_ypos-5);
 		//draw bottom scale line
 		int tmpx=(xpos_start+xpos_end)/2; //50%
 		int tmpx1 = (xpos_start+tmpx)/2; //25%
@@ -103,8 +111,9 @@ public class CustomSlider extends JPanel{
 		str = df.format(this.getScaleMin());
 		g.drawChars(str.toCharArray(), 0, str.length(), xpos_start, line2_ypos+12);
 		
-		str = df.format(this.getScaleMax());
-		g.drawChars(str.toCharArray(), 0, str.length(), xpos_end-15, line2_ypos+12);
+		str = df.format(this.getScaleMax());		
+		strl = SwingUtilities.computeStringWidth(fm, str); 
+		g.drawChars(str.toCharArray(), 0, str.length(), xpos_end-strl, line2_ypos+12);
 		
 		//draw filled shape
 		Polygon p = new Polygon();
@@ -205,6 +214,7 @@ public class CustomSlider extends JPanel{
 				double t_min = owner.getScaleMin();
 				double t_max = owner.getScaleMax();
 				owner.owner_hierarchy.setScaleRange(t_min, t_max);
+				owner.repaint();
 			}
 		}
 

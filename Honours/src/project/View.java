@@ -2,9 +2,9 @@ package project;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -13,6 +13,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -65,7 +67,7 @@ public class View extends JFrame {
 	/**
 	 * The split pane that is the top most panel
 	 */
-//	private JSplitPane window;
+	// private JSplitPane window;
 
 	/**
 	 * The transparent glass that is sometimes on top of the window
@@ -111,10 +113,13 @@ public class View extends JFrame {
 	 * @author Qiang Liu
 	 */
 
-	public ArrayList<Hierarchy> hierarchies=new ArrayList<Hierarchy>();
+	public ArrayList<Hierarchy> hierarchies = new ArrayList<Hierarchy>();
 	public ArrayList<Integer> zorders = new ArrayList<Integer>();
 	public JToolBar topPanel;
 	public JCheckBox cbx_showInfo;
+	public JLabel lbl_foreColor;
+	public JLabel lbl_backColor;
+
 
 	// /**
 	// * The first hierarchy
@@ -139,7 +144,7 @@ public class View extends JFrame {
 	/**
 	 * The right padding on all labels and panels
 	 */
-	private int default_left_padding = 5;
+	private int default_left_padding = 0;
 
 	/* VIS INFO */
 
@@ -210,12 +215,12 @@ public class View extends JFrame {
 
 		/* THE TOP MOST ELEMENT */
 
-//		window = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-//		window.setOneTouchExpandable(true);
-//		window.setResizeWeight(0.98);
+		// window = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		// window.setOneTouchExpandable(true);
+		// window.setResizeWeight(0.98);
 
 		// Add the panel to the frame
-//		getContentPane().add(window, BorderLayout.CENTER);
+		// getContentPane().add(window, BorderLayout.CENTER);
 
 		/* GLASS PANE EXTRAS */
 
@@ -227,50 +232,35 @@ public class View extends JFrame {
 		// Create the main panel
 		main_panel = new JPanel();
 
-
 		// Create the global options panel
 		global_options = new JPanel();
 		global_options
 				.setLayout(new BoxLayout(global_options, BoxLayout.Y_AXIS));
 		global_options.setPreferredSize(new Dimension(1366, 25));
 
-//		window.setRightComponent(global_options);
+		// window.setRightComponent(global_options);
 
 		JPanel interaction_options = new JPanel();
 		interaction_options.setLayout(new GridBagLayout());
 
 		/* HIERARCHY PANELS */
-		
+
 		String query = "select * from hierarchy";
 
 		ResultSet main_table = model.getMyQuery(query);
 
 		try {
-			// if(main_table.next())
-			// hierarchy1 = new Hierarchy(main_table.getInt(1),
-			// main_table.getString(2));
-			//
-			// if(main_table.next())
-			// hierarchy2 = new Hierarchy(main_table.getInt(1),
-			// main_table.getString(2));
-			//
-			// if(main_table.next())
-			// hierarchy3 = new Hierarchy(main_table.getInt(1),
-			// main_table.getString(2));
-			// }
-			
 			while (main_table.next()) {
-				//change "XXX_hierarchy" to XXX
+				// change "XXX_hierarchy" to XXX
 				String hd = main_table.getString(2);
-				hd=hd.toLowerCase().replaceAll("_hierarchy", "");
-				Hierarchy h = new Hierarchy(main_table.getInt(1),
-						hd);
+				hd = hd.toLowerCase().replaceAll("_hierarchy", "");
+				Hierarchy h = new Hierarchy(main_table.getInt(1), hd);
 				h.cbx_visible = new JCheckBox(hd);
 				h.cbx_visible.setSelected(true);
 				h.add_cbx_visible_actionListener();
 				hierarchies.add(h);
 				h.zorder = hierarchies.size();
-			}			
+			}
 
 		} catch (SQLException se) {
 			se.printStackTrace();
@@ -279,28 +269,45 @@ public class View extends JFrame {
 							"ERROR: An error has occurred adding the Hierarchy to the display");
 		}
 
-		// main_panel.add(hierarchy1);
-		// main_panel.add(hierarchy2);
-		// main_panel.add(hierarchy3);
-		
 		main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.X_AXIS));
-//		main_panel.setLayout(new GridLayout(1,hierarchies.size()));
-//		window.setLeftComponent(main_panel);
-		
-		topPanel=new JToolBar();
-		topPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-		cbx_showInfo=new JCheckBox("Show information of intersections");
+		// window.setLeftComponent(main_panel);
+
+		// The tool bar --qiang
+		topPanel = new JToolBar();
+		topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		cbx_showInfo = new JCheckBox("Show information of intersections");
 		cbx_showInfo.setSelected(false);
-		topPanel.add(this.cbx_showInfo);
-		topPanel.addSeparator(new Dimension(10,20));
+
+		// init color items
+		lbl_foreColor = new JLabel("          ");
+		lbl_backColor = new JLabel("          ");
+		lbl_foreColor.setOpaque(true);
+		lbl_backColor.setOpaque(true);
+		lbl_foreColor.setSize(40, 18);
+		lbl_backColor.setSize(40, 18);
+		lbl_foreColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_backColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_foreColor.setBackground(GlobalConstants.bar_foreColor);
+		lbl_backColor.setBackground(GlobalConstants.bar_backColor);		
+		lbl_foreColor.addMouseListener(new ColorMouseListener());
+		lbl_backColor.addMouseListener(new ColorMouseListener());
 		
+		topPanel.add(this.cbx_showInfo);
+		topPanel.addSeparator(new Dimension(10, 20));
+		topPanel.add(new JLabel(" Bar forecolor:"));
+		topPanel.add(lbl_foreColor);
+		topPanel.add(new JLabel(" Bar backcolor:"));
+		topPanel.add(lbl_backColor);
+		topPanel.addSeparator(new Dimension(10, 20));
+
+		// add hierarchy panels
 		this.setLayout(new BorderLayout());
-		this.add(topPanel,BorderLayout.NORTH);
-		this.add(global_options,BorderLayout.SOUTH);
-		this.add(main_panel,BorderLayout.CENTER);
-		for (Hierarchy h : this.hierarchies){
+		this.add(topPanel, BorderLayout.NORTH);
+		this.add(global_options, BorderLayout.SOUTH);
+		this.add(main_panel, BorderLayout.CENTER);
+		for (Hierarchy h : this.hierarchies) {
 			main_panel.add(h);
-			main_panel.setComponentZOrder(h, h.zorder-1);
+			main_panel.setComponentZOrder(h, h.zorder - 1);
 			topPanel.add(h.cbx_visible);
 		}
 
@@ -352,10 +359,10 @@ public class View extends JFrame {
 		interaction_options.add(bar_options);
 		interaction_options.add(new JLabel(" Look options: "));
 		interaction_options.add(look_options);
-		
-		//removed --qiang
-//		interaction_options.add(new JLabel(" Connection options: "));
-//		interaction_options.add(connection_options);
+
+		// removed --qiang
+		// interaction_options.add(new JLabel(" Connection options: "));
+		// interaction_options.add(connection_options);
 
 		// add this to the options panel
 		global_options.add(interaction_options);
@@ -393,7 +400,40 @@ public class View extends JFrame {
 		setTitle("Polyarchy Viewer");
 		// The final attributes of the display
 		setVisible(true);
+	}
 
+	class ColorMouseListener implements MouseListener {
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			JLabel lbl = (JLabel) e.getSource();
+			Color bgColor = JColorChooser.showDialog(null,"Choose Color",lbl.getBackground());
+		    if (bgColor != null){
+		    	lbl.setBackground(bgColor);
+		    	if(lbl==lbl_foreColor){
+		    		GlobalConstants.bar_foreColor = lbl.getBackground();
+		    		for(Hierarchy h:hierarchies){
+		    			h.getInnerhierarchy().setVisible(false);
+		    			h.getInnerhierarchy().setVisible(true);
+		    		}
+		    	}
+		    	
+		    	if(lbl==lbl_backColor){
+		    		GlobalConstants.bar_backColor = lbl.getBackground();
+		    		for(Hierarchy h:hierarchies){
+		    			h.getInnerhierarchy().setVisible(false);
+		    			h.getInnerhierarchy().setVisible(true);
+		    		}
+		    	}
+		    }
+		}
+		@Override
+		public void mouseEntered(MouseEvent e) {}
+		@Override
+		public void mouseExited(MouseEvent e) {}
+		@Override
+		public void mousePressed(MouseEvent e) {}
+		@Override
+		public void mouseReleased(MouseEvent e) {}		
 	}
 
 	/* METHODS */
@@ -510,7 +550,7 @@ public class View extends JFrame {
 		int padding = 0;
 
 		// The font to be used for the label
-		Font font = null;
+//		Font font = null;
 
 		/* Get the information we need for adding the labels */
 
@@ -528,22 +568,22 @@ public class View extends JFrame {
 		case 1:
 			// level 1 at the top
 			padding = 0;
-			font = selectableFonts.getMediumFont();
+//			font = selectableFonts.getMediumFont();
 			break;
 		case 2:
 			// level 2 on the second row
 			padding = 15;
-			font = selectableFonts.getSmallFont();
+//			font = selectableFonts.getSmallFont();
 			break;
 		case 3:
 			// level 3 anywhere but not the top 2
 			padding = 30;
-			font = selectableFonts.getSmallestFont();
+//			font = selectableFonts.getSmallestFont();
 			break;
 		default:
 			// any other level, be safe and put it in the middle
 			padding = 15;
-			font = selectableFonts.getSmallFont();
+//			font = selectableFonts.getSmallFont();
 			break;
 		}
 
@@ -580,12 +620,12 @@ public class View extends JFrame {
 
 		} else {
 			image.setBullet(true);
-			padding += 5;
+//			padding += 5;
 		}
 
 		// insert some padding on the side so make it consistent
 		constraint.insets = new Insets(0, padding, 0, panel.getWidth()
-				- (padding + 15));
+				- (padding + 15));		
 
 		// Add this image to the label for reference
 		label.image(image);
@@ -602,7 +642,7 @@ public class View extends JFrame {
 		constraint.insets = new Insets(0, padding, 0, 0);
 
 		// set the font of this label and place on left size
-		label.setFont(font);
+//		label.setFont(font);
 
 		// set the alignment
 		label.setHorizontalAlignment(JLabel.LEFT);
@@ -665,24 +705,10 @@ public class View extends JFrame {
 	 * @return - the hierarchy in that position
 	 */
 	public Hierarchy decide_hierarchy(int hierarchy_num) {
-
-		// find which hierarchy want to add the contents and get the relevant
-		// information
-		// switch (hierarchy_num) {
-		// case 1:
-		// return hierarchy1;
-		// case 2:
-		// return hierarchy2;
-		// case 3:
-		// return hierarchy3;
-		// default:
-		// //something else has been specified, give an error message
-		// Custom_Messages.display_error(this, "ERROR",
-		// "ERROR: An invalid hierarchy level has been specified");
-		// return null;
-		// }
-		for(Hierarchy h:hierarchies){
-			if(h.getId() == hierarchy_num) return h;
+		
+		for (Hierarchy h : hierarchies) {
+			if (h.getId() == hierarchy_num)
+				return h;
 		}
 		return null;
 	}
@@ -901,6 +927,11 @@ public class View extends JFrame {
 			// "  Panel Width: " + width);
 			// reset the constraints on this label with the new padding
 			layout.setConstraints(bar_label, constraint);
+			
+			//record the largest bar
+			if(count>=largest_count) {
+				hierarchy.max_bar = bar_label;
+			}
 		}
 	}
 
@@ -920,9 +951,8 @@ public class View extends JFrame {
 	 *            - The padding to be added
 	 * @param bar
 	 *            - The bar itself
-	 * @return - the inset that has the padding added to it
-	 * -------
-	 * Change to log(length+1) --removed
+	 * @return - the inset that has the padding added to it ------- Change to
+	 *         log(length+1) --removed
 	 * @author Qiang Liu
 	 */
 	public Insets decideSpace(double count, float largest, float panel_width,
@@ -935,11 +965,10 @@ public class View extends JFrame {
 
 			// subtract the left padding on both sides so that we have a buffer
 			panel_width -= (left_padding * 1.5);
-
 			// find the width of this bar compared to the largest, this is a
 			// percentage
 			double this_width_per = count / largest;
-//			double this_width_per = Math.log(count+1) / Math.log(largest+1);
+			// double this_width_per = Math.log(count+1) / Math.log(largest+1);
 
 			// we don't want the label to exceed the size of the panel with the
 			// left padding being added
@@ -1042,44 +1071,43 @@ public class View extends JFrame {
 		// the label is in Panel_Controller.java split by " - " to get the name
 		// which is the id of hierarchy
 		int index = Integer.valueOf(label.getName().split(" - ")[1].trim());
-		//the panel we are going to move
+		// the panel we are going to move
 		Hierarchy panel = decide_hierarchy(index);
-	
-		if(label.equals(panel.getPanel_controller().getMove_left())){			
-			if(panel.zorder==1){
-				for(Hierarchy h:hierarchies)h.zorder--;
+
+		if (label.equals(panel.getPanel_controller().getMove_left())) {
+			if (panel.zorder == 1) {
+				for (Hierarchy h : hierarchies)
+					h.zorder--;
 				panel.zorder = hierarchies.size();
-			}
-			else{
-				for(Hierarchy h:hierarchies){
-					if(h.zorder==panel.zorder-1){
+			} else {
+				for (Hierarchy h : hierarchies) {
+					if (h.zorder == panel.zorder - 1) {
 						h.zorder++;
 						panel.zorder--;
 						break;
 					}
-				}				
+				}
 			}
-		}
-		else if(label.equals(panel.getPanel_controller().getMove_right())){
-			if(panel.zorder==hierarchies.size()){
-				for(Hierarchy h:hierarchies)h.zorder++;
+		} else if (label.equals(panel.getPanel_controller().getMove_right())) {
+			if (panel.zorder == hierarchies.size()) {
+				for (Hierarchy h : hierarchies)
+					h.zorder++;
 				panel.zorder = 1;
-			}
-			else{
-				for(Hierarchy h:hierarchies){
-					if(h.zorder==panel.zorder+1){
+			} else {
+				for (Hierarchy h : hierarchies) {
+					if (h.zorder == panel.zorder + 1) {
 						h.zorder--;
 						panel.zorder++;
 						break;
 					}
-				}				
+				}
 			}
 		}
-		
-		for(Hierarchy h:hierarchies){
-			getMain_panel().setComponentZOrder(h, h.zorder-1);
+
+		for (Hierarchy h : hierarchies) {
+			getMain_panel().setComponentZOrder(h, h.zorder - 1);
 		}
-		
+
 		// //the panel we are going to move
 		// Hierarchy panel = null;
 		//
@@ -1150,34 +1178,34 @@ public class View extends JFrame {
 		// getMain_panel().setComponentZOrder(p3, three);
 	}
 
-//	/**
-//	 * Wrap the count left
-//	 * 
-//	 * @param value
-//	 *            - the position
-//	 * @param total
-//	 *            - the total number of panels
-//	 * @return - the panels new position
-//	 */
-//	public int left(int value, int total) {
-//		if (value == 0) {
-//			return total - 1;
-//		}
-//		return (value - 1) % total;
-//	}
-//
-//	/**
-//	 * Wrap the count right
-//	 * 
-//	 * @param value
-//	 *            - the position
-//	 * @param total
-//	 *            - the total number of panels
-//	 * @return - the panels new position
-//	 */
-//	public int right(int value, int total) {
-//		return (value + 1) % total;
-//	}
+	// /**
+	// * Wrap the count left
+	// *
+	// * @param value
+	// * - the position
+	// * @param total
+	// * - the total number of panels
+	// * @return - the panels new position
+	// */
+	// public int left(int value, int total) {
+	// if (value == 0) {
+	// return total - 1;
+	// }
+	// return (value - 1) % total;
+	// }
+	//
+	// /**
+	// * Wrap the count right
+	// *
+	// * @param value
+	// * - the position
+	// * @param total
+	// * - the total number of panels
+	// * @return - the panels new position
+	// */
+	// public int right(int value, int total) {
+	// return (value + 1) % total;
+	// }
 
 	/**
 	 * Perform some action on the global panel This can move, show, hide the
@@ -1188,11 +1216,11 @@ public class View extends JFrame {
 	 */
 	public void move_action(JLabel label) {
 
-		System.out.println("---" + label.getName());
-		
+//		System.out.println("---" + label.getName());
+
 		// Decide the action
 		if (label.getName().startsWith("show")) {
-			
+
 			// Show the panel
 			hide_show_panel(label, true);
 
@@ -1244,8 +1272,8 @@ public class View extends JFrame {
 	public void hide_show_panel(JLabel label, boolean visible) {
 
 		// Get the hierarchy that this label belongs to
-//		int index = Character.getNumericValue(label.getName().charAt(
-//				label.getName().length() - 1));
+		// int index = Character.getNumericValue(label.getName().charAt(
+		// label.getName().length() - 1));
 		int index = Integer.valueOf(label.getName().split(" - ")[1].trim());
 		Hierarchy hierarchy = decide_hierarchy(index);
 
@@ -1269,24 +1297,25 @@ public class View extends JFrame {
 	 */
 	public Hierarchy findHierarchy(String id) {
 
-		for(Hierarchy h:hierarchies)
-			if(h.getMap().containsKey(id)) return h;
-		
+		for (Hierarchy h : hierarchies)
+			if (h.getMap().containsKey(id))
+				return h;
+
 		return null;
-//		if (getHierarchy1().getMap().containsKey(id)) {
-//			return getHierarchy1();
-//		}
-//
-//		if (getHierarchy2().getMap().containsKey(id)) {
-//			return getHierarchy2();
-//		}
-//
-//		if (getHierarchy3().getMap().containsKey(id)) {
-//			return getHierarchy3();
-//		}
-//
-//		// nothing has been found
-//		return null;
+		// if (getHierarchy1().getMap().containsKey(id)) {
+		// return getHierarchy1();
+		// }
+		//
+		// if (getHierarchy2().getMap().containsKey(id)) {
+		// return getHierarchy2();
+		// }
+		//
+		// if (getHierarchy3().getMap().containsKey(id)) {
+		// return getHierarchy3();
+		// }
+		//
+		// // nothing has been found
+		// return null;
 	}
 
 	/**
@@ -1297,10 +1326,11 @@ public class View extends JFrame {
 	 */
 	public void setBar_options(String option) {
 
-		for(Hierarchy h:hierarchies)h.setBar_option(option);
-//		hierarchy1.setBar_option(option);
-//		hierarchy2.setBar_option(option);
-//		hierarchy3.setBar_option(option);
+		for (Hierarchy h : hierarchies)
+			h.setBar_option(option);
+		// hierarchy1.setBar_option(option);
+		// hierarchy2.setBar_option(option);
+		// hierarchy3.setBar_option(option);
 	}
 
 	/* LISTENERS */
@@ -1384,7 +1414,7 @@ public class View extends JFrame {
 			if (new_label_position.y != old_label_position.y
 					|| new_label_position.x != old_label_position.x) {
 				robot.mouseMove(new_label_position.x + width,
-						new_label_position.y + 2);				
+						new_label_position.y + 2);
 			}
 		}
 	}
@@ -1413,46 +1443,46 @@ public class View extends JFrame {
 		count_options = countOptions;
 	}
 
-//	/**
-//	 * @return the hierarchy1
-//	 */
-//	public Hierarchy getHierarchy1() {
-//		return hierarchies.get(0);
-////		return hierarchy1;
-//	}
-//
-//	/**
-//	 * @return the hierarchy2
-//	 */
-//	public Hierarchy getHierarchy2() {
-//		return hierarchies.get(1);
-//
-////		return hierarchy2;
-//	}
-//
-//	/**
-//	 * @return the hierarchy3
-//	 */
-//	public Hierarchy getHierarchy3() {
-//		return hierarchies.get(2);
-//
-////		return hierarchy3;
-//	}
+	// /**
+	// * @return the hierarchy1
+	// */
+	// public Hierarchy getHierarchy1() {
+	// return hierarchies.get(0);
+	// // return hierarchy1;
+	// }
+	//
+	// /**
+	// * @return the hierarchy2
+	// */
+	// public Hierarchy getHierarchy2() {
+	// return hierarchies.get(1);
+	//
+	// // return hierarchy2;
+	// }
+	//
+	// /**
+	// * @return the hierarchy3
+	// */
+	// public Hierarchy getHierarchy3() {
+	// return hierarchies.get(2);
+	//
+	// // return hierarchy3;
+	// }
 
-//	/**
-//	 * @return the total
-//	 */
-//	public int getTotal() {
-//		return total;
-//	}
-//
-//	/**
-//	 * @param total
-//	 *            the total to set
-//	 */
-//	public void setTotal(int total) {
-//		this.total = total;
-//	}
+	// /**
+	// * @return the total
+	// */
+	// public int getTotal() {
+	// return total;
+	// }
+	//
+	// /**
+	// * @param total
+	// * the total to set
+	// */
+	// public void setTotal(int total) {
+	// this.total = total;
+	// }
 
 	/**
 	 * @return the loaded
