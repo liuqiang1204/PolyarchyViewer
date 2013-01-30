@@ -311,14 +311,14 @@ public class Hierarchy extends JPanel {
 		innerhierarchy.setName(id + "");
 
 		//add proportion panel
-//		JPanel midPane = new JPanel(new BorderLayout());
-//		midPane.add(innerhierarchy,BorderLayout.CENTER);
-//		midPane.add(pane_proportion,BorderLayout.WEST);
+		JPanel midPane = new JPanel(new BorderLayout());
+		midPane.add(innerhierarchy,BorderLayout.CENTER);
+		midPane.add(pane_proportion,BorderLayout.WEST);
 		
 		
 		// this allows the panel to be scrolled as it will become too large
-		hierarchyScroll = new AMScrollPane(innerhierarchy);
-//		hierarchyScroll = new AMScrollPane(midPane);
+//		hierarchyScroll = new AMScrollPane(innerhierarchy);
+		hierarchyScroll = new AMScrollPane(midPane);
 
 		// scrolling
 		hierarchyScroll

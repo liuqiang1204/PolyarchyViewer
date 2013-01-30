@@ -284,7 +284,8 @@ public class Controller {
 		for (Hierarchy h : m_view.hierarchies) {
 			h.isWeighted.addActionListener(new cbx_isWeighted_Listener(h));
 			h.getClear().addActionListener(new Btn_clear_Listener(h));
-			h.addMouseListener(hml);
+//			h.addMouseListener(hml);
+			h.pane_proportion.addMouseListener(hml);
 
 		}
 
@@ -1534,6 +1535,7 @@ public class Controller {
 			h.selectedItemIds.clear();
 			h.totalWeightedValue.clear();
 			h.clearCount();
+			h.pane_proportion.clearAll();
 		}
 		// step 1: get the intersection of publictions and ids
 		boolean has = false;
@@ -1590,6 +1592,11 @@ public class Controller {
 		// compute and display each entry
 		for (Hierarchy h : m_view.hierarchies)
 			computeEntry(h, idStr, m_view.hierarchies);
+		
+		//update the proportion panel
+		for (Hierarchy h : m_view.hierarchies)
+			this.update_proportion(h);
+		
 	}
 
 	public void computeEntry(Hierarchy h, String idstr,
@@ -2115,16 +2122,34 @@ public class Controller {
 		}
 
 		public void mouseEntered(MouseEvent e) {
-			Hierarchy h = (Hierarchy) e.getComponent();
-			System.out.println("Enter h:"+h.getId());
+//			Hierarchy h = (Hierarchy) e.getComponent();
+//			System.out.println("Enter h:"+h.getId());
+//			Proportion_Panel p = (Proportion_Panel) e.getComponent();
+//			
+//			System.out.println("Enter :"+p);
 		}
 
 		public void mouseExited(MouseEvent e) {
-			Hierarchy h = (Hierarchy) e.getComponent();
-			System.out.println("Exit h:"+h.getId());
+//			Hierarchy h = (Hierarchy) e.getComponent();
+//			System.out.println("Exit h:"+h.getId());
 		}
 
 		public void mouseClicked(MouseEvent e) {
 		}
+	}
+	
+	public void update_proportion(Hierarchy h){
+		HashMap<String, Integer> map = h.getMap();
+		JPanel panel = h.getInnerhierarchy();
+//		h.pane_proportion.clearAll();
+		
+		for(Integer s : map.values()){
+			AMLabel lbl = (AMLabel) panel.getComponent(s);
+			double v = lbl.getIts_bar().getSub_count()/lbl.getIts_bar().getCount();
+			int y = lbl.getLocation().y;
+			if(lbl.isVisible())h.pane_proportion.addPair(v, y);
+
+		}
+		h.pane_proportion.repaint();
 	}
 }
