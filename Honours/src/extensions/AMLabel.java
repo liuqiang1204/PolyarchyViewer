@@ -184,6 +184,8 @@ public class AMLabel extends JLabel {
 	public AMLabel owner;
 	public double min_limit = 0;
 	public double max_limit = 9999999;
+	
+	public String originalText;
 
 	// public ArrayList<AMLabel> parents = new ArrayList<AMLabel>();
 	// public ArrayList<AMLabel> children = new ArrayList<AMLabel>();
@@ -370,6 +372,7 @@ public class AMLabel extends JLabel {
 		level = its_level;
 		position = its_position;
 
+		this.originalText = primary;
 		// set double buffered to be on
 		setDoubleBuffered(true);
 	}
@@ -425,20 +428,6 @@ public class AMLabel extends JLabel {
 				status = 0;
 				image = Roll_Images.getClosed();
 			} else {
-
-				// System.out.println("img label status-->"+this.status);
-
-				// if(status == 1||status==2) {
-				//
-				// //If the status is 1 we want to open it (2???--qiang)
-				//
-				// image = Roll_Images.getOpen();
-				//
-				// } else {
-				//
-				// //otherwise close it
-				// image = Roll_Images.getClosed();
-				// }
 				if (this.owner.is_expanded)
 					image = Roll_Images.getOpen();
 				else
@@ -550,6 +539,11 @@ public class AMLabel extends JLabel {
 
 			// if clicked set the background to darker
 			// if not clicked set the background to transparent
+			if (is_checked)
+				setBackground(GlobalConstants.bar_checkedColor);
+			else
+				setBackground(new Color(0,true));
+			
 
 			// always opaque
 			setOpaque(true);
@@ -609,20 +603,20 @@ public class AMLabel extends JLabel {
 //			else
 //				setBackground(new Color(0, true));
 
-			if (this.has_bar) {
-				// get metrics from the graphics
-				FontMetrics metrics = g.getFontMetrics(getFont());
-
-				// find the width of the text
-				int adv = metrics.stringWidth(getText());
-				int pw = this.getIts_bar().bar_width;
-				if(adv>pw)pw=adv;				
-				this.setSize(pw, metrics.getHeight());
-				if (is_checked)
-					setBackground(GlobalConstants.bar_checkedColor);
-				else
-					setBackground(GlobalConstants.bar_backColor);
-			}
+//			if (this.has_bar) {
+//				// get metrics from the graphics
+//				FontMetrics metrics = g.getFontMetrics(getFont());
+//
+//				// find the width of the text
+//				int adv = metrics.stringWidth(getText());
+//				int pw = this.getIts_bar().bar_width;
+//				if(adv>pw)pw=adv;				
+//				this.setSize(pw, metrics.getHeight());
+//				if (is_checked)
+//					setBackground(GlobalConstants.bar_checkedColor);
+//				else
+//					setBackground(GlobalConstants.bar_backColor);
+//			}
 
 		}
 
@@ -1271,6 +1265,8 @@ public class AMLabel extends JLabel {
 			this.getIts_bar().setToolTipText(s);
 			if (this.has_image)
 				this.getIts_image().setToolTipText(s);
-		}
+			
+			this.setText(this.originalText+ " -- " + s);
+		}		
 	}
 }

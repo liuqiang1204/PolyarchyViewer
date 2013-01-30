@@ -280,10 +280,11 @@ public class Controller {
 		/**
 		 * Add some new listeners
 		 */
-
+		Hierarchy_Mouse_Listener hml=new Hierarchy_Mouse_Listener();
 		for (Hierarchy h : m_view.hierarchies) {
 			h.isWeighted.addActionListener(new cbx_isWeighted_Listener(h));
 			h.getClear().addActionListener(new Btn_clear_Listener(h));
+			h.addMouseListener(hml);
 
 		}
 
@@ -316,11 +317,17 @@ public class Controller {
 			h.searchingItems.clear();
 			h.refreshSearchingTable();
 			Alpha_table(m_view.hierarchies.indexOf(h)+1);
+			
 			h.m_slider.c_min=0;
 			h.m_slider.c_max=100;
+			h.m_slider.repaint();
+//			double t_min = h.m_slider.getScaleMin();
+//			double t_max = h.m_slider.getScaleMax();
+//			h.setScaleRange(t_min, t_max);
+//			h.repaint();
 			h.setScaleRange(0, h.getLargest_top());
-			h.setVisible(false);
-			h.setVisible(true);
+			h.repaint();
+			h.getInnerhierarchy().repaint();
 			perform_connection();			
 		}
 		
@@ -531,6 +538,8 @@ public class Controller {
 		}
 		// First get all of the top level values
 		ResultSet data = m_model.getTopLevel(tableName[index]);
+//		String query = "select * from " + tableName[index] + " where ParentID=0 order by Label";
+//		ResultSet data = m_model.getMyQuery(query);
 
 		if (hierarchy.isWeighted.isSelected()) {
 			// Loop through the results
@@ -577,7 +586,7 @@ public class Controller {
 
 					// go an edit this labels bar
 					m_view.bar_edit(sub_count, hierarchy, label);
-
+//					System.out.println(label.getText()+"  --  "+sub_count);
 					// the overall count needs to be updated
 					// overal_count += sub_count;
 				}
@@ -1377,10 +1386,15 @@ public class Controller {
 		// status: 1. mouse pressed 2.mouse released
 		// 3. enter 4. exit 5 left clicked 6right clicked
 		// 7. double clicked
+		
+		//Control img to be not selected
+		boolean isIMG = lbl.isIs_image();
 
 		// image and text should be same action
 		if (lbl.isIs_image() || lbl.isIs_bar())
 			lbl = lbl.owner;
+		
+		
 
 		String id = lbl.getUniqueID();
 		Hierarchy hierarchy = m_view.findHierarchy(id);
@@ -1394,16 +1408,17 @@ public class Controller {
 		case 2: // release
 			break;
 		case 3: // enter
-			hierarchy.addSearchingItem(lbl, 3);
-			lbl.change_text(true);
-			perform_connection();
+			if(!isIMG){
+				hierarchy.addSearchingItem(lbl, 3);
+				lbl.change_text(true);
+				perform_connection();
+			}
 			break;
 		case 4: // exit
-			hierarchy.removeTempSearchingItem(lbl);
-			// connection(new HashSet<Integer>(), hierarchy);
-			// perform_searching();
-			perform_connection();
-
+			if(!isIMG){
+				hierarchy.removeTempSearchingItem(lbl);
+				perform_connection();
+			}
 			break;
 		case 5: // left clicked
 			// !!!!!!!!!!!consider multilevels
@@ -2089,5 +2104,27 @@ public class Controller {
 
 		ResultSet rs = m_model.getMyQuery(sql);
 		m_info.setValues(title + " : " + incIds.size(), rs);
+	}
+	
+	class Hierarchy_Mouse_Listener extends MouseAdapter {
+		public void mousePressed(MouseEvent e) {
+		}
+
+		public void mouseReleased(MouseEvent e) {
+
+		}
+
+		public void mouseEntered(MouseEvent e) {
+			Hierarchy h = (Hierarchy) e.getComponent();
+			System.out.println("Enter h:"+h.getId());
+		}
+
+		public void mouseExited(MouseEvent e) {
+			Hierarchy h = (Hierarchy) e.getComponent();
+			System.out.println("Exit h:"+h.getId());
+		}
+
+		public void mouseClicked(MouseEvent e) {
+		}
 	}
 }

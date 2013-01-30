@@ -28,6 +28,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -221,6 +222,14 @@ public class Hierarchy extends JPanel {
 
 	//the max length bar
 	public AMLabel max_bar;
+	
+	//new search input text field and button
+	public JTextField txt_search = new JTextField(10);
+	public JButton btn_search = new JButton("Search");
+	
+	//Proportion panel
+	public Proportion_Panel pane_proportion = new Proportion_Panel();
+	
 	/* CONSTRUCTORS */
 
 	/**
@@ -301,8 +310,15 @@ public class Hierarchy extends JPanel {
 		innerhierarchy.setAlignmentY(TOP_ALIGNMENT);
 		innerhierarchy.setName(id + "");
 
+		//add proportion panel
+//		JPanel midPane = new JPanel(new BorderLayout());
+//		midPane.add(innerhierarchy,BorderLayout.CENTER);
+//		midPane.add(pane_proportion,BorderLayout.WEST);
+		
+		
 		// this allows the panel to be scrolled as it will become too large
 		hierarchyScroll = new AMScrollPane(innerhierarchy);
+//		hierarchyScroll = new AMScrollPane(midPane);
 
 		// scrolling
 		hierarchyScroll
@@ -630,6 +646,7 @@ public class Hierarchy extends JPanel {
 	public void setScaleRange(double min, double max){
 		AMPanel ih = getInnerhierarchy();
 		HashMap<String,Integer> im = getMap();
+		System.out.println(">>>"+min + " -- "+max);
 		for(int id:im.values()){
 			AMLabel l = (AMLabel)ih.getComponent(id);
 			l.min_limit = min;
@@ -656,7 +673,7 @@ public class Hierarchy extends JPanel {
 			AMLabel bar = l.getIts_bar();
 			GridBagLayout layout = (GridBagLayout) ih.getLayout();
 			GridBagConstraints constraint = layout.getConstraints(bar);
-			
+			System.out.println("C:"+l.getCount()+ " min:"+l.min_limit+" max:"+l.max_limit+ " w:"+width+" lp:"+left_padding+ " bar:"+ l.getText());
 			constraint.insets = decideSpace(l.getCount(), l.min_limit,l.max_limit, width,
 					left_padding, bar);			
 
@@ -761,7 +778,7 @@ public class Hierarchy extends JPanel {
 		// searchLabel = new JLabel("Search:");
 		// searchText = new JTextField(20);
 
-		clear = new JButton("Clear");
+		clear = new JButton("Clear Selection");
 		// clear.addActionListener(new btn_clear_clicked());
 		// clear.setIcon(Controller_Images.getBtnDelete());
 
@@ -776,6 +793,8 @@ public class Hierarchy extends JPanel {
 
 		information.add(isWeighted);
 		information.add(clear);
+		information.add(txt_search);
+		information.add(btn_search);
 
 		search.setSize(120, 50);
 		search.add(jsp, BorderLayout.CENTER);

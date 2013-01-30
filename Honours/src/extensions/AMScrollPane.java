@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
 import project.View;
 
@@ -44,6 +45,14 @@ public class AMScrollPane extends JScrollPane{
 		setDoubleBuffered(true);
 	}
 
+public AMScrollPane(JSplitPane panel) {
+		
+		//add the panel
+		super(panel);
+		
+		//set double buffering to be on to add speed
+		setDoubleBuffered(true);
+	}
 	
 	/*OVERWRITE METHODS*/
 

@@ -82,7 +82,7 @@ public class CustomSlider extends JPanel{
 		xpos_end = this.getWidth()-xpos_start+3;
 		line_length = xpos_end-xpos_start; 
 		line1_ypos = (int) (this.getHeight()*0.5)-10;
-		line2_ypos = line1_ypos+20;
+		line2_ypos = line1_ypos+10;
 		
 
 		g.drawLine(xpos_start, line1_ypos, xpos_end, line1_ypos);
@@ -119,9 +119,9 @@ public class CustomSlider extends JPanel{
 		Polygon p = new Polygon();
 		p.addPoint(xpos_start, line2_ypos);
 		p.addPoint(xpos_end, line2_ypos);
-		p.addPoint((int) (xpos_start+c_max*line_length/100), line2_ypos-19);
-		p.addPoint((int) (xpos_start+c_min*line_length/100), line2_ypos-19);
-		g.setColor(Color.LIGHT_GRAY);
+		p.addPoint((int) (xpos_start+c_max*line_length/100), line2_ypos-9);
+		p.addPoint((int) (xpos_start+c_min*line_length/100), line2_ypos-9);
+		g.setColor(Color.GRAY);
 		g.fillPolygon(p);
 		
 		//place min max slider btn

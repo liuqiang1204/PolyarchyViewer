@@ -915,6 +915,7 @@ public class View extends JFrame {
 			// count = Math.round(count*100)/100.0d;
 			// doing the round operation when paint it --qiang
 			bar_label.setCount(count);
+			label.setCount(count);
 
 			int left_padding = label.getLeft_padding();
 

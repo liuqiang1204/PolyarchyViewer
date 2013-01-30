@@ -246,7 +246,7 @@ public class Java_Connector {
 	 */
 	public ResultSet getTopLevel(String tableName) {
 
-		String query = "select * from " + tableName + " where ParentID=0 ";
+		String query = "select * from " + tableName + " where ParentID=0 order by label";
 		return getMyQuery(query);
 	}
 
@@ -260,7 +260,7 @@ public class Java_Connector {
 	public ResultSet getMiddleLevel(String tableName, String parent) {
 
 		String query = "select * from " + tableName + " where "
-				+ " parentid = " + parent;
+				+ " parentid = " + parent + " order by Label";
 
 		return getMyQuery(query);
 	}
