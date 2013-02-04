@@ -1,7 +1,6 @@
 package extensions;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -11,7 +10,6 @@ import java.text.DecimalFormat;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputListener;
 
 public class CustomSlider extends JPanel{
@@ -35,12 +33,13 @@ public class CustomSlider extends JPanel{
 	private int max_posx = 0;
 	private int max_posy = 0;
 	
+	int distance = 6;
+	int xpos_start;
+	int xpos_end;
+	int line_length; 
+	int line1_ypos;
+	int line2_ypos;
 	
-	int xpos_start = 5;
-	int xpos_end = (int) (getWidth()*0.98 - xpos_start);
-	int line_length = xpos_end-xpos_start; 
-	int line1_ypos = (int) (this.getHeight()*0.5)-10;
-	int line2_ypos = line1_ypos+10;
 	
 	Hierarchy owner_hierarchy;
 	
@@ -50,9 +49,6 @@ public class CustomSlider extends JPanel{
 		M_Listener ml = new M_Listener(this);
 		this.addMouseListener(ml);
 		this.addMouseMotionListener(ml);
-		this.setPreferredSize(new Dimension(60,50));
-		this.setSize(60,50);
-		this.setBorder(new EmptyBorder(40, 0, 0, 0));
 		this.owner_hierarchy = h;		
 	}
 	
@@ -71,18 +67,23 @@ public class CustomSlider extends JPanel{
 	}
 	
 	public void paint(Graphics g) {
+
 		super.paint(g);
+		this.setOpaque(true);
+
 		
 		DecimalFormat df = new DecimalFormat("#.##");
 		Font f = this.getFont();
 		FontMetrics fm = this.getFontMetrics(f);
 		
+		
 		//draw line at center
-		xpos_start = 25;
-		xpos_end = this.getWidth()-xpos_start+3;
-		line_length = xpos_end-xpos_start; 
-		line1_ypos = (int) (this.getHeight()*0.5)-10;
-		line2_ypos = line1_ypos+10;
+		
+		xpos_start = 20 + owner_hierarchy.pane_proportion.getWidth();
+		line_length=this.owner_hierarchy.getHierarchyScroll().getWidth() - xpos_start-18;
+		xpos_end = line_length+xpos_start;		
+		line1_ypos = (int) (this.getHeight()*0.5)-5;
+		line2_ypos = line1_ypos+distance;
 		
 
 		g.drawLine(xpos_start, line1_ypos, xpos_end, line1_ypos);
@@ -91,11 +92,11 @@ public class CustomSlider extends JPanel{
 		
 		//draw text for center line
 		String str = df.format(min_scalevalue);		
-		g.drawChars(str.toCharArray(), 0, str.length(), xpos_start, line1_ypos-5);
+		g.drawChars(str.toCharArray(), 0, str.length(), xpos_start, line1_ypos-2);
 		
 		str = df.format(max_scalevalue);
 		int strl = SwingUtilities.computeStringWidth(fm, str);
-		g.drawChars(str.toCharArray(), 0, str.length(), xpos_end-strl, line1_ypos-5);
+		g.drawChars(str.toCharArray(), 0, str.length(), xpos_end-strl, line1_ypos-2);
 		//draw bottom scale line
 		int tmpx=(xpos_start+xpos_end)/2; //50%
 		int tmpx1 = (xpos_start+tmpx)/2; //25%
@@ -119,8 +120,8 @@ public class CustomSlider extends JPanel{
 		Polygon p = new Polygon();
 		p.addPoint(xpos_start, line2_ypos);
 		p.addPoint(xpos_end, line2_ypos);
-		p.addPoint((int) (xpos_start+c_max*line_length/100), line2_ypos-9);
-		p.addPoint((int) (xpos_start+c_min*line_length/100), line2_ypos-9);
+		p.addPoint((int) (xpos_start+c_max*line_length/100), line1_ypos+1);
+		p.addPoint((int) (xpos_start+c_min*line_length/100), line1_ypos+1);
 		g.setColor(Color.GRAY);
 		g.fillPolygon(p);
 		

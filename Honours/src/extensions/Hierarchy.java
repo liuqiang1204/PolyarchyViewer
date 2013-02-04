@@ -1,15 +1,17 @@
 package extensions;
 
+import images.Controller_Images;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -24,28 +26,27 @@ import java.util.Random;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
+import javax.swing.JToolBar;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import listener.Link_Label_Action;
-import project.Controller.Clear_Button_Action;
+//import project.Controller.Clear_Button_Action;
 import project.Controller.KeyPress_Action;
 import project.Controller.Scroll_adjust_listener;
+import project.GlobalConstants;
 import project.View.Control_Listener;
 import selectors.selectableFonts;
 
@@ -146,12 +147,12 @@ public class Hierarchy extends JPanel {
 	/**
 	 * This button clear the search
 	 */
-	private JButton clear;
+	// private JButton clear;
 
 	/**
 	 * Information that can be shown to the user after interaction on a label
 	 */
-	private JPanel information;
+	// private JPanel information;
 
 	/* THE TOP COTROLER */
 
@@ -201,35 +202,42 @@ public class Hierarchy extends JPanel {
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
 	public JCheckBox isWeighted = new JCheckBox("Weighted");
-//	public JScrollBar jsb_filter = new JScrollBar();
+	// public JScrollBar jsb_filter = new JScrollBar();
 	public JCheckBox cbx_visible;
-	
-	//the position in the panel
-	public int zorder =0;
 
-	//slider bar to controll the scale
+	// the position in the panel
+	public int zorder = 0;
+
+	// slider bar to controll the scale
 	public CustomSlider m_slider;
 	/**
 	 * for connection computing
+	 * 
 	 * @author Qiang Liu
 	 */
-	//the intersection of selected count ids
+	// the intersection of selected count ids
 	public HashSet<Integer> intersectionOfCountIds = new HashSet<Integer>();
-	//the selected entry ids (the last level)
+	// the selected entry ids (the last level)
 	public HashSet<Integer> selectedItemIds = new HashSet<Integer>();
-	// to record the publication(people) ids with the total weighted value (countid,value)
+	// to record the publication(people) ids with the total weighted value
+	// (countid,value)
 	public HashMap<Integer, Double> totalWeightedValue = new HashMap<Integer, Double>();
 
-	//the max length bar
+	// the max length bar
 	public AMLabel max_bar;
-	
-	//new search input text field and button
+
+	// new search input text field and button
 	public JTextField txt_search = new JTextField(10);
-	public JButton btn_search = new JButton("Search");
-	
-	//Proportion panel
+	public JButton btn_search = new JButton(Controller_Images.btn_search);// new
+																			// JButton("Search");
+	public JButton btn_clearSearch = new JButton(
+			Controller_Images.btn_clearSearch);// new JButton("Clear Results");
+	public JButton btn_clearTable = new JButton(
+			Controller_Images.btn_clearTable);
+
+	// Proportion panel
 	public Proportion_Panel pane_proportion = new Proportion_Panel();
-	
+
 	/* CONSTRUCTORS */
 
 	/**
@@ -270,11 +278,11 @@ public class Hierarchy extends JPanel {
 	public void add_elements(String heading) {
 
 		// Get the font to be used for the heading
-		Font headingFont = selectableFonts.getLargeFontClick();
+		Font headingFont = selectableFonts.getLargeFont();
 
 		// Set the layout for the panel to be a box that lays out elements on
 		// the y axis
-//		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		// setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setLayout(new BorderLayout());
 
 		// Add a border around the panel
@@ -285,23 +293,41 @@ public class Hierarchy extends JPanel {
 		// Create the heading for the panel
 		panelHeading = new JLabel(heading);
 		panelHeading.setFont(headingFont);
-		
+
 		panel_controller = new Panel_Controller(id + "", 1);
 		panel_controller.setToolTipText(panelHeading.getText());
-		
+
 		JPanel tpane = new JPanel();
-//		tpane.setLayout(new BoxLayout(tpane, BoxLayout.X_AXIS));
 		tpane.add(panelHeading);
 		tpane.add(panel_controller);
 
 		panel_heading = new JPanel();
 		panel_heading.setLayout(new BorderLayout());
+		panel_heading.add(tpane, BorderLayout.NORTH);
+		panel_heading.setToolTipText(panelHeading.getText());		
+
+		// align the panel so that they fill the entire panel
+		panel_controller.setAlignmentX((float) 0.0);
+		panel_heading.setAlignmentX((float) 0.0);
+
+		// add a custom slider bar to control the scale
+		this.m_slider = new CustomSlider(0, this.largest_top, this);
+		panel_heading.add(m_slider, BorderLayout.CENTER);
+
+		this.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				double t_min = m_slider.getScaleMin();
+				double t_max = m_slider.getScaleMax();
+				setScaleRange(t_min, t_max);
+			}
+		});
+
 		
-		panel_heading.add(tpane,BorderLayout.NORTH);
-
-		panel_heading.setToolTipText(panelHeading.getText());
-
-		this.add(panel_heading,BorderLayout.NORTH);
+//		tpane.setBorder(BorderFactory.createLineBorder(Color.green));		
+//		m_slider.setBorder(BorderFactory.createLineBorder(Color.red));
+//		panel_heading.setBorder(BorderFactory.createLineBorder(Color.black));
+		panel_heading.setPreferredSize(new Dimension(300, 65));
+		this.add(panel_heading, BorderLayout.NORTH);
 
 		/* INNER PANELS */
 
@@ -310,20 +336,20 @@ public class Hierarchy extends JPanel {
 		innerhierarchy.setAlignmentY(TOP_ALIGNMENT);
 		innerhierarchy.setName(id + "");
 
-		//add proportion panel
+		// add proportion panel
 		JPanel midPane = new JPanel(new BorderLayout());
-		midPane.add(innerhierarchy,BorderLayout.CENTER);
-		midPane.add(pane_proportion,BorderLayout.WEST);
-		
-		
+		midPane.add(innerhierarchy, BorderLayout.CENTER);
+		midPane.add(pane_proportion, BorderLayout.WEST);
+
 		// this allows the panel to be scrolled as it will become too large
-//		hierarchyScroll = new AMScrollPane(innerhierarchy);
+		// hierarchyScroll = new AMScrollPane(innerhierarchy);
 		hierarchyScroll = new AMScrollPane(midPane);
 
 		// scrolling
 		hierarchyScroll
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		hierarchyScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		hierarchyScroll
+				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 		// set the scrolling constants
 		hierarchyScroll.getVerticalScrollBar().setUnitIncrement(unitInc);
@@ -331,20 +357,20 @@ public class Hierarchy extends JPanel {
 
 		// The options for the hierarchy
 		hierarchy_options = new JPanel();
-		
+
 		// add the contents
 		hierarchy = new JSplitPane(JSplitPane.VERTICAL_SPLIT, hierarchyScroll,
 				hierarchy_options);
 
 		// Set some attributes of the panel
 		hierarchy.setContinuousLayout(true);
-		
+
 		// Used for allowing the panel to be resized with a button
 		hierarchy.setOneTouchExpandable(true);
 		hierarchy.setResizeWeight(1);
 
 		// add the split pane to the frame
-		this.add(hierarchy,BorderLayout.CENTER);
+		this.add(hierarchy, BorderLayout.CENTER);
 
 		// set the layout of the inner to be a gridbag so that we can manipulate
 		// the location of the labels
@@ -354,20 +380,20 @@ public class Hierarchy extends JPanel {
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
-		
-//		//test
-//		AMLabel ttt=new AMLabel("1234567890");
-//		ttt.setOpaque(true);
-//		ttt.setBackground(Color.red);
-//		ttt.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-//		
-//		GridBagLayout layout = (GridBagLayout) innerhierarchy.getLayout();
-//		GridBagConstraints constraint = layout.getConstraints(ttt);
-//		constraint.insets = new Insets(0, 0, 0, 0);
-//		layout.setConstraints(ttt, constraint);
-//		ttt.setPreferredSize(new Dimension(500,1));
-		
-//		this.innerhierarchy.add(ttt);
+
+		// //test
+		// AMLabel ttt=new AMLabel("1234567890");
+		// ttt.setOpaque(true);
+		// ttt.setBackground(Color.red);
+		// ttt.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+		//
+		// GridBagLayout layout = (GridBagLayout) innerhierarchy.getLayout();
+		// GridBagConstraints constraint = layout.getConstraints(ttt);
+		// constraint.insets = new Insets(0, 0, 0, 0);
+		// layout.setConstraints(ttt, constraint);
+		// ttt.setPreferredSize(new Dimension(500,1));
+
+		// this.innerhierarchy.add(ttt);
 
 		// The search panel and all of the required objects
 		hierarchy_options.add(addSearch());
@@ -378,22 +404,6 @@ public class Hierarchy extends JPanel {
 		/* array used to quickly switch between items */
 		click = new HashSet<Integer>();
 
-		// align the panel so that they fill the entire panel
-		panel_controller.setAlignmentX((float) 0.0);
-		panel_heading.setAlignmentX((float) 0.0);
-//		panel_controller.setAlignmentX((float) 0.0);
-		
-		//add a custom slider bar to control the scale
-		this.m_slider = new CustomSlider(0,this.largest_top,this);
-		panel_heading.add(m_slider,BorderLayout.SOUTH);
-		
-		this.addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent e) {
-            	double t_min = m_slider.getScaleMin();
-				double t_max = m_slider.getScaleMax();
-				setScaleRange(t_min, t_max);
-            }
-        });		
 	}
 
 	/**
@@ -410,19 +420,20 @@ public class Hierarchy extends JPanel {
 	/**
 	 * add a listener for cbx_visible
 	 */
-	public void add_cbx_visible_actionListener(){
+	public void add_cbx_visible_actionListener() {
 		final Hierarchy h = this;
-		this.cbx_visible.addActionListener(new ActionListener(){
+		this.cbx_visible.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(e.getSource()==cbx_visible){
+				if (e.getSource() == cbx_visible) {
 					h.setVisible(cbx_visible.isSelected());
 				}
 			}
-			
+
 		});
 	}
+
 	/**
 	 * Perform the action when the clear button is clicked
 	 */
@@ -585,7 +596,7 @@ public class Hierarchy extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-//			System.out.println("removeSearchingItem");
+			// System.out.println("removeSearchingItem");
 			removeSearchingItem(owner);
 			// innerhierarchy.repaint();
 		}
@@ -614,7 +625,7 @@ public class Hierarchy extends JPanel {
 	}
 
 	public void removeTempSearchingItem(AMLabel lbl) {
-		if(searchingItems.containsKey(lbl)){
+		if (searchingItems.containsKey(lbl)) {
 			int status = searchingItems.get(lbl);
 			if (status == 3) {
 				searchingItems.remove(lbl);
@@ -640,73 +651,76 @@ public class Hierarchy extends JPanel {
 			item.setVisible(false);
 			item.setVisible(true);
 		}
-//		System.out.println(">>>" + item.getText() + " -- " + ischecked);
+		// System.out.println(">>>" + item.getText() + " -- " + ischecked);
 	}
-	
-	public void setScaleRange(double min, double max){
+
+	public void setScaleRange(double min, double max) {
 		AMPanel ih = getInnerhierarchy();
-		HashMap<String,Integer> im = getMap();
-		System.out.println(">>>"+min + " -- "+max);
-		for(int id:im.values()){
-			AMLabel l = (AMLabel)ih.getComponent(id);
+		HashMap<String, Integer> im = getMap();
+		// System.out.println(">>>"+min + " -- "+max);
+		for (int id : im.values()) {
+			AMLabel l = (AMLabel) ih.getComponent(id);
 			l.min_limit = min;
 			l.getIts_bar().min_limit = l.min_limit;
 			l.getIts_image().min_limit = l.min_limit;
-			
+
 			l.max_limit = max;
 			l.getIts_bar().max_limit = l.max_limit;
 			l.getIts_image().max_limit = l.max_limit;
-			
-			if(l.getCount()>=l.min_limit&&l.isEnabled()){
+
+			if (l.getCount() >= l.min_limit && l.isEnabled()) {
 				l.setVisible(true);
 				l.getIts_bar().setVisible(true);
 				l.getIts_image().setVisible(true);
-			}
-			else{
+			} else {
 				l.setVisible(false);
 				l.getIts_bar().setVisible(false);
 				l.getIts_image().setVisible(false);
 			}
-			
+
 			int left_padding = l.getLeft_padding();
-			int width = getHierarchyScroll().getWidth()-15;
+			int width = getHierarchyScroll().getWidth() - 15 - this.pane_proportion.getWidth();
 			AMLabel bar = l.getIts_bar();
 			GridBagLayout layout = (GridBagLayout) ih.getLayout();
 			GridBagConstraints constraint = layout.getConstraints(bar);
-			System.out.println("C:"+l.getCount()+ " min:"+l.min_limit+" max:"+l.max_limit+ " w:"+width+" lp:"+left_padding+ " bar:"+ l.getText());
-			constraint.insets = decideSpace(l.getCount(), l.min_limit,l.max_limit, width,
-					left_padding, bar);			
+			// System.out.println("C:"+l.getCount()+
+			// " min:"+l.min_limit+" max:"+l.max_limit+
+			// " w:"+width+" lp:"+left_padding+ " bar:"+ l.getText());
+			constraint.insets = decideSpace(l.getCount(), l.min_limit,
+					l.max_limit, width, left_padding, bar);
 
 			layout.setConstraints(bar, constraint);
 		}
 		ih.setVisible(false);
 		ih.setVisible(true);
 	}
-	public Insets decideSpace(double count, double min_limit, double max_limit, float panel_width,
-			int left_padding, AMLabel bar) {
 
-		//--qiang ??? how to compute
-		
+	public Insets decideSpace(double count, double min_limit, double max_limit,
+			float panel_width, int left_padding, AMLabel bar) {
+
+		// --qiang ??? how to compute
+
 		if (bar.isIs_bar()) {
 			panel_width -= (left_padding * 1.5);
-			double this_width_per = (count-min_limit) / (max_limit-min_limit);
+			double this_width_per = (count - min_limit)
+					/ (max_limit - min_limit);
 
 			double size = (panel_width * this_width_per);
 
 			// find the correct amount of right padding
 			double padding = panel_width - size;
-			if(padding<0)padding=5;
+			if (padding < 0)
+				padding = 5;
 
 			// set the sizes of the bar
 			bar.setBar_width((int) (size));
 			return new Insets(0, left_padding, 0, (int) padding);
-			
+
 		}
 
 		// if it is not a bar then return a constant rather than null
 		return new Insets(0, 0, 0, 0);
 	}
-
 
 	public void refreshSearchingTable() {
 		MyTableModel tm = new MyTableModel();
@@ -725,14 +739,14 @@ public class Hierarchy extends JPanel {
 			int value = entry.getValue();
 
 			Object row[] = new Object[3];
-			Color bc = Color.WHITE;
+			Color bc = GlobalConstants.table_normalColor;
 			row[0] = new Boolean(true);
 			switch (value) {
 			case 0:
 				row[0] = new Boolean(false);
 				break;
 			case 3:
-				bc = Color.GREEN;
+				bc = GlobalConstants.table_tempColor;
 				break;
 
 			default:
@@ -743,7 +757,7 @@ public class Hierarchy extends JPanel {
 			else
 				row[0] = new Boolean(true);
 
-			row[1] = key.getText();
+			row[1] = key.originalText;
 			row[2] = key;
 			tm.addRow(row, bc);
 		}
@@ -754,8 +768,8 @@ public class Hierarchy extends JPanel {
 		search = new JPanel();
 		search.setLayout(new BorderLayout());
 
+		// The selection table nested in a scroll panel
 		searchingOpts = new JTable();
-
 		MouseAdapter adapter = new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				int row = searchingOpts.getSelectedRow();
@@ -772,33 +786,36 @@ public class Hierarchy extends JPanel {
 		JScrollPane jsp = new JScrollPane(searchingOpts);
 		jsp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		information = new JPanel();
 
-		// JPanel text = new JPanel();
-		// searchLabel = new JLabel("Search:");
-		// searchText = new JTextField(20);
+		// the toolbar to search and do others
 
-		clear = new JButton("Clear Selection");
-		// clear.addActionListener(new btn_clear_clicked());
-		// clear.setIcon(Controller_Images.getBtnDelete());
-
-		// text.add(searchLabel);
-		// text.add(searchText);
-		// text.add(clear);
-
-		information.setSize(200, 20);
-		information.setBorder(new EmptyBorder(0, 40, 0, 40));
+		// clear = new JButton("Clear Selection");
 		isWeighted.setSelected(false);
-		
+		isWeighted.setToolTipText("Set weighted/non-weighted values");
+		btn_search.setToolTipText("Search by keyword.");
+		btn_clearSearch
+				.setToolTipText("Remove highlights for the searching results.");
+		btn_clearTable.setToolTipText("Remove all selected entries.");
 
-		information.add(isWeighted);
-		information.add(clear);
-		information.add(txt_search);
-		information.add(btn_search);
+		JToolBar innerTools = new JToolBar();
+		innerTools.setLayout(new FlowLayout(FlowLayout.LEFT, 1, 1));
 
-		search.setSize(120, 50);
+		innerTools.setFloatable(false);
+
+		innerTools.add(isWeighted);
+		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
+		innerTools.addSeparator(new Dimension(5, 20));
+		innerTools.add(txt_search);
+		innerTools.add(btn_search);
+		innerTools.add(btn_clearSearch);
+		innerTools.addSeparator(new Dimension(5, 20));
+		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
+
+		innerTools.add(btn_clearTable);
+
+		search.setPreferredSize(new Dimension(300, 200));
 		search.add(jsp, BorderLayout.CENTER);
-		search.add(information, BorderLayout.NORTH);
+		search.add(innerTools, BorderLayout.NORTH);
 
 		return search;
 	}
@@ -856,7 +873,7 @@ public class Hierarchy extends JPanel {
 	 */
 	public void add_listeners(Control_Listener c_l,
 			Scroll_adjust_listener scroll_listener,
-			Clear_Button_Action clear_button_listener,
+			// Clear_Button_Action clear_button_listener,
 			KeyPress_Action keypress_listener) {
 
 		// Add the listener to the controller objects
@@ -885,64 +902,64 @@ public class Hierarchy extends JPanel {
 		panel.setText(name);
 	}
 
-	/**
-	 * Remove / hide the results panel
-	 */
-	public void removeResult() {
-		searchResult.setText("");
-		searchResult.setVisible(false);
-		searchText.setText("");
-	}
+	// /**
+	// * Remove / hide the results panel
+	// */
+	// public void removeResult() {
+	// searchResult.setText("");
+	// searchResult.setVisible(false);
+	// searchText.setText("");
+	// }
 
-	/**
-	 * Add some information to the search text
-	 * 
-	 * @param result
-	 *            - the string to be added
-	 */
-	public void addResults(String result) {
-		searchText.setText(result);
-		searchText.setVisible(true);
-	}
+	// /**
+	// * Add some information to the search text
+	// *
+	// * @param result
+	// * - the string to be added
+	// */
+	// public void addResults(String result) {
+	// searchText.setText(result);
+	// searchText.setVisible(true);
+	// }
 
-	/**
-	 * Remove the labels with the information panel Used once a user has
-	 * unclicked the label
-	 */
-	public void removeInformation() {
-		// Remove all of the contents of the panel
-		information.removeAll();
+	// /**
+	// * Remove the labels with the information panel Used once a user has
+	// * unclicked the label
+	// */
+	// public void removeInformation() {
+	// // Remove all of the contents of the panel
+	// information.removeAll();
+	//
+	// // Don't display the panel
+	// information.setVisible(false);
+	// }
 
-		// Don't display the panel
-		information.setVisible(false);
-	}
-
-	/**
-	 * Clear this specific level Loop through all of the elements and perform
-	 * the operation
-	 * 
-	 * @param remove_count
-	 *            - if we want to remove the count or not
-	 */
-	public void clearlevel(boolean remove_count) {
-
-		// loop through all of the elements and clear it
-		for (int i = 0; i < innerhierarchy.getComponentCount(); i++) {
-			((AMLabel) innerhierarchy.getComponent(i))
-					.clear_just_this(remove_count);
-		}
-
-		innerhierarchy.repaint();
-
-		// Move the scroll panel so that we are at the top
-		JViewport viewport = (JViewport) innerhierarchy.getParent();
-		Rectangle r = viewport.getViewRect();
-		Point p = r.getLocation();
-		p.y = 0;
-
-		// set the position of the view
-		viewport.setViewPosition(p);
-	}
+	// /**
+	// * Clear this specific level Loop through all of the elements and perform
+	// * the operation
+	// *
+	// * @param remove_count
+	// * - if we want to remove the count or not
+	// */
+	// public void clearlevel(boolean remove_count) {
+	//
+	// // loop through all of the elements and clear it
+	// for (int i = 0; i < innerhierarchy.getComponentCount(); i++) {
+	// ((AMLabel) innerhierarchy.getComponent(i))
+	// .clear_just_this(remove_count);
+	// }
+	//
+	// innerhierarchy.repaint();
+	//
+	// // Move the scroll panel so that we are at the top
+	// JViewport viewport = (JViewport) innerhierarchy.getParent();
+	// Rectangle r = viewport.getViewRect();
+	// Point p = r.getLocation();
+	// p.y = 0;
+	//
+	// // set the position of the view
+	// viewport.setViewPosition(p);
+	// }
 
 	/**
 	 * Clear the count for this panel
@@ -974,30 +991,30 @@ public class Hierarchy extends JPanel {
 	 * @return the contents label for the possibility of an action listener to
 	 *         be added
 	 */
-	public void showDetails(String name, String contents, String website) {
-
-		// before we place new information remove the old
-		removeInformation();
-
-		// Create the two new labels
-		JLabel labelName = new JLabel(name);
-		JLabel labelContents = new JLabel(contents);
-
-		// This allows the text to be underlined
-		labelContents.setText("<html><u>" + contents + "</u></html>");
-		labelContents.setName(website);
-
-		// Add the labels to the display
-		information.add(labelName);
-		information.add(labelContents);
-
-		// Allow the panel to be visible
-		information.setVisible(true);
-
-		// allow the user to click the element as a hyperlink
-		labelContents.addMouseListener(new Link_Label_Action());
-
-	}
+	// public void showDetails(String name, String contents, String website) {
+	//
+	// // before we place new information remove the old
+	// removeInformation();
+	//
+	// // Create the two new labels
+	// JLabel labelName = new JLabel(name);
+	// JLabel labelContents = new JLabel(contents);
+	//
+	// // This allows the text to be underlined
+	// labelContents.setText("<html><u>" + contents + "</u></html>");
+	// labelContents.setName(website);
+	//
+	// // Add the labels to the display
+	// information.add(labelName);
+	// information.add(labelContents);
+	//
+	// // Allow the panel to be visible
+	// information.setVisible(true);
+	//
+	// // allow the user to click the element as a hyperlink
+	// labelContents.addMouseListener(new Link_Label_Action());
+	//
+	// }
 
 	/**
 	 * Decide the action to be performed on this label We are concern here with
@@ -1016,270 +1033,270 @@ public class Hierarchy extends JPanel {
 	 * @param is_left_up
 	 *            - if the event was caused by a left and up motion
 	 */
-//	public void expand_collapse_decision(AMLabel original_label,
-//			AMLabel comparison_label, boolean entry, boolean hover,
-//			boolean is_left_up) {
-//		/**
-//		 * rewrite by Qiang NOT FINISHED!!!
-//		 */
-//		int comp_level = comparison_label.getLevel();
-//		int orig_level = original_label.getLevel();
-//		//
-//		boolean change_icon = true;
-//		//
-//		// //we only want to change the image on click and exit
-//		// if(!entry || !hover) {
-//		// change_icon = true;
-//		// }
-//
-//		boolean tmp_entry = entry;
-//
-//		if (original_label.isIs_image()) {
-//
-//			if (is_left_up && hover) {
-//				entry = false;
-//			} else if (!is_left_up) {
-//				entry = true;
-//			}
-//
-//			if (!hover) {
-//				if (original_label.isClicked()) {
-//					if (comparison_label.isIs_image()) {
-//						comparison_label.setClicked(true);
-//					}
-//					entry = true;
-//				} else if (!original_label.isClicked()) {
-//					if (comparison_label.isIs_image()) {
-//						comparison_label.setClicked(false);
-//					}
-//					entry = false;
-//				}
-//			}
-//
-//			if (entry
-//					&& (comparison_label.getStatus() != 1 || comparison_label
-//							.isBullet())) {
-//
-//				/*
-//				 * ENTRY EVENTS what happens on entry
-//				 */
-//
-//				if (comparison_label.isIs_image()) {
-//					System.out.println(change_icon);
-//					System.out.println(orig_level + " " + comp_level);
-//					// its an image
-//					if (orig_level >= comp_level) {
-//						comparison_label.status(change_icon, 1);
-//						comparison_label.change(true);
-//					} else if (orig_level + 1 == comp_level) {
-//						if (comparison_label.isBullet()) {
-//							comparison_label.change(true);
-//						} else {
-//							comparison_label.status(change_icon, 0);
-//							comparison_label.change(true);
-//						}
-//					} else {
-//						comparison_label.status(change_icon, 1);
-//						comparison_label.change(true);
-//					}
-//				} else {
-//
-//					// its anything else
-//					if (orig_level >= comp_level - 1) {
-//						comparison_label.change(true);
-//					} else {
-//						comparison_label.change(false);
-//					}
-//				}
-//
-//			} else if (!entry) {
-//				if (!original_label.isClicked()) {
-//					if (comparison_label.isIs_image()) {
-//						if (comp_level == orig_level) {
-//							comparison_label.setStatus(0);
-//							comparison_label.change(true);
-//						} else if (comp_level > orig_level) {
-//							comparison_label.setStatus(0);
-//							comparison_label.change(false);
-//						} else {// above, cannot assume this
-//							comparison_label.setStatus(1);
-//							comparison_label.change(true);
-//						}
-//					} else {
-//
-//						// any other plain label
-//						if (comp_level <= orig_level) {
-//							comparison_label.change(true);
-//						} else {
-//							comparison_label.change(false);
-//						}
-//					}
-//				}
-//			}
-//
-//			entry = tmp_entry;
-//
-//			// if this label has a bar recursively call this method
-//			if (comparison_label.isHas_bar()) {
-//				expand_collapse_decision(original_label,
-//						comparison_label.getIts_bar(), entry, hover, is_left_up);
-//			}
-//
-//			// if this label has an image then recursively call this method
-//			if (comparison_label.isHas_image()) {
-//				expand_collapse_decision(original_label,
-//						comparison_label.getIts_image(), entry, hover,
-//						is_left_up);
-//			}
-//
-//		} else if (comparison_label.isClicked()
-//				&& comparison_label.isIs_image() && entry) {
-//			comparison_label.setStatus(0);
-//			comparison_label.setClicked(false);
-//		}
-//		comparison_label.repaint();
-//
-//		// int comp_level = comparison_label.getLevel();
-//		// int orig_level = original_label.getLevel();
-//		//
-//		// boolean change_icon = false;
-//		//
-//		// //we only want to change the image on click and exit
-//		// if(!entry || !hover) {
-//		// change_icon = true;
-//		// }
-//		//
-//		// boolean tmp_entry = entry;
-//		//
-//		// //The new label must be showable and the original be an image
-//		// if(original_label.isIs_image()) {
-//		//
-//		// if(is_left_up && hover) {
-//		// entry = false;
-//		// } else if (!is_left_up && !entry) {
-//		// change_icon = true;
-//		// entry = true;
-//		// }
-//		//
-//		//
-//		// if(!hover) {
-//		// if(original_label.isClicked() || (original_label.isClicked() &&
-//		// original_label.getStatus() == 1)) {
-//		// if(comparison_label.isIs_image()) {
-//		// comparison_label.setClicked(true);
-//		// }
-//		// entry = true;
-//		// } else if(!original_label.isClicked()){
-//		// if(comparison_label.isIs_image()) {
-//		// comparison_label.setClicked(false);
-//		// }
-//		// entry = false;
-//		// }
-//		// }
-//		//
-//		// if(entry && (comparison_label.getStatus() != 1 ||
-//		// comparison_label.isBullet())) {
-//		//
-//		// /*
-//		// * ENTRY EVENTS
-//		// * what happens on entry
-//		// */
-//		//
-//		// //we don't want click to occur and now label isn't clicked, that is a
-//		// collapse
-//		// if(comparison_label.isIs_bar()) {
-//		//
-//		// //its a bar
-//		// if(orig_level >= comp_level || orig_level + 1 == comp_level) {
-//		// comparison_label.change(true);
-//		// } else {
-//		// comparison_label.change(false);
-//		// }
-//		// } else if(comparison_label.isIs_image()) {
-//		// System.out.println(change_icon);
-//		// System.out.println(orig_level + " " + comp_level);
-//		// //its an image
-//		// if(orig_level >= comp_level) {
-//		// comparison_label.status(change_icon, 1);
-//		// comparison_label.change(true);
-//		// } else if(orig_level + 1 == comp_level) {
-//		// if(comparison_label.isBullet()) {
-//		// comparison_label.change(true);
-//		// } else {
-//		// comparison_label.status(change_icon, 0);
-//		// comparison_label.change(true);
-//		// }
-//		// }else {
-//		// comparison_label.status(change_icon, 1);
-//		// comparison_label.change(false);
-//		// }
-//		// } else {
-//		//
-//		// //its anything else
-//		// if(orig_level >= comp_level || orig_level + 1 == comp_level) {
-//		// comparison_label.change(true);
-//		// } else {
-//		// comparison_label.change(false);
-//		// }
-//		// }
-//		//
-//		// } else if(!entry) {
-//		// //should remove hover!!!
-//		// if((!hover && !original_label.isClicked()) || (hover &&
-//		// !original_label.isClicked())) {
-//		//
-//		// if(comparison_label.isIs_bar()) {
-//		// if(comp_level <= orig_level)
-//		// comparison_label.change(true);
-//		// else {
-//		// comparison_label.change(false);
-//		// }
-//		// }
-//		// if(comparison_label.isIs_image()) {
-//		// if(comp_level == orig_level) {
-//		// comparison_label.setStatus(0);
-//		// comparison_label.change(true);
-//		// } else if(comp_level > orig_level) {
-//		// comparison_label.setStatus(0);
-//		// comparison_label.change(false);
-//		// } else {//above, cannot assume this
-//		// comparison_label.setStatus(1);
-//		// comparison_label.change(true);
-//		// }
-//		// } else {
-//		//
-//		// //any other plain label
-//		// if(comp_level <= orig_level) {
-//		// comparison_label.change(true);
-//		// } else {
-//		// comparison_label.change(false);
-//		// }
-//		// }
-//		// }
-//		// }
-//		//
-//		// entry = tmp_entry;
-//		//
-//		// //if this label has a bar recursively call this method
-//		// if(comparison_label.isHas_bar()) {
-//		// expand_collapse_decision(original_label,
-//		// comparison_label.getIts_bar(), entry, hover, is_left_up);
-//		// }
-//		//
-//		// //if this label has an image then recursively call this method
-//		// if(comparison_label.isHas_image()) {
-//		// expand_collapse_decision(original_label,
-//		// comparison_label.getIts_image(), entry, hover, is_left_up);
-//		// }
-//		//
-//		// //comparison_label.repaint();
-//		// } else if(comparison_label.isClicked() &&
-//		// comparison_label.isIs_image() && entry) {
-//		// comparison_label.setStatus(0);
-//		// comparison_label.setClicked(false);
-//		// }
-//		// comparison_label.repaint();
-//	}
+	// public void expand_collapse_decision(AMLabel original_label,
+	// AMLabel comparison_label, boolean entry, boolean hover,
+	// boolean is_left_up) {
+	// /**
+	// * rewrite by Qiang NOT FINISHED!!!
+	// */
+	// int comp_level = comparison_label.getLevel();
+	// int orig_level = original_label.getLevel();
+	// //
+	// boolean change_icon = true;
+	// //
+	// // //we only want to change the image on click and exit
+	// // if(!entry || !hover) {
+	// // change_icon = true;
+	// // }
+	//
+	// boolean tmp_entry = entry;
+	//
+	// if (original_label.isIs_image()) {
+	//
+	// if (is_left_up && hover) {
+	// entry = false;
+	// } else if (!is_left_up) {
+	// entry = true;
+	// }
+	//
+	// if (!hover) {
+	// if (original_label.isClicked()) {
+	// if (comparison_label.isIs_image()) {
+	// comparison_label.setClicked(true);
+	// }
+	// entry = true;
+	// } else if (!original_label.isClicked()) {
+	// if (comparison_label.isIs_image()) {
+	// comparison_label.setClicked(false);
+	// }
+	// entry = false;
+	// }
+	// }
+	//
+	// if (entry
+	// && (comparison_label.getStatus() != 1 || comparison_label
+	// .isBullet())) {
+	//
+	// /*
+	// * ENTRY EVENTS what happens on entry
+	// */
+	//
+	// if (comparison_label.isIs_image()) {
+	// System.out.println(change_icon);
+	// System.out.println(orig_level + " " + comp_level);
+	// // its an image
+	// if (orig_level >= comp_level) {
+	// comparison_label.status(change_icon, 1);
+	// comparison_label.change(true);
+	// } else if (orig_level + 1 == comp_level) {
+	// if (comparison_label.isBullet()) {
+	// comparison_label.change(true);
+	// } else {
+	// comparison_label.status(change_icon, 0);
+	// comparison_label.change(true);
+	// }
+	// } else {
+	// comparison_label.status(change_icon, 1);
+	// comparison_label.change(true);
+	// }
+	// } else {
+	//
+	// // its anything else
+	// if (orig_level >= comp_level - 1) {
+	// comparison_label.change(true);
+	// } else {
+	// comparison_label.change(false);
+	// }
+	// }
+	//
+	// } else if (!entry) {
+	// if (!original_label.isClicked()) {
+	// if (comparison_label.isIs_image()) {
+	// if (comp_level == orig_level) {
+	// comparison_label.setStatus(0);
+	// comparison_label.change(true);
+	// } else if (comp_level > orig_level) {
+	// comparison_label.setStatus(0);
+	// comparison_label.change(false);
+	// } else {// above, cannot assume this
+	// comparison_label.setStatus(1);
+	// comparison_label.change(true);
+	// }
+	// } else {
+	//
+	// // any other plain label
+	// if (comp_level <= orig_level) {
+	// comparison_label.change(true);
+	// } else {
+	// comparison_label.change(false);
+	// }
+	// }
+	// }
+	// }
+	//
+	// entry = tmp_entry;
+	//
+	// // if this label has a bar recursively call this method
+	// if (comparison_label.isHas_bar()) {
+	// expand_collapse_decision(original_label,
+	// comparison_label.getIts_bar(), entry, hover, is_left_up);
+	// }
+	//
+	// // if this label has an image then recursively call this method
+	// if (comparison_label.isHas_image()) {
+	// expand_collapse_decision(original_label,
+	// comparison_label.getIts_image(), entry, hover,
+	// is_left_up);
+	// }
+	//
+	// } else if (comparison_label.isClicked()
+	// && comparison_label.isIs_image() && entry) {
+	// comparison_label.setStatus(0);
+	// comparison_label.setClicked(false);
+	// }
+	// comparison_label.repaint();
+	//
+	// // int comp_level = comparison_label.getLevel();
+	// // int orig_level = original_label.getLevel();
+	// //
+	// // boolean change_icon = false;
+	// //
+	// // //we only want to change the image on click and exit
+	// // if(!entry || !hover) {
+	// // change_icon = true;
+	// // }
+	// //
+	// // boolean tmp_entry = entry;
+	// //
+	// // //The new label must be showable and the original be an image
+	// // if(original_label.isIs_image()) {
+	// //
+	// // if(is_left_up && hover) {
+	// // entry = false;
+	// // } else if (!is_left_up && !entry) {
+	// // change_icon = true;
+	// // entry = true;
+	// // }
+	// //
+	// //
+	// // if(!hover) {
+	// // if(original_label.isClicked() || (original_label.isClicked() &&
+	// // original_label.getStatus() == 1)) {
+	// // if(comparison_label.isIs_image()) {
+	// // comparison_label.setClicked(true);
+	// // }
+	// // entry = true;
+	// // } else if(!original_label.isClicked()){
+	// // if(comparison_label.isIs_image()) {
+	// // comparison_label.setClicked(false);
+	// // }
+	// // entry = false;
+	// // }
+	// // }
+	// //
+	// // if(entry && (comparison_label.getStatus() != 1 ||
+	// // comparison_label.isBullet())) {
+	// //
+	// // /*
+	// // * ENTRY EVENTS
+	// // * what happens on entry
+	// // */
+	// //
+	// // //we don't want click to occur and now label isn't clicked, that is a
+	// // collapse
+	// // if(comparison_label.isIs_bar()) {
+	// //
+	// // //its a bar
+	// // if(orig_level >= comp_level || orig_level + 1 == comp_level) {
+	// // comparison_label.change(true);
+	// // } else {
+	// // comparison_label.change(false);
+	// // }
+	// // } else if(comparison_label.isIs_image()) {
+	// // System.out.println(change_icon);
+	// // System.out.println(orig_level + " " + comp_level);
+	// // //its an image
+	// // if(orig_level >= comp_level) {
+	// // comparison_label.status(change_icon, 1);
+	// // comparison_label.change(true);
+	// // } else if(orig_level + 1 == comp_level) {
+	// // if(comparison_label.isBullet()) {
+	// // comparison_label.change(true);
+	// // } else {
+	// // comparison_label.status(change_icon, 0);
+	// // comparison_label.change(true);
+	// // }
+	// // }else {
+	// // comparison_label.status(change_icon, 1);
+	// // comparison_label.change(false);
+	// // }
+	// // } else {
+	// //
+	// // //its anything else
+	// // if(orig_level >= comp_level || orig_level + 1 == comp_level) {
+	// // comparison_label.change(true);
+	// // } else {
+	// // comparison_label.change(false);
+	// // }
+	// // }
+	// //
+	// // } else if(!entry) {
+	// // //should remove hover!!!
+	// // if((!hover && !original_label.isClicked()) || (hover &&
+	// // !original_label.isClicked())) {
+	// //
+	// // if(comparison_label.isIs_bar()) {
+	// // if(comp_level <= orig_level)
+	// // comparison_label.change(true);
+	// // else {
+	// // comparison_label.change(false);
+	// // }
+	// // }
+	// // if(comparison_label.isIs_image()) {
+	// // if(comp_level == orig_level) {
+	// // comparison_label.setStatus(0);
+	// // comparison_label.change(true);
+	// // } else if(comp_level > orig_level) {
+	// // comparison_label.setStatus(0);
+	// // comparison_label.change(false);
+	// // } else {//above, cannot assume this
+	// // comparison_label.setStatus(1);
+	// // comparison_label.change(true);
+	// // }
+	// // } else {
+	// //
+	// // //any other plain label
+	// // if(comp_level <= orig_level) {
+	// // comparison_label.change(true);
+	// // } else {
+	// // comparison_label.change(false);
+	// // }
+	// // }
+	// // }
+	// // }
+	// //
+	// // entry = tmp_entry;
+	// //
+	// // //if this label has a bar recursively call this method
+	// // if(comparison_label.isHas_bar()) {
+	// // expand_collapse_decision(original_label,
+	// // comparison_label.getIts_bar(), entry, hover, is_left_up);
+	// // }
+	// //
+	// // //if this label has an image then recursively call this method
+	// // if(comparison_label.isHas_image()) {
+	// // expand_collapse_decision(original_label,
+	// // comparison_label.getIts_image(), entry, hover, is_left_up);
+	// // }
+	// //
+	// // //comparison_label.repaint();
+	// // } else if(comparison_label.isClicked() &&
+	// // comparison_label.isIs_image() && entry) {
+	// // comparison_label.setStatus(0);
+	// // comparison_label.setClicked(false);
+	// // }
+	// // comparison_label.repaint();
+	// }
 
 	/**
 	 * Check to see if this label is at the bottom of the vis by checking it
@@ -1580,35 +1597,20 @@ public class Hierarchy extends JPanel {
 		this.searchResult = searchResult;
 	}
 
-	/**
-	 * @return the clear
-	 */
-	public JButton getClear() {
-		return clear;
-	}
+	// /**
+	// * @return the clear
+	// */
+	// public JButton getClear() {
+	// return clear;
+	// }
 
-	/**
-	 * @param clear
-	 *            the clear to set
-	 */
-	public void setClear(JButton clear) {
-		this.clear = clear;
-	}
-
-	/**
-	 * @return the information
-	 */
-	public JPanel getInformation() {
-		return information;
-	}
-
-	/**
-	 * @param information
-	 *            the information to set
-	 */
-	public void setInformation(JPanel information) {
-		this.information = information;
-	}
+	// /**
+	// * @param clear
+	// * the clear to set
+	// */
+	// public void setClear(JButton clear) {
+	// this.clear = clear;
+	// }
 
 	/**
 	 * @return the constraints
@@ -1667,7 +1669,7 @@ public class Hierarchy extends JPanel {
 	 */
 	public void setLargest_top(float largest_top) {
 		this.largest_top = largest_top;
-		this.m_slider.setScaleValue(0,largest_top);
+		this.m_slider.setScaleValue(0, largest_top);
 		this.setScaleRange(0, largest_top);
 	}
 
@@ -1722,12 +1724,28 @@ public class Hierarchy extends JPanel {
 	public void setPanel_controller(Panel_Controller panelController) {
 		panel_controller = panelController;
 	}
-	
-	public void reset_Constraints(){
+
+	public void reset_Constraints() {
 		constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.HORIZONTAL;		
+		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		this.innerhierarchy.setAlignmentY(TOP_ALIGNMENT);
+	}
+
+	/**
+	 * Control label to show percentage or not
+	 */
+
+	public void SetDetailedLabel(boolean isShow) {
+		// get all labels
+		JPanel panel = this.getInnerhierarchy();
+
+		for (Integer s : map.values()) {
+			AMLabel lbl = (AMLabel) panel.getComponent(s);
+			lbl.is_showDetail = isShow;
+			if (lbl.isValid())
+				lbl.repaint();
+		}
 	}
 }

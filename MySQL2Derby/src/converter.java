@@ -133,6 +133,7 @@ public class converter {
 			
 			//create each table at derby database
 			for(String tn:tables){
+				if(tn.equalsIgnoreCase("TmpTable"))continue;
 				sql = "show create table " + tn;
 				rs = ms.executeQuery(sql);
 				rs.next();

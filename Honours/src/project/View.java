@@ -21,7 +21,6 @@ import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
@@ -33,7 +32,7 @@ import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import project.Controller.Clear_Button_Action;
+//import project.Controller.Clear_Button_Action;
 import project.Controller.ComboBox_Action;
 import project.Controller.KeyPress_Action;
 import project.Controller.Scroll_adjust_listener;
@@ -119,28 +118,8 @@ public class View extends JFrame {
 	public JCheckBox cbx_showInfo;
 	public JLabel lbl_foreColor;
 	public JLabel lbl_backColor;
+	public JLabel lbl_proportionBarColor;
 
-
-	// /**
-	// * The first hierarchy
-	// */
-	// private Hierarchy hierarchy1;
-	//
-	// /**
-	// * The second hierarchy
-	// */
-	// private Hierarchy hierarchy2;
-	//
-	// /**
-	// * The third hierarchy
-	// */
-	// private Hierarchy hierarchy3;
-	//
-	// /**
-	// * The number of panels
-	// */
-	// private int total = 3;
-	//
 	/**
 	 * The right padding on all labels and panels
 	 */
@@ -274,23 +253,31 @@ public class View extends JFrame {
 
 		// The tool bar --qiang
 		topPanel = new JToolBar();
-		topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		topPanel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
 		cbx_showInfo = new JCheckBox("Show information of intersections");
 		cbx_showInfo.setSelected(false);
 
 		// init color items
-		lbl_foreColor = new JLabel("          ");
-		lbl_backColor = new JLabel("          ");
+		lbl_foreColor = new JLabel("          ");		
 		lbl_foreColor.setOpaque(true);
-		lbl_backColor.setOpaque(true);
 		lbl_foreColor.setSize(40, 18);
-		lbl_backColor.setSize(40, 18);
 		lbl_foreColor.setBorder(BorderFactory.createLineBorder(Color.black));
-		lbl_backColor.setBorder(BorderFactory.createLineBorder(Color.black));
 		lbl_foreColor.setBackground(GlobalConstants.bar_foreColor);
-		lbl_backColor.setBackground(GlobalConstants.bar_backColor);		
 		lbl_foreColor.addMouseListener(new ColorMouseListener());
+
+		lbl_backColor = new JLabel("          ");		
+		lbl_backColor.setOpaque(true);
+		lbl_backColor.setSize(40, 18);
+		lbl_backColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_backColor.setBackground(GlobalConstants.bar_backColor);		
 		lbl_backColor.addMouseListener(new ColorMouseListener());
+		
+		lbl_proportionBarColor = new JLabel("          ");
+		lbl_proportionBarColor.setOpaque(true);
+		lbl_proportionBarColor.setSize(40, 18);
+		lbl_proportionBarColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_proportionBarColor.setBackground(GlobalConstants.proporion_barColor);		
+		lbl_proportionBarColor.addMouseListener(new ColorMouseListener());
 		
 		topPanel.add(this.cbx_showInfo);
 		topPanel.addSeparator(new Dimension(10, 20));
@@ -298,6 +285,9 @@ public class View extends JFrame {
 		topPanel.add(lbl_foreColor);
 		topPanel.add(new JLabel(" Bar backcolor:"));
 		topPanel.add(lbl_backColor);
+		topPanel.add(new JLabel(" Proportion bar color:"));
+		topPanel.add(lbl_proportionBarColor);
+		
 		topPanel.addSeparator(new Dimension(10, 20));
 
 		// add hierarchy panels
@@ -411,19 +401,21 @@ public class View extends JFrame {
 		    	lbl.setBackground(bgColor);
 		    	if(lbl==lbl_foreColor){
 		    		GlobalConstants.bar_foreColor = lbl.getBackground();
-		    		for(Hierarchy h:hierarchies){
-		    			h.getInnerhierarchy().setVisible(false);
-		    			h.getInnerhierarchy().setVisible(true);
-		    		}
 		    	}
 		    	
 		    	if(lbl==lbl_backColor){
 		    		GlobalConstants.bar_backColor = lbl.getBackground();
-		    		for(Hierarchy h:hierarchies){
-		    			h.getInnerhierarchy().setVisible(false);
-		    			h.getInnerhierarchy().setVisible(true);
-		    		}
 		    	}
+		    	
+		    	if(lbl==lbl_proportionBarColor){
+		    		GlobalConstants.proporion_barColor = lbl.getBackground();
+		    	}
+		    	
+	    		for(Hierarchy h:hierarchies){
+	    			h.getInnerhierarchy().setVisible(false);
+	    			h.getInnerhierarchy().setVisible(true);
+	    			h.pane_proportion.repaint();
+	    		}
 		    }
 		}
 		@Override
@@ -452,7 +444,8 @@ public class View extends JFrame {
 	 */
 	public void add_listeners(ComboBox_Action combo_box,
 			Scroll_adjust_listener scroll_listener,
-			Clear_Button_Action clear_listener, KeyPress_Action keypress) {
+			//Clear_Button_Action clear_listener, 
+			KeyPress_Action keypress) {
 
 		/* LISTENER OBJECTS */
 
@@ -468,7 +461,7 @@ public class View extends JFrame {
 		// hierarchy3.add_listeners(c_l, scroll_listener, clear_listener,
 		// keypress);
 		for (Hierarchy h : hierarchies)
-			h.add_listeners(c_l, scroll_listener, clear_listener, keypress);
+			h.add_listeners(c_l, scroll_listener, keypress);
 
 		/* GLOBAL */
 
@@ -572,17 +565,17 @@ public class View extends JFrame {
 			break;
 		case 2:
 			// level 2 on the second row
-			padding = 15;
+			padding = 10;
 //			font = selectableFonts.getSmallFont();
 			break;
 		case 3:
 			// level 3 anywhere but not the top 2
-			padding = 30;
+			padding = 20;
 //			font = selectableFonts.getSmallestFont();
 			break;
 		default:
 			// any other level, be safe and put it in the middle
-			padding = 15;
+			padding = 10;
 //			font = selectableFonts.getSmallFont();
 			break;
 		}
@@ -636,7 +629,7 @@ public class View extends JFrame {
 		panel.add(image, constraint);
 
 		// add more padding after the image
-		padding += 20;
+		padding += 15;
 
 		// the constraints for the other two labels
 		constraint.insets = new Insets(0, padding, 0, 0);
@@ -992,70 +985,70 @@ public class View extends JFrame {
 		return new Insets(0, 0, 0, 0);
 	}
 
-	/**
-	 * Clear all of the panels with information Also clear the corresponding
-	 * information box We can only clear the panels if they are not locked
-	 */
-	public void clearAll() {
-		// clear the level and information
-		for (Hierarchy h : hierarchies) {
-			h.clearlevel(true);
-			h.removeInformation();
-		}
-		// //clear the level and information
-		// hierarchy1.clearlevel(true);
-		// hierarchy1.removeInformation();
-		//
-		// //If the second panel isn't locked
-		// hierarchy2.clearlevel(true);
-		// hierarchy2.removeInformation();
-		//
-		// hierarchy3.clearlevel(true);
-		// hierarchy3.removeInformation();
-	}
+//	/**
+//	 * Clear all of the panels with information Also clear the corresponding
+//	 * information box We can only clear the panels if they are not locked
+//	 */
+//	public void clearAll() {
+//		// clear the level and information
+//		for (Hierarchy h : hierarchies) {
+//			h.clearlevel(true);
+//			h.removeInformation();
+//		}
+//		// //clear the level and information
+//		// hierarchy1.clearlevel(true);
+//		// hierarchy1.removeInformation();
+//		//
+//		// //If the second panel isn't locked
+//		// hierarchy2.clearlevel(true);
+//		// hierarchy2.removeInformation();
+//		//
+//		// hierarchy3.clearlevel(true);
+//		// hierarchy3.removeInformation();
+//	}
 
-	/**
-	 * Action to be performed with the click button is pressed
-	 * 
-	 * @param source_button
-	 *            - the button that was pressed
-	 */
-	public void clear_button_event(JButton source_button) {
-
-		// variables required for generic clearing for a level
-		Hierarchy hierarchy = null;
-
-		// if we have the first clear button
-		// if(source_button.equals(hierarchy1.getClear())) {
-		//
-		// hierarchy = hierarchy1;
-		//
-		// } else if(source_button.equals(hierarchy2.getClear())) {
-		//
-		// hierarchy = hierarchy2;
-		//
-		// } else if(source_button.equals(hierarchy3.getClear())) {
-		//
-		// hierarchy = hierarchy3;
-		//
-		// }
-		for (Hierarchy h : hierarchies) {
-			if (source_button.equals(h.getClear())) {
-				hierarchy = h;
-				break;
-			}
-		}
-
-		// clear the level, set back to the normal display
-		hierarchy.clearlevel(true);
-
-		// remove the information panel
-		hierarchy.removeInformation();
-
-		// remove the result panel and the text
-		hierarchy.removeResult();
-
-	}
+//	/**
+//	 * Action to be performed with the click button is pressed
+//	 * 
+//	 * @param source_button
+//	 *            - the button that was pressed
+//	 */
+//	public void clear_button_event(JButton source_button) {
+//
+//		// variables required for generic clearing for a level
+//		Hierarchy hierarchy = null;
+//
+//		// if we have the first clear button
+//		// if(source_button.equals(hierarchy1.getClear())) {
+//		//
+//		// hierarchy = hierarchy1;
+//		//
+//		// } else if(source_button.equals(hierarchy2.getClear())) {
+//		//
+//		// hierarchy = hierarchy2;
+//		//
+//		// } else if(source_button.equals(hierarchy3.getClear())) {
+//		//
+//		// hierarchy = hierarchy3;
+//		//
+//		// }
+//		for (Hierarchy h : hierarchies) {
+//			if (source_button.equals(h.getClear())) {
+//				hierarchy = h;
+//				break;
+//			}
+//		}
+//
+//		// clear the level, set back to the normal display
+//		hierarchy.clearlevel(true);
+//
+//		// remove the information panel
+//		hierarchy.removeInformation();
+//
+//		// remove the result panel and the text
+//		hierarchy.removeResult();
+//
+//	}
 
 	/* CONTROLLING THE HIERARCHIES */
 

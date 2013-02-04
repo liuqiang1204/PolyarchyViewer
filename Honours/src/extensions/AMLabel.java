@@ -178,9 +178,11 @@ public class AMLabel extends JLabel {
 	 * Normal/expand selected/- checked/unchecked Rewrite by Qiang
 	 */
 	// status controller --Qiang
+	public boolean is_showDetail = false;
 	public boolean is_selected = false;
 	public boolean is_checked = false;
 	public boolean is_expanded = false;
+	public boolean is_searchingResult = false;
 	public AMLabel owner;
 	public double min_limit = 0;
 	public double max_limit = 9999999;
@@ -404,8 +406,8 @@ public class AMLabel extends JLabel {
 			return;
 		}
 
-		// update tooltip --Qiang
-		this.updateTooltip();	
+		// update tooltip & text --Qiang
+		this.updateTooltipAndText();	
 
 		super.paintComponent(g);
 
@@ -416,7 +418,10 @@ public class AMLabel extends JLabel {
 		// this is a bug / oversight that the grid keeps changing the size
 		// so we must overwrite this
 		if (is_image) {
-			setSize(new Dimension(13, 13));
+			setSize(new Dimension(12, 12));
+//			int x = this.getLocation().x;
+//			int y = this.getLocation().y;
+//			this.setLocation(new Point(x,y+5));
 			// the new image
 			ImageIcon image = null;
 			// Determine the image on its status
@@ -537,13 +542,16 @@ public class AMLabel extends JLabel {
 
 		} else {
 
-			// if clicked set the background to darker
-			// if not clicked set the background to transparent
-			if (is_checked)
+			// set label color by different status
+			if (is_checked){
 				setBackground(GlobalConstants.bar_checkedColor);
-			else
+			}
+			else if(is_searchingResult){
+				setBackground(GlobalConstants.bar_searchingResultColor);
+			}
+			else{
 				setBackground(new Color(0,true));
-			
+			}
 
 			// always opaque
 			setOpaque(true);
@@ -553,39 +561,6 @@ public class AMLabel extends JLabel {
 
 			if(active)font=selectableFonts.getMediumFontClick();
 			else font=selectableFonts.getMediumFont();
-//			// The font depends on the level that the label is on
-//			switch (getLevel()) {
-//			case 1:
-//				font = selectableFonts.getMediumFont();
-//				break;
-//			case 2:
-//				font = selectableFonts.getSmallFont();
-//				break;
-//			case 3:
-//				font = selectableFonts.getSmallestFont();
-//				break;
-//			default:
-//				font = selectableFonts.getSmallFont();
-//				break;
-//			}
-//			if (active) {
-//				// The font depends on the level that the label is on and
-//				// set the font
-//				switch (getLevel()) {
-//				case 1:
-//					font = selectableFonts.getMediumFontClick();
-//					break;
-//				case 2:
-//					font = selectableFonts.getSmallFontClick();
-//					break;
-//				case 3:
-//					font = selectableFonts.getSmallestFontClick();
-//					break;
-//				default:
-//					font = selectableFonts.getSmallFontClick();
-//					break;
-//				}
-//			}
 
 			// set the font for the label
 			setFont(font);
@@ -596,27 +571,6 @@ public class AMLabel extends JLabel {
 			} else {
 				setForeground(selectableColours.getNormalColor());
 			}
-
-//			// we want a transparent background
-//			if (is_checked)
-//				setBackground(new Color(224, 238, 224));
-//			else
-//				setBackground(new Color(0, true));
-
-//			if (this.has_bar) {
-//				// get metrics from the graphics
-//				FontMetrics metrics = g.getFontMetrics(getFont());
-//
-//				// find the width of the text
-//				int adv = metrics.stringWidth(getText());
-//				int pw = this.getIts_bar().bar_width;
-//				if(adv>pw)pw=adv;				
-//				this.setSize(pw, metrics.getHeight());
-//				if (is_checked)
-//					setBackground(GlobalConstants.bar_checkedColor);
-//				else
-//					setBackground(GlobalConstants.bar_backColor);
-//			}
 
 		}
 
@@ -1252,13 +1206,14 @@ public class AMLabel extends JLabel {
 	 * 
 	 * @author Qiang Liu
 	 */
-	public void updateTooltip() {
+	public void updateTooltipAndText() {
 		DecimalFormat df = new DecimalFormat("#.###");
 		DecimalFormat df1 = new DecimalFormat("#.##");
 		if (this.has_bar) {
 			double sub = this.getIts_bar().getSub_count();
 			double total = this.getIts_bar().getCount();
 			double per = sub * 100 / total;
+			if(total==0.0)per=0.00;
 			String s = df.format(sub) + " / " + df.format(total) + "   ("
 					+ df1.format(per) + "%)";
 			this.setToolTipText(s);
@@ -1266,7 +1221,8 @@ public class AMLabel extends JLabel {
 			if (this.has_image)
 				this.getIts_image().setToolTipText(s);
 			
-			this.setText(this.originalText+ " -- " + s);
+			if(this.is_showDetail) this.setText(this.originalText+ " -- " + s);
+			else this.setText(originalText);
 		}		
 	}
 }

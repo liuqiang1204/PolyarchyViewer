@@ -19,7 +19,7 @@ public class Proportion_Panel extends JPanel {
 	
 	public Proportion_Panel(){
 		super(true);
-		this.setPreferredSize(new Dimension(50,50));
+		this.setPreferredSize(new Dimension(20,50));
 		this.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.gray));
 //		this.setBackground(Color.WHITE);
 	}
@@ -44,7 +44,7 @@ public class Proportion_Panel extends JPanel {
 		}
 		
 		int thickness = 9;
-		g.setColor(GlobalConstants.bar_foreColor);
+		g.setColor(GlobalConstants.proporion_barColor);
 //		System.out.println("PPP:"+valuelist.size());
 		for(int i=0;i<this.valuelist.size();i++){
 			double value = valuelist.get(i);

@@ -40,6 +40,13 @@ public class Controller_Images extends Abstract_Image {
 
 	private static ImageIcon btn_delete = new ImageIcon(folder+"delete_icon.png");
 	
+	/**
+	 * images for buttons
+	 * @author Qiang Liu
+	 */
+	public static ImageIcon btn_search = new ImageIcon(folder+"search.png");
+	public static ImageIcon btn_clearSearch = new ImageIcon(folder+"ClearSearch.png");
+	public static ImageIcon btn_clearTable = new ImageIcon(folder+"ClearTable.png");
 	/*GETTERS*/
 	
 	public static ImageIcon getBtnDelete() {

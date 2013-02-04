@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
 //import javax.swing.JLabel;
@@ -32,6 +31,7 @@ import javax.swing.SwingUtilities;
 import utilities.Custom_Messages;
 import connector.Java_Connector;
 import extensions.AMLabel;
+import extensions.AMPanel;
 import extensions.Frame_Info;
 import extensions.Hierarchy;
 import extensions.QueryView;
@@ -280,13 +280,17 @@ public class Controller {
 		/**
 		 * Add some new listeners
 		 */
-		Hierarchy_Mouse_Listener hml=new Hierarchy_Mouse_Listener();
+		
 		for (Hierarchy h : m_view.hierarchies) {
 			h.isWeighted.addActionListener(new cbx_isWeighted_Listener(h));
-			h.getClear().addActionListener(new Btn_clear_Listener(h));
-//			h.addMouseListener(hml);
-			h.pane_proportion.addMouseListener(hml);
-
+			h.btn_search.addActionListener(new Btn_search_Listener(h));
+			h.btn_clearSearch.addActionListener(new Btn_clearSearch_Listener(h));
+			h.btn_clearTable.addActionListener(new Btn_clear_Listener(h));
+			Hierarchy_Mouse_Listener hml = new Hierarchy_Mouse_Listener(h);
+			h.getInnerhierarchy().addMouseListener(hml);
+			//Set default value for the Hierarchy UI
+			h.getHierarchy().setDividerSize(3);
+			h.getHierarchy().setDividerLocation(0.9);
 		}
 
 		this.m_view.cbx_showInfo.addActionListener(new ActionListener() {
@@ -347,6 +351,67 @@ public class Controller {
 		public void actionPerformed(ActionEvent e) {
 			Hierarchy.btn_clear_clicked(btn_owner);
 			perform_connection();
+		}
+
+	}
+	
+	public class Btn_search_Listener implements ActionListener {
+
+		Hierarchy btn_owner;
+
+		public Btn_search_Listener(Hierarchy h) {
+			super();
+			btn_owner = h;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			String keyword = btn_owner.txt_search.getText();
+			if(keyword.equals(""))return;
+			
+			HashMap<String, Integer> map = btn_owner.getMap();
+			AMPanel panel = btn_owner.getInnerhierarchy();
+			for(Integer i : map.values()){
+				AMLabel lbl = (AMLabel) panel.getComponent(i);
+				if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
+					lbl.is_searchingResult=true;
+					AMLabel p = lbl;
+					while(!p.isVisible()){						
+						p = (AMLabel) panel.getComponent(map.get(p.getParent_id()));
+						AMLabelInteractions(5,p);						
+					}
+				}
+				else lbl.is_searchingResult=false;				
+			}
+			//repaint: do not use repaint() to avoid bugs
+			panel.setVisible(false);
+			panel.setVisible(true);
+		}
+
+	}
+	
+	public class Btn_clearSearch_Listener implements ActionListener {
+
+		Hierarchy btn_owner;
+
+		public Btn_clearSearch_Listener(Hierarchy h) {
+			super();
+			btn_owner = h;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			HashMap<String, Integer> map = btn_owner.getMap();
+			AMPanel panel = btn_owner.getInnerhierarchy();
+			for(Integer s : map.values()){
+				AMLabel lbl = (AMLabel) panel.getComponent(s);
+				lbl.is_searchingResult=false;				
+			}
+			btn_owner.txt_search.setText("");
+			//repaint: do not use repaint() to avoid bugs
+			panel.setVisible(false);
+			panel.setVisible(true);
 		}
 
 	}
@@ -441,7 +506,7 @@ public class Controller {
 		/* LISTENERS REQUIRED */
 
 		// For the clear buttons
-		Clear_Button_Action clear_button = new Clear_Button_Action();
+//		Clear_Button_Action clear_button = new Clear_Button_Action();
 
 		// When a key is press in a search box
 		KeyPress_Action keypress = new KeyPress_Action();
@@ -453,7 +518,7 @@ public class Controller {
 		Scroll_adjust_listener listener = new Scroll_adjust_listener();
 
 		// VIEW LISTENERS
-		m_view.add_listeners(combo_box, listener, clear_button, keypress);
+		m_view.add_listeners(combo_box, listener, keypress);
 	}
 
 	/*
@@ -1387,7 +1452,6 @@ public class Controller {
 		// status: 1. mouse pressed 2.mouse released
 		// 3. enter 4. exit 5 left clicked 6right clicked
 		// 7. double clicked
-		
 		//Control img to be not selected
 		boolean isIMG = lbl.isIs_image();
 
@@ -1395,8 +1459,6 @@ public class Controller {
 		if (lbl.isIs_image() || lbl.isIs_bar())
 			lbl = lbl.owner;
 		
-		
-
 		String id = lbl.getUniqueID();
 		Hierarchy hierarchy = m_view.findHierarchy(id);
 
@@ -1409,6 +1471,7 @@ public class Controller {
 		case 2: // release
 			break;
 		case 3: // enter
+			hierarchy.SetDetailedLabel(true);
 			if(!isIMG){
 				hierarchy.addSearchingItem(lbl, 3);
 				lbl.change_text(true);
@@ -1416,6 +1479,7 @@ public class Controller {
 			}
 			break;
 		case 4: // exit
+			hierarchy.SetDetailedLabel(false);
 			if(!isIMG){
 				hierarchy.removeTempSearchingItem(lbl);
 				perform_connection();
@@ -1429,6 +1493,9 @@ public class Controller {
 				lbl.is_expanded = true;
 			}
 			expand_collapse_label(hierarchy, lbl);
+			
+			hierarchy.pane_proportion.clearAll();
+			this.update_proportion(hierarchy);
 			break;
 		case 6: // right clicked
 			int ls = 3;
@@ -1836,25 +1903,25 @@ public class Controller {
 	}
 
 
-	/**
-	 * The clear button action listener Perform the correct clear action when a
-	 * button is pressed Only clear the panel corresponding to the button
-	 * 
-	 * @author Anthony Scata
-	 * @version 2.0
-	 * 
-	 */
-	public class Clear_Button_Action implements ActionListener {
-
-		/**
-		 * Perform the action when the button is clicked
-		 */
-		public void actionPerformed(ActionEvent ae) {
-
-			// go and clear all of the panels
-			m_view.clear_button_event((JButton) ae.getSource());
-		}
-	}
+//	/**
+//	 * The clear button action listener Perform the correct clear action when a
+//	 * button is pressed Only clear the panel corresponding to the button
+//	 * 
+//	 * @author Anthony Scata
+//	 * @version 2.0
+//	 * 
+//	 */
+//	public class Clear_Button_Action implements ActionListener {
+//
+//		/**
+//		 * Perform the action when the button is clicked
+//		 */
+//		public void actionPerformed(ActionEvent ae) {
+//
+//			// go and clear all of the panels
+//			m_view.clear_button_event((JButton) ae.getSource());
+//		}
+//	}
 
 	/**
 	 * Listen to the keyboard and if a button is pressed then perform an action
@@ -2114,6 +2181,13 @@ public class Controller {
 	}
 	
 	class Hierarchy_Mouse_Listener extends MouseAdapter {
+		
+		Hierarchy h;
+		
+		public Hierarchy_Mouse_Listener(Hierarchy hir){
+			h=hir;
+		}
+		
 		public void mousePressed(MouseEvent e) {
 		}
 
@@ -2122,16 +2196,11 @@ public class Controller {
 		}
 
 		public void mouseEntered(MouseEvent e) {
-//			Hierarchy h = (Hierarchy) e.getComponent();
-//			System.out.println("Enter h:"+h.getId());
-//			Proportion_Panel p = (Proportion_Panel) e.getComponent();
-//			
-//			System.out.println("Enter :"+p);
+			h.SetDetailedLabel(true);
 		}
 
 		public void mouseExited(MouseEvent e) {
-//			Hierarchy h = (Hierarchy) e.getComponent();
-//			System.out.println("Exit h:"+h.getId());
+			h.SetDetailedLabel(false);
 		}
 
 		public void mouseClicked(MouseEvent e) {
@@ -2147,8 +2216,8 @@ public class Controller {
 			AMLabel lbl = (AMLabel) panel.getComponent(s);
 			double v = lbl.getIts_bar().getSub_count()/lbl.getIts_bar().getCount();
 			int y = lbl.getLocation().y;
+//			System.out.println("TTT:"+lbl.originalText+" :: "+lbl.isVisible()+" v:"+v+ " y:"+y);
 			if(lbl.isVisible())h.pane_proportion.addPair(v, y);
-
 		}
 		h.pane_proportion.repaint();
 	}
