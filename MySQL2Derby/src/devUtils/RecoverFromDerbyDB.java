@@ -1,3 +1,4 @@
+package devUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -5,14 +6,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 
-public class HTMLRemove {
+public class RecoverFromDerbyDB {
 	String MySQLDriver = "com.mysql.jdbc.Driver";
 	String DerbyDriver = "org.apache.derby.jdbc.EmbeddedDriver";
 	Connection mysqlConn;
 	Connection derbyConn;
 	String mysqlUrl = "jdbc:mysql://localhost:3306/imdb?user=root&password=admin";
 	String derbyUrl = "jdbc:derby:database/imdb;user=root;password=admin";
-	public HTMLRemove(){
+	public RecoverFromDerbyDB(){
 		try {
 			Class.forName(MySQLDriver).newInstance();
 			Class.forName(DerbyDriver).newInstance();
@@ -63,14 +64,12 @@ public class HTMLRemove {
 //		}
 
 		//recover data...
-		HTMLRemove h = new HTMLRemove();
-		Statement ms = h.mysqlConn.createStatement();
+		RecoverFromDerbyDB h = new RecoverFromDerbyDB();
 		Statement ds = h.derbyConn.createStatement();
 		String sql = "SELECT idhierarchy, Label FROM actors_hierarchy";
 		ResultSet rs = ds.executeQuery(sql);
 		while(rs.next()){
 			sql = "update actors_hierarchy set Label = '"+ rs.getString(2)+"' where idhierarchy = "+rs.getString(1)+";";
-//			System.out.println(rs.getString(1)+"\t"+rs.getString(2));
 			System.out.println(sql);
 		}
 		

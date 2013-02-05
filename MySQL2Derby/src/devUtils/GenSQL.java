@@ -1,3 +1,4 @@
+package devUtils;
 
 public class GenSQL {
 

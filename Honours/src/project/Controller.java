@@ -945,7 +945,7 @@ public class Controller {
 		// go and set the largest variables
 		hierachy.setLargest_top(largest_top);
 
-		System.out.println(index + " - largest : " + largest_top);
+//		System.out.println(index + " - largest : " + largest_top);
 
 	}
 
@@ -986,7 +986,6 @@ public class Controller {
 			try {
 				while(rs.next())ids.add(rs.getInt(1));
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1787,8 +1786,8 @@ public class Controller {
 		ArrayList<String> lst = new ArrayList<String>();
 		ArrayList<HashSet<Integer>> rowids = new ArrayList<HashSet<Integer>>();
 		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
-			System.out.println(item.getKey().getText() + " : "
-					+ item.getValue());
+//			System.out.println(item.getKey().getText() + " : "
+//					+ item.getValue());
 			if (item.getValue() != 0) {
 				AMLabel lbl = item.getKey();
 				String str = alpha_code(lbl, h.getId());
