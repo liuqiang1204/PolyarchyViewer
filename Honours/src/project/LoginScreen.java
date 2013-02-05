@@ -86,7 +86,7 @@ public class LoginScreen extends javax.swing.JDialog {
     dbList.addActionListener(lSymAction);
     //}}
     
-    frame.setVisible(true);
+    
     
     
     /**
@@ -96,6 +96,7 @@ public class LoginScreen extends javax.swing.JDialog {
     frame.setResizable(false);
     frame.setLocationRelativeTo(null);
     
+    frame.setVisible(true);
     
     
     _ok.setBounds(40, 100, 100, 24);

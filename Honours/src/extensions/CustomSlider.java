@@ -211,7 +211,6 @@ public class CustomSlider extends JPanel{
 			if(owner.isMinPressed||owner.isMaxPressed){
 				owner.isMinPressed=false;		
 				owner.isMaxPressed=false;
-				owner.repaint();
 				double t_min = owner.getScaleMin();
 				double t_max = owner.getScaleMax();
 				owner.owner_hierarchy.setScaleRange(t_min, t_max);
@@ -228,6 +227,10 @@ public class CustomSlider extends JPanel{
 				if(x<owner.xpos_start)x=owner.xpos_start;
 				owner.c_min = (x-owner.xpos_start)*100/owner.line_length;
 				owner.repaint();
+				
+				double t_min = owner.getScaleMin();
+				double t_max = owner.getScaleMax();
+				owner.owner_hierarchy.setScaleRange(t_min, t_max);
 			}		
 			if(owner.isMaxPressed){
 				int x = me.getX();
@@ -235,6 +238,10 @@ public class CustomSlider extends JPanel{
 				if(x>owner.xpos_end)x=owner.xpos_end;
 				owner.c_max = (x-owner.xpos_start)*100/owner.line_length;
 				owner.repaint();
+				
+				double t_min = owner.getScaleMin();
+				double t_max = owner.getScaleMax();
+				owner.owner_hierarchy.setScaleRange(t_min, t_max);
 			}
 			
 		}
