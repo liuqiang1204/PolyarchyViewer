@@ -1,7 +1,5 @@
 package extensions;
 
-import images.Controller_Images;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -227,14 +225,14 @@ public class Hierarchy extends JPanel {
 	public AMLabel max_bar;
 
 	// new search input text field and button
-	public JTextField txt_search = new JTextField(10);
-	public JButton btn_search = new JButton(Controller_Images.btn_search);// new
-																			// JButton("Search");
-	public JButton btn_clearSearch = new JButton(
-			Controller_Images.btn_clearSearch);// new JButton("Clear Results");
-	public JButton btn_clearTable = new JButton(
-			Controller_Images.btn_clearTable);
-
+	public JTextField txt_search = new JTextField(9);
+//	public JButton btn_search = new JButton(Controller_Images.btn_search);
+//	public JButton btn_clearSearch = new JButton(
+//			Controller_Images.btn_clearSearch);// new JButton("Clear Results");
+//	public JButton btn_clearTable = new JButton(
+//			Controller_Images.btn_clearTable);
+	public JButton btn_clearTable = new JButton("Clear Selection");
+	
 	// Proportion panel
 	public Proportion_Panel pane_proportion = new Proportion_Panel();
 
@@ -792,9 +790,9 @@ public class Hierarchy extends JPanel {
 		// clear = new JButton("Clear Selection");
 		isWeighted.setSelected(false);
 		isWeighted.setToolTipText("Set weighted/non-weighted values");
-		btn_search.setToolTipText("Search by keyword.");
-		btn_clearSearch
-				.setToolTipText("Remove highlights for the searching results.");
+//		btn_search.setToolTipText("Search by keyword.");
+//		btn_clearSearch
+//				.setToolTipText("Remove highlights for the searching results.");
 		btn_clearTable.setToolTipText("Remove all selected entries.");
 
 		JToolBar innerTools = new JToolBar();
@@ -806,8 +804,8 @@ public class Hierarchy extends JPanel {
 		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
 		innerTools.addSeparator(new Dimension(5, 20));
 		innerTools.add(txt_search);
-		innerTools.add(btn_search);
-		innerTools.add(btn_clearSearch);
+//		innerTools.add(btn_search);
+//		innerTools.add(btn_clearSearch);
 		innerTools.addSeparator(new Dimension(5, 20));
 		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
 

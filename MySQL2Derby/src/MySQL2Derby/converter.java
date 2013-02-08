@@ -52,6 +52,7 @@ public class converter {
 		System.out.println("3 - " + this.mysqlUrl.replaceAll("honours", "movie_small"));
 		System.out.println("4 - " + this.mysqlUrl.replaceAll("honours", "publication_small"));
 		System.out.println("5 - " + this.mysqlUrl.replaceAll("honours", "IMDB"));
+		System.out.println("6 - " + this.mysqlUrl.replaceAll("honours", "CarDB"));
 		
 		String is = br.readLine().trim();
 		if(is.equals("2")){
@@ -69,6 +70,10 @@ public class converter {
 		else if(is.equals("5")){
 			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "IMDB");
 			this.derbyUrl = this.derbyUrl.replaceAll("honours", "IMDB");
+		}
+		else if(is.equals("6")){
+			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "CarDB");
+			this.derbyUrl = this.derbyUrl.replaceAll("honours", "CarDB");
 		}
 		else if(is.equals("1")||is.equals("")){
 			
@@ -99,6 +104,7 @@ public class converter {
 		t = t.replaceAll(" text ", " Varchar(3000) ");
 		t = t.replaceAll(" text,", " Varchar(3000),");
 		t = t.replaceAll("TABLE connection ","TABLE d_connection");
+		t = t.replaceAll(" tinyint[(]1[)]", " Integer");
 		
 //index???here remove it
 //		if(t.contains(",\n  KEY")){

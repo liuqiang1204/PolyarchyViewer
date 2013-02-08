@@ -253,8 +253,8 @@ public class View extends JFrame {
 
 		// The tool bar --qiang
 		topPanel = new JToolBar();
-		topPanel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
-		cbx_showInfo = new JCheckBox("Show information of intersections");
+		topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		cbx_showInfo = new JCheckBox("Show element details");
 		cbx_showInfo.setSelected(false);
 
 		// init color items

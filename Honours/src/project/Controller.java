@@ -27,6 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import utilities.Custom_Messages;
 import connector.Java_Connector;
@@ -283,8 +285,9 @@ public class Controller {
 		
 		for (Hierarchy h : m_view.hierarchies) {
 			h.isWeighted.addActionListener(new cbx_isWeighted_Listener(h));
-			h.btn_search.addActionListener(new Btn_search_Listener(h));
-			h.btn_clearSearch.addActionListener(new Btn_clearSearch_Listener(h));
+//			h.btn_search.addActionListener(new Btn_search_Listener(h));
+//			h.btn_clearSearch.addActionListener(new Btn_clearSearch_Listener(h));
+			h.txt_search.getDocument().addDocumentListener(new Txt_search_Listener(h));
 			h.btn_clearTable.addActionListener(new Btn_clear_Listener(h));
 			Hierarchy_Mouse_Listener hml = new Hierarchy_Mouse_Listener(h);
 			h.getInnerhierarchy().addMouseListener(hml);
@@ -355,66 +358,124 @@ public class Controller {
 
 	}
 	
-	public class Btn_search_Listener implements ActionListener {
+	public class Txt_search_Listener implements DocumentListener {
 
-		Hierarchy btn_owner;
-
-		public Btn_search_Listener(Hierarchy h) {
+		Hierarchy owner;
+		public Txt_search_Listener(Hierarchy h){
 			super();
-			btn_owner = h;
+			owner = h;
+//			System.out.println("CCC");
+		}
+		@Override
+		public void changedUpdate(DocumentEvent arg0) {
 		}
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void insertUpdate(DocumentEvent arg0) {
+			// TODO Auto-generated method stub
+			searching();
+		}
+
+		@Override
+		public void removeUpdate(DocumentEvent arg0) {
+			// TODO Auto-generated method stub
+			searching();
+		}
+		
+		public void searching(){
 			
-			String keyword = btn_owner.txt_search.getText();
-			if(keyword.equals(""))return;
+			String keyword = owner.txt_search.getText();
+			HashMap<String, Integer> map = owner.getMap();
+			AMPanel panel = owner.getInnerhierarchy();
+		
+//			System.out.println(keyword);
 			
-			HashMap<String, Integer> map = btn_owner.getMap();
-			AMPanel panel = btn_owner.getInnerhierarchy();
-			for(Integer i : map.values()){
-				AMLabel lbl = (AMLabel) panel.getComponent(i);
-				if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
-					lbl.is_searchingResult=true;
-					AMLabel p = lbl;
-					while(!p.isVisible()){						
-						p = (AMLabel) panel.getComponent(map.get(p.getParent_id()));
-						AMLabelInteractions(5,p);						
-					}
+			if(keyword.equals("")){
+				for(Integer s : map.values()){
+					AMLabel lbl = (AMLabel) panel.getComponent(s);
+					lbl.is_searchingResult=false;				
 				}
-				else lbl.is_searchingResult=false;				
+			}
+			else
+			{			
+				for(Integer i : map.values()){
+					AMLabel lbl = (AMLabel) panel.getComponent(i);
+					if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
+						lbl.is_searchingResult=true;
+						AMLabel p = lbl;
+						while(!p.isVisible()){						
+							p = (AMLabel) panel.getComponent(map.get(p.getParent_id()));
+							AMLabelInteractions(5,p);						
+						}
+					}
+					else lbl.is_searchingResult=false;				
+				}
 			}
 			//repaint: do not use repaint() to avoid bugs
 			panel.setVisible(false);
 			panel.setVisible(true);
 		}
-
 	}
-	
-	public class Btn_clearSearch_Listener implements ActionListener {
-
-		Hierarchy btn_owner;
-
-		public Btn_clearSearch_Listener(Hierarchy h) {
-			super();
-			btn_owner = h;
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			HashMap<String, Integer> map = btn_owner.getMap();
-			AMPanel panel = btn_owner.getInnerhierarchy();
-			for(Integer s : map.values()){
-				AMLabel lbl = (AMLabel) panel.getComponent(s);
-				lbl.is_searchingResult=false;				
-			}
-			btn_owner.txt_search.setText("");
-			//repaint: do not use repaint() to avoid bugs
-			panel.setVisible(false);
-			panel.setVisible(true);
-		}
-
-	}
+//	public class Btn_search_Listener implements ActionListener {
+//
+//		Hierarchy btn_owner;
+//
+//		public Btn_search_Listener(Hierarchy h) {
+//			super();
+//			btn_owner = h;
+//		}
+//
+//		@Override
+//		public void actionPerformed(ActionEvent e) {
+//			
+//			String keyword = btn_owner.txt_search.getText();
+//			if(keyword.equals(""))return;
+//			
+//			HashMap<String, Integer> map = btn_owner.getMap();
+//			AMPanel panel = btn_owner.getInnerhierarchy();
+//			for(Integer i : map.values()){
+//				AMLabel lbl = (AMLabel) panel.getComponent(i);
+//				if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
+//					lbl.is_searchingResult=true;
+//					AMLabel p = lbl;
+//					while(!p.isVisible()){						
+//						p = (AMLabel) panel.getComponent(map.get(p.getParent_id()));
+//						AMLabelInteractions(5,p);						
+//					}
+//				}
+//				else lbl.is_searchingResult=false;				
+//			}
+//			//repaint: do not use repaint() to avoid bugs
+//			panel.setVisible(false);
+//			panel.setVisible(true);
+//		}
+//
+//	}
+//	
+//	public class Btn_clearSearch_Listener implements ActionListener {
+//
+//		Hierarchy btn_owner;
+//
+//		public Btn_clearSearch_Listener(Hierarchy h) {
+//			super();
+//			btn_owner = h;
+//		}
+//
+//		@Override
+//		public void actionPerformed(ActionEvent e) {
+//			HashMap<String, Integer> map = btn_owner.getMap();
+//			AMPanel panel = btn_owner.getInnerhierarchy();
+//			for(Integer s : map.values()){
+//				AMLabel lbl = (AMLabel) panel.getComponent(s);
+//				lbl.is_searchingResult=false;				
+//			}
+//			btn_owner.txt_search.setText("");
+//			//repaint: do not use repaint() to avoid bugs
+//			panel.setVisible(false);
+//			panel.setVisible(true);
+//		}
+//
+//	}
 
 	/* ADDING CONTENTS */
 
@@ -921,6 +982,13 @@ public class Controller {
 						rs1.close();
 						if(end_ids.length()>0){
 							end_ids = end_ids.substring(0, end_ids.length() - 1);
+//							for(String s:this.tableName){
+//								System.out.println(s);
+//							}
+//							for(String s:this.linkTableName){
+//								System.out.println(s);
+//							}
+							
 							sql = "select count(distinct " + column + ") from "
 									+ linkTableName[index] + " where "
 									+ columnName[index] + " in (" + end_ids + ")";
