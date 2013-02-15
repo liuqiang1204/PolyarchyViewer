@@ -9,6 +9,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.text.DecimalFormat;
+import java.util.HashSet;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -182,15 +184,15 @@ public class AMLabel extends JLabel {
 	public boolean is_selected = false;
 	public boolean is_checked = false;
 	public boolean is_expanded = false;
-	public boolean is_searchingResult = false;
+	public boolean is_searchingResult = true;
 	public AMLabel owner;
 	public double min_limit = 0;
 	public double max_limit = 9999999;
 	
 	public String originalText;
 
-	// public ArrayList<AMLabel> parents = new ArrayList<AMLabel>();
-	// public ArrayList<AMLabel> children = new ArrayList<AMLabel>();
+	public AMLabel parent = null;
+	public HashSet<AMLabel> children = new HashSet<AMLabel>();
 
 	// public boolean is_checkboxShowed = false;
 
@@ -478,10 +480,12 @@ public class AMLabel extends JLabel {
 				// set the colour for the bar
 				// g2.setColor(selectableColours.getWholeBar());
 				if (this.is_checked)
-					g2.setColor(GlobalConstants.bar_checkedColor);
-				else
+					g2.setColor(GlobalConstants.bar_checkedColor);				
+				else if(this.is_searchingResult)
 					g2.setColor(GlobalConstants.bar_backColor);
-
+				else
+					g2.setColor(GlobalConstants.bar_backColor_nonResult);
+				
 				// a bar of the correct width and height
 				g2.fillRect(0, 0, bw, bar_height-1);
 				
@@ -542,35 +546,46 @@ public class AMLabel extends JLabel {
 
 		} else {
 
-			// set label color by different status
-			if (is_checked){
-				setBackground(GlobalConstants.bar_checkedColor);
-			}
-			else if(is_searchingResult){
-				setBackground(GlobalConstants.bar_searchingResultColor);
-			}
-			else{
-				setBackground(new Color(0,true));
-			}
-
 			// always opaque
 			setOpaque(true);
 
 			// The font to be used
 			Font font = null;
 
+			
+			//active, use bold font
 			if(active)font=selectableFonts.getMediumFontClick();
 			else font=selectableFonts.getMediumFont();
+			
+			//is search result or not
+			if(is_searchingResult){
+				this.setForeground(GlobalConstants.font_resultColor);
+			}
+			else
+			{
+				this.setForeground(GlobalConstants.font_nonResultColor);
+			}
+			
+			
+			// set label color by different status			
+			if (is_checked){
+				setBackground(GlobalConstants.bar_checkedColor);
+			}
+			else{
+				setBackground(new Color(0,true));
+			}			
+
+			
 
 			// set the font for the label
 			setFont(font);
 
-			// If it has been counted set the colour
-			if (isCounted()) {
-				setForeground(selectableColours.getOtherColor());
-			} else {
-				setForeground(selectableColours.getNormalColor());
-			}
+//			// If it has been counted set the colour -- not used now --Qiang
+//			if (isCounted()) {
+//				setForeground(selectableColours.getOtherColor());
+//			} else {
+//				setForeground(selectableColours.getNormalColor());
+//			}
 
 		}
 

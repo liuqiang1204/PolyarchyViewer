@@ -79,8 +79,8 @@ public class CustomSlider extends JPanel{
 		
 		//draw line at center
 		
-		xpos_start = 20 + owner_hierarchy.pane_proportion.getWidth();
-		line_length=this.owner_hierarchy.getHierarchyScroll().getWidth() - xpos_start-18;
+		xpos_start = 20 + owner_hierarchy.pane_proportion.getWidth() - 25;
+		line_length=this.owner_hierarchy.getHierarchyScroll().getWidth() - xpos_start-18 - 25;
 		xpos_end = line_length+xpos_start;		
 		line1_ypos = (int) (this.getHeight()*0.5)-5;
 		line2_ypos = line1_ypos+distance;

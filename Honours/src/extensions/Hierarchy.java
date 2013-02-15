@@ -1,5 +1,7 @@
 package extensions;
 
+import images.Controller_Images;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -232,6 +234,9 @@ public class Hierarchy extends JPanel {
 //	public JButton btn_clearTable = new JButton(
 //			Controller_Images.btn_clearTable);
 	public JButton btn_clearTable = new JButton("Clear Selection");
+	public JButton btn_collapseAll = new JButton(Controller_Images.btn_collapseAll);
+	
+	
 	
 	// Proportion panel
 	public Proportion_Panel pane_proportion = new Proportion_Panel();
@@ -311,6 +316,11 @@ public class Hierarchy extends JPanel {
 		// add a custom slider bar to control the scale
 		this.m_slider = new CustomSlider(0, this.largest_top, this);
 		panel_heading.add(m_slider, BorderLayout.CENTER);
+		
+		JToolBar ctl = new JToolBar();
+		ctl.add(btn_collapseAll);
+		ctl.setFloatable(false);		
+		panel_heading.add(ctl,BorderLayout.WEST);
 
 		this.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {

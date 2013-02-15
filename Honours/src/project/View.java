@@ -21,6 +21,7 @@ import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
@@ -115,7 +116,8 @@ public class View extends JFrame {
 	public ArrayList<Hierarchy> hierarchies = new ArrayList<Hierarchy>();
 	public ArrayList<Integer> zorders = new ArrayList<Integer>();
 	public JToolBar topPanel;
-	public JCheckBox cbx_showInfo;
+	public JButton btn_showInfo;
+	public boolean is_showInfo;
 	public JLabel lbl_foreColor;
 	public JLabel lbl_backColor;
 	public JLabel lbl_proportionBarColor;
@@ -254,8 +256,8 @@ public class View extends JFrame {
 		// The tool bar --qiang
 		topPanel = new JToolBar();
 		topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		cbx_showInfo = new JCheckBox("Show element details");
-		cbx_showInfo.setSelected(false);
+		btn_showInfo = new JButton("Show element details");
+		is_showInfo = false;
 
 		// init color items
 		lbl_foreColor = new JLabel("          ");		
@@ -279,7 +281,7 @@ public class View extends JFrame {
 		lbl_proportionBarColor.setBackground(GlobalConstants.proporion_barColor);		
 		lbl_proportionBarColor.addMouseListener(new ColorMouseListener());
 		
-		topPanel.add(this.cbx_showInfo);
+		topPanel.add(this.btn_showInfo);
 		topPanel.addSeparator(new Dimension(10, 20));
 		topPanel.add(new JLabel(" Bar forecolor:"));
 		topPanel.add(lbl_foreColor);

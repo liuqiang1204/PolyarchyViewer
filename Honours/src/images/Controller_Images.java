@@ -47,6 +47,7 @@ public class Controller_Images extends Abstract_Image {
 	public static ImageIcon btn_search = new ImageIcon(folder+"search.png");
 	public static ImageIcon btn_clearSearch = new ImageIcon(folder+"ClearSearch.png");
 	public static ImageIcon btn_clearTable = new ImageIcon(folder+"ClearTable.png");
+	public static ImageIcon btn_collapseAll = new ImageIcon(folder+"icon_collapse_all.png");
 	/*GETTERS*/
 	
 	public static ImageIcon getBtnDelete() {

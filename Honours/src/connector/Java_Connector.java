@@ -246,7 +246,9 @@ public class Java_Connector {
 	 */
 	public ResultSet getTopLevel(String tableName) {
 
-		String query = "select * from " + tableName + " where ParentID=0 order by label";
+		String query = "select * from " + tableName + " where ParentID=0";
+		if(!tableName.equalsIgnoreCase("weight_hierarchy"))
+			query+=" order by label ";
 		return getMyQuery(query);
 	}
 
@@ -260,8 +262,11 @@ public class Java_Connector {
 	public ResultSet getMiddleLevel(String tableName, String parent) {
 
 		String query = "select * from " + tableName + " where "
-				+ " parentid = " + parent + " order by Label";
+				+ " parentid = " + parent;
 
+		if(!tableName.equalsIgnoreCase("weight_hierarchy"))
+			query+=" order by label ";
+		
 		return getMyQuery(query);
 	}
 

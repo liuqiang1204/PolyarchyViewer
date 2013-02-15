@@ -11,18 +11,17 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map.Entry;
 
 import javax.swing.JComboBox;
-import javax.swing.JCheckBox;
-//import javax.swing.JLabel;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
@@ -228,7 +227,7 @@ public class Controller {
 			// fetch the name of the column based on the linking table selected
 			// eg. for movies, column will be movieId, people -> peopleId
 			query1 = "select * from atom where t_name = '"
-					+ count_type.toLowerCase() + "'";
+					+ count_type + "'";
 			rs = m_model.getMyQuery(query1);
 			rs.next();
 			column = rs.getString(3);
@@ -289,6 +288,7 @@ public class Controller {
 //			h.btn_clearSearch.addActionListener(new Btn_clearSearch_Listener(h));
 			h.txt_search.getDocument().addDocumentListener(new Txt_search_Listener(h));
 			h.btn_clearTable.addActionListener(new Btn_clear_Listener(h));
+			h.btn_collapseAll.addActionListener(new btn_collapseAll_Listener(h));
 			Hierarchy_Mouse_Listener hml = new Hierarchy_Mouse_Listener(h);
 			h.getInnerhierarchy().addMouseListener(hml);
 			//Set default value for the Hierarchy UI
@@ -296,12 +296,68 @@ public class Controller {
 			h.getHierarchy().setDividerLocation(0.9);
 		}
 
-		this.m_view.cbx_showInfo.addActionListener(new ActionListener() {
+		m_info.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		m_info.addWindowListener(new WindowListener(){
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				m_info.setVisible(false);
+				m_view.is_showInfo=false;
+				m_view.btn_showInfo.setText("Show element details");				
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+	
+		});
+		
+		this.m_view.btn_showInfo.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent ae) {
-				JCheckBox cb = (JCheckBox) ae.getSource();
-				m_info.setVisible(cb.isSelected());
+				if(m_view.is_showInfo){
+					m_view.is_showInfo=false;
+					m_view.btn_showInfo.setText("Show element details");
+				}
+				else{
+					m_view.is_showInfo=true;
+					m_view.btn_showInfo.setText("Hide element details");
+				}		
+				m_info.setVisible(m_view.is_showInfo);
+
 			}
 
 		});
@@ -323,9 +379,9 @@ public class Controller {
 		public void actionPerformed(ActionEvent arg0) {
 			Hierarchy h=owner;
 			h.searchingItems.clear();
-			h.refreshSearchingTable();
+			h.refreshSearchingTable();			
 			Alpha_table(m_view.hierarchies.indexOf(h)+1);
-			
+			collapseAll(h);
 			h.m_slider.c_min=0;
 			h.m_slider.c_max=100;
 			h.m_slider.repaint();
@@ -358,13 +414,50 @@ public class Controller {
 
 	}
 	
+	public class btn_collapseAll_Listener implements ActionListener {
+
+		Hierarchy owner;
+		public btn_collapseAll_Listener(Hierarchy h){
+			super();
+			owner = h;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent ae) {
+			if(ae.getSource() == owner.btn_collapseAll){
+				collapseAll(owner);
+			}
+		}
+		
+	}
+	
+	public void collapseAll(Hierarchy h){
+		HashMap<String, Integer> map = h.getMap();
+		AMPanel panel = h.getInnerhierarchy();
+		for(Integer s : map.values()){
+			AMLabel lbl = (AMLabel) panel.getComponent(s);
+			lbl.is_expanded=false;
+			if(lbl.getLevel()==1){
+				lbl.setVisible(true);
+				lbl.getIts_bar().setVisible(true);
+				lbl.getIts_image().setVisible(true);
+			}
+			else {
+				lbl.setVisible(false);
+				lbl.getIts_bar().setVisible(false);
+				lbl.getIts_image().setVisible(false);
+			}
+		}
+		panel.setVisible(false);
+		panel.setVisible(true);
+	}
+	
 	public class Txt_search_Listener implements DocumentListener {
 
 		Hierarchy owner;
 		public Txt_search_Listener(Hierarchy h){
 			super();
 			owner = h;
-//			System.out.println("CCC");
 		}
 		@Override
 		public void changedUpdate(DocumentEvent arg0) {
@@ -372,110 +465,64 @@ public class Controller {
 
 		@Override
 		public void insertUpdate(DocumentEvent arg0) {
-			// TODO Auto-generated method stub
-			searching();
+			searchByKeyword(owner);
 		}
 
 		@Override
 		public void removeUpdate(DocumentEvent arg0) {
-			// TODO Auto-generated method stub
-			searching();
+			searchByKeyword(owner);
 		}
-		
-		public void searching(){
-			
-			String keyword = owner.txt_search.getText();
-			HashMap<String, Integer> map = owner.getMap();
-			AMPanel panel = owner.getInnerhierarchy();
-		
-//			System.out.println(keyword);
-			
-			if(keyword.equals("")){
-				for(Integer s : map.values()){
-					AMLabel lbl = (AMLabel) panel.getComponent(s);
-					lbl.is_searchingResult=false;				
-				}
-			}
-			else
-			{			
-				for(Integer i : map.values()){
-					AMLabel lbl = (AMLabel) panel.getComponent(i);
-					if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
-						lbl.is_searchingResult=true;
-						AMLabel p = lbl;
-						while(!p.isVisible()){						
-							p = (AMLabel) panel.getComponent(map.get(p.getParent_id()));
-							AMLabelInteractions(5,p);						
-						}
-					}
-					else lbl.is_searchingResult=false;				
-				}
-			}
-			//repaint: do not use repaint() to avoid bugs
-			panel.setVisible(false);
-			panel.setVisible(true);
-		}
+
 	}
-//	public class Btn_search_Listener implements ActionListener {
-//
-//		Hierarchy btn_owner;
-//
-//		public Btn_search_Listener(Hierarchy h) {
-//			super();
-//			btn_owner = h;
-//		}
-//
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			
-//			String keyword = btn_owner.txt_search.getText();
-//			if(keyword.equals(""))return;
-//			
-//			HashMap<String, Integer> map = btn_owner.getMap();
-//			AMPanel panel = btn_owner.getInnerhierarchy();
-//			for(Integer i : map.values()){
-//				AMLabel lbl = (AMLabel) panel.getComponent(i);
-//				if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
-//					lbl.is_searchingResult=true;
-//					AMLabel p = lbl;
-//					while(!p.isVisible()){						
-//						p = (AMLabel) panel.getComponent(map.get(p.getParent_id()));
+
+	public void searchByKeyword(Hierarchy h){
+		String keyword = h.txt_search.getText().trim();
+		HashMap<String, Integer> map = h.getMap();
+		AMPanel panel = h.getInnerhierarchy();
+	
+//		System.out.println(keyword);
+		
+		if(keyword.equals("")){
+			for(Integer s : map.values()){
+				AMLabel lbl = (AMLabel) panel.getComponent(s);
+				lbl.is_searchingResult=true;
+				lbl.getIts_bar().is_searchingResult = true;
+			}
+		}
+		else
+		{	
+			for(Integer s : map.values()){
+				AMLabel lbl = (AMLabel) panel.getComponent(s);
+				lbl.is_searchingResult=false;
+				lbl.getIts_bar().is_searchingResult = false;
+
+			}
+			
+			for(Integer i : map.values()){
+				AMLabel lbl = (AMLabel) panel.getComponent(i);
+				if(lbl.originalText.toLowerCase().contains(keyword.toLowerCase())){
+					lbl.is_searchingResult=true;
+					lbl.getIts_bar().is_searchingResult = true;
+
+					AMLabel p = lbl;
+					while(!p.isVisible()){						
+						p = p.parent;
+						if(p.isVisible()){
+							p.is_searchingResult = true;
+							p.getIts_bar().is_searchingResult = true;
+							break;
+						}
 //						AMLabelInteractions(5,p);						
-//					}
-//				}
-//				else lbl.is_searchingResult=false;				
-//			}
-//			//repaint: do not use repaint() to avoid bugs
-//			panel.setVisible(false);
-//			panel.setVisible(true);
-//		}
-//
-//	}
-//	
-//	public class Btn_clearSearch_Listener implements ActionListener {
-//
-//		Hierarchy btn_owner;
-//
-//		public Btn_clearSearch_Listener(Hierarchy h) {
-//			super();
-//			btn_owner = h;
-//		}
-//
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			HashMap<String, Integer> map = btn_owner.getMap();
-//			AMPanel panel = btn_owner.getInnerhierarchy();
-//			for(Integer s : map.values()){
-//				AMLabel lbl = (AMLabel) panel.getComponent(s);
-//				lbl.is_searchingResult=false;				
-//			}
-//			btn_owner.txt_search.setText("");
-//			//repaint: do not use repaint() to avoid bugs
-//			panel.setVisible(false);
-//			panel.setVisible(true);
-//		}
-//
-//	}
+					}
+
+				}
+			}
+			
+		}
+		//repaint: do not use repaint() to avoid bugs
+		panel.setVisible(false);
+		panel.setVisible(true);
+	}
 
 	/* ADDING CONTENTS */
 
@@ -603,12 +650,15 @@ public class Controller {
 	 * @return - the label that is created
 	 */
 	public AMLabel addLabel(String id, String name, Hierarchy hierarchy,
-			int level, String parent) {
+			int level, String parent, AMLabel par) {
 
 		// Add the label to the visualisation and save the returned label
 		// Send the hierarchy to which it belongs, the level, the name or
 		// description and the FOR code
 		AMLabel label = m_view.addLabel(hierarchy, level, name, id, parent);
+		label.parent = par;
+		if(par!=null)par.children.add(label);
+		
 		// Add the action listener to this label for interaction
 		label.addMouseListener(new Interaction_Mouse_Listener());
 
@@ -660,7 +710,7 @@ public class Controller {
 
 		//deal with non-weighted values --qiang
 		if(!hierarchy.isWeighted.isSelected()){			
-			this.alpha_count_nonWeighted(0, index, 0);
+			this.alpha_count_nonWeighted(0, index, 0, null);
 			return;
 		}
 		// First get all of the top level values
@@ -688,7 +738,7 @@ public class Controller {
 					AMLabel label;
 					if(x==null){
 						label = addLabel(alpha_code,
-								data.getString("label"), hierarchy, level, "");
+								data.getString("label"), hierarchy, level, "",null);
 					}
 					else{
 						label = (AMLabel) hierarchy.getInnerhierarchy().getComponent(x);
@@ -702,7 +752,7 @@ public class Controller {
 						// if there is another level, call function
 						// alpha_codes_middle to fill the rest of the values
 						sub_count = alpha_codes_middle(hierarchy, level + 1,
-								alpha_code, left_padding + 15, index);
+								alpha_code,label, left_padding + 15, index);
 					} else {
 						// if this the last level, call the count method
 						// String string_sub_count = alpha_count(alpha_code,
@@ -746,7 +796,7 @@ public class Controller {
 	 * @return - the number of objects that were counted
 	 */
 	public double alpha_codes_middle(Hierarchy hierarchy, int level,
-			String parent_id, int left_padding, int index) {
+			String parent_id,AMLabel par, int left_padding, int index) {
 
 		float overal_count = 0;
 		int hierarchy_num = index + 1;
@@ -777,7 +827,7 @@ public class Controller {
 				AMLabel label;
 				if(x==null){
 					label = addLabel(alpha_code, data.getString("label"),
-							hierarchy, level, parent_id);
+							hierarchy, level, parent_id,par);					
 				}
 				else{
 					label = (AMLabel) hierarchy.getInnerhierarchy().getComponent(x);
@@ -787,7 +837,7 @@ public class Controller {
 
 				if (level < tableLevel[index]) {
 					sub_count = alpha_codes_middle(hierarchy, level + 1,
-							alpha_code, left_padding + 15, index);
+							alpha_code,label, left_padding + 15, index);
 				} else {
 					// String string_sub_count = alpha_count(alpha_code, index);
 					// sub_count = Double.parseDouble(string_sub_count);
@@ -1045,7 +1095,7 @@ public class Controller {
 		return count.doubleValue();
 	}
 
-	public HashSet<Integer> alpha_count_nonWeighted(int id, int index,int level){
+	public HashSet<Integer> alpha_count_nonWeighted(int id, int index,int level,AMLabel par){
 		HashSet<Integer> ids=new HashSet<Integer>();
 		if(level==tableLevel[index]){
 			String query = "SELECT " + column + " FROM  " + linkTableName[index]
@@ -1073,7 +1123,7 @@ public class Controller {
 					AMLabel label;
 					if(x==null){
 						label = addLabel(alpha_code, rs.getString("label"),
-							hierarchy, level+1, lbl_str);
+							hierarchy, level+1, lbl_str,par);
 					}
 					else{
 						label = (AMLabel) hierarchy.getInnerhierarchy().getComponent(x);
@@ -1083,7 +1133,7 @@ public class Controller {
 
 					double sub_count;
 					
-					cids = this.alpha_count_nonWeighted(rs.getInt(1), index, level+1);
+					cids = this.alpha_count_nonWeighted(rs.getInt(1), index, level+1,label);
 					sub_count = cids.size();
 					
 					// edit the bar now we have the data
@@ -1553,16 +1603,20 @@ public class Controller {
 			}
 			break;
 		case 5: // left clicked
-			// !!!!!!!!!!!consider multilevels
 			if (lbl.is_expanded) {
 				lbl.is_expanded = false;
 			} else {
 				lbl.is_expanded = true;
 			}
 			expand_collapse_label(hierarchy, lbl);
+
+			//update searching result
+			searchByKeyword(hierarchy);
 			
+			//updata proportion panel
 			hierarchy.pane_proportion.clearAll();
 			this.update_proportion(hierarchy);
+
 			break;
 		case 6: // right clicked
 			int ls = 3;
@@ -1587,46 +1641,55 @@ public class Controller {
 	}
 
 	public void expand_collapse_label(Hierarchy hierarchy, AMLabel lbl) {
-		String query = "SELECT idhierarchy FROM "
-				+ tableName[hierarchy.getId() - 1] + " WHERE parentid = "
-				+ lbl.getUniqueID().substring(3) + " ";
-		ResultSet data = m_model.getMyQuery(query);
-		HashMap<String, Integer> position_map = hierarchy.getMap();
-		HashSet<Integer> list = new HashSet<Integer>();
-		try {
-			while (data.next()) {
-				ResultSetMetaData rsmd = data.getMetaData();
-				int NumOfCol = rsmd.getColumnCount();
-				for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
-					String key = data.getString(1).toString();
-					key = hierarchy.getId() + "00" + key;
-					if (position_map.containsKey(key)) {
-						int index = position_map.get(key);
-						Integer tmp_index = new Integer(index);
-						list.add(tmp_index);
-					}
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		for (Iterator<Integer> i = list.iterator(); i.hasNext();) {
-			Integer tindex = i.next();
-			AMLabel this_label = (AMLabel) hierarchy.getInnerhierarchy()
-					.getComponent(tindex);
+		for(AMLabel this_label:lbl.children){
 			this_label.change(lbl.is_expanded);
-			if (this_label.isHas_image())
-				this_label.getIts_image().change(lbl.is_expanded);
-			if (this_label.isHas_bar())
-				this_label.getIts_bar().change(lbl.is_expanded);
+			this_label.getIts_image().change(lbl.is_expanded);
+			this_label.getIts_bar().change(lbl.is_expanded);
+
 			if (!lbl.is_expanded && lbl != this_label) {
-				// System.out.println("C:::" + lbl.getText() + " :: "
-				// + this_label.getText());
 				this_label.is_expanded = false;
 				this.expand_collapse_label(hierarchy, this_label);
 			}
-		}
+			
+		}		
+//		String query = "SELECT idhierarchy FROM "
+//				+ tableName[hierarchy.getId() - 1] + " WHERE parentid = "
+//				+ lbl.getUniqueID().substring(3) + " ";
+//		ResultSet data = m_model.getMyQuery(query);
+//		HashMap<String, Integer> position_map = hierarchy.getMap();
+//		HashSet<Integer> list = new HashSet<Integer>();
+//		try {
+//			while (data.next()) {
+//				ResultSetMetaData rsmd = data.getMetaData();
+//				int NumOfCol = rsmd.getColumnCount();
+//				for (int column_rows = 1; column_rows <= NumOfCol; column_rows++) {
+//					String key = data.getString(1).toString();
+//					key = hierarchy.getId() + "00" + key;
+//					if (position_map.containsKey(key)) {
+//						int index = position_map.get(key);
+//						Integer tmp_index = new Integer(index);
+//						list.add(tmp_index);
+//					}
+//				}
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//
+//		for (Iterator<Integer> i = list.iterator(); i.hasNext();) {
+//			Integer tindex = i.next();
+//			AMLabel this_label = (AMLabel) hierarchy.getInnerhierarchy()
+//					.getComponent(tindex);
+//			this_label.change(lbl.is_expanded);
+//			if (this_label.isHas_image())
+//				this_label.getIts_image().change(lbl.is_expanded);
+//			if (this_label.isHas_bar())
+//				this_label.getIts_bar().change(lbl.is_expanded);
+//			if (!lbl.is_expanded && lbl != this_label) {
+//				this_label.is_expanded = false;
+//				this.expand_collapse_label(hierarchy, this_label);
+//			}
+//		}
 	}
 
 	public ArrayList<String> intersectionOf(ArrayList<String> a,
@@ -1725,11 +1788,11 @@ public class Controller {
 
 		// compute and display each entry
 		for (Hierarchy h : m_view.hierarchies)
-			computeEntry(h, idStr, m_view.hierarchies);
+			if(h.isVisible())computeEntry(h, idStr, m_view.hierarchies);
 		
 		//update the proportion panel
 		for (Hierarchy h : m_view.hierarchies)
-			this.update_proportion(h);
+			if(h.isVisible())this.update_proportion(h);
 		
 	}
 
@@ -1879,25 +1942,7 @@ public class Controller {
 		String sql = "select " + this.column + " from "
 				+ linkTableName[h.getId() - 1] + " where 1=1 ";
 		boolean has = false;
-		// for (String s : lst) {
-		// String msql = sql + " and " + columnName[h.getId() - 1] + " in ("
-		// + s + ") ";
-		// ResultSet mrs = m_model.getMyQuery(msql);
-		// HashSet<Integer> rowcids = new HashSet<Integer>();
-		// try {
-		// while (mrs.next())
-		// rowcids.add(mrs.getInt(1));
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// if (has) {
-		// cids = intersectionOf(cids, rowcids);
-		// } else {
-		// cids = rowcids;
-		// has = true;
-		// }
-		// }
+
 		for (HashSet<Integer> row : rowids) {
 			if (row.size() == 0)
 				continue;
@@ -2221,8 +2266,8 @@ public class Controller {
 		String ct = this.count_type.substring(0, count_type.length() - 8);
 		String title = "Intersection of " + ct;
 
-		// not IMDB
-		if (!ct.equalsIgnoreCase("films")) {
+		// not IMDB or carDB
+		if (!(ct.equalsIgnoreCase("films")||ct.equalsIgnoreCase("cars"))) {
 			String msg = "Number of " + ct + " : " + incIds.size() + "\nIDs : ";
 			for (int i : incIds)
 				msg += i + ", ";
@@ -2231,7 +2276,7 @@ public class Controller {
 			return;
 		}
 
-		// IMDB
+		// IMDB or carDB
 		if (this.incIds.isEmpty()) {
 			m_info.setValues(title, "None!");
 			return;
