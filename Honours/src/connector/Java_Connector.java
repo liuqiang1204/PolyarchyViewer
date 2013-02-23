@@ -162,7 +162,7 @@ public class Java_Connector {
 		// The variables that hold information for the query
 		Statement statement = null;
 
-//		System.out.println("exeMyQuery:: " + query);
+		System.out.println("exeMyQuery:: " + query);
 		String sql = query;
 
 		// Try and execute the query
@@ -214,7 +214,7 @@ public class Java_Connector {
 		ResultSet result_set = null;
 
 //		long st = System.currentTimeMillis();
-//		System.out.println("getMyQuery:: " + query);
+		System.out.println("getMyQuery:: " + query);
 
 		// Try and execute the query
 		try {

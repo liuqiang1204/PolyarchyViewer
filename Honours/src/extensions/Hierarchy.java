@@ -16,9 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -39,10 +38,10 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import project.Controller;
 //import project.Controller.Clear_Button_Action;
 import project.Controller.KeyPress_Action;
 import project.Controller.Scroll_adjust_listener;
@@ -90,32 +89,32 @@ public class Hierarchy extends JPanel {
 	/**
 	 * Panel that holds the heading information
 	 */
-	private JPanel panel_heading;
+	public JPanel panel_heading;
 
 	/**
 	 * The heading panel for the hierarchy
 	 */
-	private JLabel panelHeading;
+	public JLabel panelHeading;
 
 	/**
 	 * The split pane for the hierarchy
 	 */
-	private JSplitPane hierarchy;
+	public JSplitPane hierarchy;
 
 	/**
 	 * The panel that contains some options for the user
 	 */
-	private JPanel hierarchy_options;
+	public JPanel hierarchy_options;
 
 	/**
 	 * The panel that contains the intractable elements
 	 */
-	private AMPanel innerhierarchy;
+	public AMPanel innerhierarchy;
 
 	/**
 	 * A scroll able panel
 	 */
-	private AMScrollPane hierarchyScroll;
+	public AMScrollPane hierarchyScroll;
 
 	/**
 	 * The array list that contains the clicked elements for this hierarchy
@@ -159,7 +158,7 @@ public class Hierarchy extends JPanel {
 	/**
 	 * Controls for the panel
 	 */
-	private Panel_Controller panel_controller;
+	public Panel_Controller panel_controller;
 
 	/* CONSTRAINTS FOR THE PANEL */
 
@@ -171,7 +170,7 @@ public class Hierarchy extends JPanel {
 	/**
 	 * An empty label used for padding
 	 */
-	private AMLabel padding_label;
+	public AMLabel padding_label;
 
 	/**
 	 * The maximum number of levels in this hierarchy
@@ -197,7 +196,7 @@ public class Hierarchy extends JPanel {
 	/**
 	 * --Qiang
 	 */
-	private JTable searchingOpts;
+	public JTable searchingOpts;
 	// label,status(0-unselected 1-selected 3-tmp added)
 	public HashMap<AMLabel, Integer> searchingItems = new HashMap<AMLabel, Integer>();
 
@@ -227,15 +226,12 @@ public class Hierarchy extends JPanel {
 	public AMLabel max_bar;
 
 	// new search input text field and button
-	public JTextField txt_search = new JTextField(9);
-//	public JButton btn_search = new JButton(Controller_Images.btn_search);
-//	public JButton btn_clearSearch = new JButton(
-//			Controller_Images.btn_clearSearch);// new JButton("Clear Results");
-//	public JButton btn_clearTable = new JButton(
-//			Controller_Images.btn_clearTable);
+	public JTextField txt_search = new JTextField(18);
 	public JButton btn_clearTable = new JButton("Clear Selection");
 	public JButton btn_collapseAll = new JButton(Controller_Images.btn_collapseAll);
 	
+	//for control -- need improve the code structure later
+	public Controller m_controller = null;
 	
 	
 	// Proportion panel
@@ -317,6 +313,8 @@ public class Hierarchy extends JPanel {
 		this.m_slider = new CustomSlider(0, this.largest_top, this);
 		panel_heading.add(m_slider, BorderLayout.CENTER);
 		
+		//add collapse all button
+		btn_collapseAll.setToolTipText("Collapse all");
 		JToolBar ctl = new JToolBar();
 		ctl.add(btn_collapseAll);
 		ctl.setFloatable(false);		
@@ -389,20 +387,6 @@ public class Hierarchy extends JPanel {
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
-		// //test
-		// AMLabel ttt=new AMLabel("1234567890");
-		// ttt.setOpaque(true);
-		// ttt.setBackground(Color.red);
-		// ttt.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-		//
-		// GridBagLayout layout = (GridBagLayout) innerhierarchy.getLayout();
-		// GridBagConstraints constraint = layout.getConstraints(ttt);
-		// constraint.insets = new Insets(0, 0, 0, 0);
-		// layout.setConstraints(ttt, constraint);
-		// ttt.setPreferredSize(new Dimension(500,1));
-
-		// this.innerhierarchy.add(ttt);
-
 		// The search panel and all of the required objects
 		hierarchy_options.add(addSearch());
 
@@ -435,7 +419,10 @@ public class Hierarchy extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == cbx_visible) {
-					h.setVisible(cbx_visible.isSelected());
+					boolean is = cbx_visible.isSelected();
+					h.setVisible(is);
+					if(is)cbx_visible.setToolTipText("Hide "+cbx_visible.getText().trim()+ " hierarchy");
+					else cbx_visible.setToolTipText("Show "+cbx_visible.getText().trim()+ " hierarchy");
 				}
 			}
 
@@ -454,55 +441,7 @@ public class Hierarchy extends JPanel {
 		h.innerhierarchy.setVisible(true);
 	}
 
-	static class MyTableModel extends DefaultTableModel {
-
-		private static final long serialVersionUID = 1L;
-		ArrayList<Color> rowColors = new ArrayList<Color>();
-
-		public MyTableModel(Object[][] data, String[] columns) {
-			super(data, columns);
-		}
-
-		public MyTableModel() {
-			super();
-			addColumn("");
-			addColumn("Item");
-			addColumn("");
-		}
-
-		public void addRow(Object[] rowData, Color bc) {
-			this.addRow(rowData);
-			rowColors.add(bc);
-			this.setRowColour(this.getRowCount() - 1, bc);
-		}
-
-		public void setRowColour(int row, Color c) {
-			rowColors.set(row, c);
-			fireTableRowsUpdated(row, row);
-		}
-
-		public Color getRowColour(int row) {
-			return rowColors.get(row);
-		}
-
-		public boolean isCellEditable(int row, int column) {
-			if (column == 0)
-				return true;
-			if (column == 2)
-				return true;
-			return false;
-		}
-
-		public Class<?> getColumnClass(int columnIndex) {
-			if (columnIndex == 0)
-				return Boolean.class;
-			if (columnIndex == 2)
-				return ButtonRenderer.class;
-			else
-				return Object.class;
-			// return getValueAt(0, columnIndex).getClass();
-		}
-	}
+	
 
 	public static class MyTableCellRenderer extends DefaultTableCellRenderer {
 		private static final long serialVersionUID = 1L;
@@ -511,7 +450,7 @@ public class Hierarchy extends JPanel {
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
-			MyTableModel model = (MyTableModel) table.getModel();
+			ItemSelectionTableModel model = (ItemSelectionTableModel) table.getModel();
 			Component c = super.getTableCellRendererComponent(table, value,
 					isSelected, hasFocus, row, column);
 			c.setForeground(Color.black);
@@ -538,7 +477,7 @@ public class Hierarchy extends JPanel {
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int col) {
-			MyTableModel model = (MyTableModel) table.getModel();
+			ItemSelectionTableModel model = (ItemSelectionTableModel) table.getModel();
 			Boolean v = (Boolean) value;
 			this.setSelected(v);
 			if (isSelected) {
@@ -579,7 +518,7 @@ public class Hierarchy extends JPanel {
 		public Component getTableCellRendererComponent(final JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
-			MyTableModel model = (MyTableModel) table.getModel();
+			ItemSelectionTableModel model = (ItemSelectionTableModel) table.getModel();
 			owner = (AMLabel) value;
 			if (isSelected) {
 				renderButton.setBackground(table.getSelectionBackground());
@@ -604,8 +543,8 @@ public class Hierarchy extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			// System.out.println("removeSearchingItem");
 			removeSearchingItem(owner);
+			m_controller.perform_connection();
 			// innerhierarchy.repaint();
 		}
 	}
@@ -629,7 +568,6 @@ public class Hierarchy extends JPanel {
 		refreshSearchingTable();
 		this.innerhierarchy.setVisible(false);
 		this.innerhierarchy.setVisible(true);
-
 	}
 
 	public void removeTempSearchingItem(AMLabel lbl) {
@@ -645,7 +583,7 @@ public class Hierarchy extends JPanel {
 	}
 
 	public void checkboxClicked(int row) {
-		MyTableModel tm = (MyTableModel) searchingOpts.getModel();
+		ItemSelectionTableModel tm = (ItemSelectionTableModel) searchingOpts.getModel();
 		boolean ischecked = (Boolean) tm.getValueAt(row, 0);
 		AMLabel item = (AMLabel) tm.getValueAt(row, 2);
 		if (ischecked) {
@@ -659,7 +597,6 @@ public class Hierarchy extends JPanel {
 			item.setVisible(false);
 			item.setVisible(true);
 		}
-		// System.out.println(">>>" + item.getText() + " -- " + ischecked);
 	}
 
 	public void setScaleRange(double min, double max) {
@@ -710,7 +647,9 @@ public class Hierarchy extends JPanel {
 
 		if (bar.isIs_bar()) {
 			panel_width -= (left_padding * 1.5);
-			double this_width_per = (count - min_limit)
+			double this_width_per;
+			if(max_limit==min_limit)this_width_per=0.00001;
+			else this_width_per = (count - min_limit)
 					/ (max_limit - min_limit);
 
 			double size = (panel_width * this_width_per);
@@ -731,7 +670,7 @@ public class Hierarchy extends JPanel {
 	}
 
 	public void refreshSearchingTable() {
-		MyTableModel tm = new MyTableModel();
+		ItemSelectionTableModel tm = new ItemSelectionTableModel();
 		searchingOpts.setModel(tm);
 		searchingOpts.setDefaultRenderer(Object.class,
 				new MyTableCellRenderer());
@@ -778,17 +717,9 @@ public class Hierarchy extends JPanel {
 
 		// The selection table nested in a scroll panel
 		searchingOpts = new JTable();
-		MouseAdapter adapter = new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				int row = searchingOpts.getSelectedRow();
-				if (searchingOpts.getSelectedColumn() == 0) {
-					checkboxClicked(row);
-				}
-			}
-		};
-		searchingOpts.addMouseListener(adapter);
 
-		MyTableModel tm = new MyTableModel();
+
+		ItemSelectionTableModel tm = new ItemSelectionTableModel();
 		searchingOpts.setModel(tm);
 
 		JScrollPane jsp = new JScrollPane(searchingOpts);
@@ -812,14 +743,47 @@ public class Hierarchy extends JPanel {
 
 		innerTools.add(isWeighted);
 		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
+		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
+		
 		innerTools.addSeparator(new Dimension(5, 20));
 		innerTools.add(txt_search);
-//		innerTools.add(btn_search);
-//		innerTools.add(btn_clearSearch);
-		innerTools.addSeparator(new Dimension(5, 20));
-		innerTools.add(Box.createRigidArea(new Dimension(5, 20)));
+		//add search indicator
+		Font f = txt_search.getFont();
+		Font nf = new Font(f.getName(),Font.ITALIC,f.getSize());
+		txt_search.setForeground(Color.gray);
+		txt_search.setFont(nf);
+		txt_search.setText("Input keyword for search:");
+		txt_search.addFocusListener(new FocusListener(){
 
-		innerTools.add(btn_clearTable);
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				if(txt_search.getText().equals("Input keyword for search:")){
+					Font f = txt_search.getFont();
+					Font nf = new Font(f.getName(),Font.PLAIN,f.getSize());
+					txt_search.setForeground(Color.black);
+					txt_search.setFont(nf);
+					txt_search.setText("");
+//					txt_search.repaint();
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				System.out.println(txt_search.getText());
+				if(txt_search.getText().trim().equals("")){					
+					Font f = txt_search.getFont();
+					Font nf = new Font(f.getName(),Font.ITALIC,f.getSize());
+					txt_search.setForeground(Color.gray);
+					txt_search.setFont(nf);
+					txt_search.setText("Input keyword for search:");
+//					txt_search.repaint();
+				}
+			}
+			
+		});
+		
+
+//		innerTools.add(btn_clearTable);
 
 		search.setPreferredSize(new Dimension(300, 200));
 		search.add(jsp, BorderLayout.CENTER);

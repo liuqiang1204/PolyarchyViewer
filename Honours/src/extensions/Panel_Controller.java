@@ -124,10 +124,11 @@ public class Panel_Controller extends JPanel {
 	    
 	    this.add(move_left = new JLabel(Controller_Images.getMove_left()));
 	    move_left.setName("move left - " + name);
+	    move_left.setToolTipText("Move left");
 	    
 	    this.add(move_right = new JLabel(Controller_Images.getMove_right()));
 	    move_right.setName("move right - " + name);
-	    
+	    move_right.setToolTipText("Move right");
 	    hide_show_option.setVisible(false);
 	}
 	

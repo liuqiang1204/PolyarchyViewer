@@ -467,7 +467,8 @@ public class AMLabel extends JLabel {
 				g2.setColor(selectableColours.getBorderBar());
 
 				// add our own border, its better optimised this way
-				g2.drawRect(0, 0, bw, bar_height - 1);				
+				g2.drawRect(0, 0, bw, bar_height - 1);
+				this.setSize(bw, bar_height);
 
 			} else {
 
@@ -570,9 +571,11 @@ public class AMLabel extends JLabel {
 			// set label color by different status			
 			if (is_checked){
 				setBackground(GlobalConstants.bar_checkedColor);
+				setForeground(GlobalConstants.font_checkedColor);
 			}
 			else{
 				setBackground(new Color(0,true));
+				setForeground(GlobalConstants.font_normalColor);
 			}			
 
 			

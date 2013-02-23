@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.ResultSet;
@@ -146,6 +147,13 @@ public class Controller {
 	 */
 
 	HashMap<AMLabel, HashSet<Integer>> labelIds = new HashMap<AMLabel, HashSet<Integer>>();
+	
+	/**
+	 * for floating window
+	 */
+	MouseMotionListener_For_FloatingWin ml_floating = new MouseMotionListener_For_FloatingWin();
+	
+	Interaction_Mouse_Listener lbl_mouselistener = new Interaction_Mouse_Listener();
 
 	// ALTER TABLE `grants_researcher_link` ADD INDEX (`researcher_id`)
 	// ALTER TABLE publications_researcher_link ENGINE = MyISAM
@@ -227,7 +235,7 @@ public class Controller {
 			// fetch the name of the column based on the linking table selected
 			// eg. for movies, column will be movieId, people -> peopleId
 			query1 = "select * from atom where t_name = '"
-					+ count_type + "'";
+					+ count_type.toLowerCase() + "'";
 			rs = m_model.getMyQuery(query1);
 			rs.next();
 			column = rs.getString(3);
@@ -283,17 +291,47 @@ public class Controller {
 		 */
 		
 		for (Hierarchy h : m_view.hierarchies) {
+			//add listeners
 			h.isWeighted.addActionListener(new cbx_isWeighted_Listener(h));
-//			h.btn_search.addActionListener(new Btn_search_Listener(h));
-//			h.btn_clearSearch.addActionListener(new Btn_clearSearch_Listener(h));
 			h.txt_search.getDocument().addDocumentListener(new Txt_search_Listener(h));
 			h.btn_clearTable.addActionListener(new Btn_clear_Listener(h));
 			h.btn_collapseAll.addActionListener(new btn_collapseAll_Listener(h));
+			h.searchingOpts.addMouseListener(new SelectionTableMouseAdapter(h));
+			
 			Hierarchy_Mouse_Listener hml = new Hierarchy_Mouse_Listener(h);
 			h.getInnerhierarchy().addMouseListener(hml);
+			
+			//pass controller to hierarchy -- need modify later to split controller and UI
+			h.m_controller = this;
+			
 			//Set default value for the Hierarchy UI
-			h.getHierarchy().setDividerSize(3);
-			h.getHierarchy().setDividerLocation(0.9);
+			h.getHierarchy().setDividerSize(5);
+			h.getHierarchy().setDividerLocation(0.8d);
+		}
+		
+		//add listener for floating window
+		m_view.addMouseMotionListener(ml_floating);
+		m_view.btn_showInfo.addMouseMotionListener(ml_floating);
+		m_view.topPanel.addMouseMotionListener(ml_floating);
+		m_view.lbl_floating.addMouseMotionListener(ml_floating);
+		for (Hierarchy h : m_view.hierarchies) {
+			h.addMouseMotionListener(ml_floating);
+			h.getInnerhierarchy().addMouseMotionListener(ml_floating);
+			h.pane_proportion.addMouseMotionListener(ml_floating);
+			h.btn_collapseAll.addMouseMotionListener(ml_floating);
+			h.m_slider.addMouseMotionListener(ml_floating);
+			h.searchingOpts.addMouseMotionListener(ml_floating);
+			h.txt_search.addMouseMotionListener(ml_floating);
+			h.padding_label.addMouseMotionListener(ml_floating);
+			h.cbx_visible.addMouseMotionListener(ml_floating);
+			h.hierarchy.addMouseMotionListener(ml_floating);
+			h.hierarchy_options.addMouseMotionListener(ml_floating);
+			h.hierarchyScroll.addMouseMotionListener(ml_floating);
+			h.panel_controller.addMouseMotionListener(ml_floating);
+			h.panel_heading.addMouseMotionListener(ml_floating);
+			h.panelHeading.addMouseMotionListener(ml_floating);
+			h.searchingOpts.addMouseMotionListener(ml_floating);
+			h.isWeighted.addMouseMotionListener(ml_floating);
 		}
 
 		m_info.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -431,6 +469,44 @@ public class Controller {
 		
 	}
 	
+	public class Txt_search_Listener implements DocumentListener {
+	
+		Hierarchy owner;
+		public Txt_search_Listener(Hierarchy h){
+			super();
+			owner = h;
+		}
+		@Override
+		public void changedUpdate(DocumentEvent arg0) {
+		}
+	
+		@Override
+		public void insertUpdate(DocumentEvent arg0) {
+			searchByKeyword(owner);
+		}
+	
+		@Override
+		public void removeUpdate(DocumentEvent arg0) {
+			searchByKeyword(owner);
+		}
+	
+	}
+
+	class SelectionTableMouseAdapter extends MouseAdapter{
+		Hierarchy owner;
+		public SelectionTableMouseAdapter(Hierarchy h){
+			super();
+			owner = h;
+		}
+		public void mouseClicked(MouseEvent e) {
+			int row = owner.searchingOpts.getSelectedRow();
+			if (owner.searchingOpts.getSelectedColumn() == 0) {
+				owner.checkboxClicked(row);
+				perform_connection();
+			}
+		}
+	}
+	
 	public void collapseAll(Hierarchy h){
 		HashMap<String, Integer> map = h.getMap();
 		AMPanel panel = h.getInnerhierarchy();
@@ -452,29 +528,6 @@ public class Controller {
 		panel.setVisible(true);
 	}
 	
-	public class Txt_search_Listener implements DocumentListener {
-
-		Hierarchy owner;
-		public Txt_search_Listener(Hierarchy h){
-			super();
-			owner = h;
-		}
-		@Override
-		public void changedUpdate(DocumentEvent arg0) {
-		}
-
-		@Override
-		public void insertUpdate(DocumentEvent arg0) {
-			searchByKeyword(owner);
-		}
-
-		@Override
-		public void removeUpdate(DocumentEvent arg0) {
-			searchByKeyword(owner);
-		}
-
-	}
-
 	public void searchByKeyword(Hierarchy h){
 		String keyword = h.txt_search.getText().trim();
 		HashMap<String, Integer> map = h.getMap();
@@ -482,7 +535,7 @@ public class Controller {
 	
 //		System.out.println(keyword);
 		
-		if(keyword.equals("")){
+		if(keyword.equals("")||keyword.equals("Input keyword for search:")){
 			for(Integer s : map.values()){
 				AMLabel lbl = (AMLabel) panel.getComponent(s);
 				lbl.is_searchingResult=true;
@@ -660,7 +713,12 @@ public class Controller {
 		if(par!=null)par.children.add(label);
 		
 		// Add the action listener to this label for interaction
-		label.addMouseListener(new Interaction_Mouse_Listener());
+		label.addMouseListener(lbl_mouselistener);
+		label.getIts_bar().addMouseListener(lbl_mouselistener);
+		label.getIts_image().addMouseListener(lbl_mouselistener);
+		label.addMouseMotionListener(ml_floating);
+		label.getIts_bar().addMouseMotionListener(ml_floating);
+		label.getIts_image().addMouseMotionListener(ml_floating);
 
 		// If we have an image then add the listener to that to
 		if (label.isHas_image()) {
@@ -1571,14 +1629,21 @@ public class Controller {
 		// 7. double clicked
 		//Control img to be not selected
 		boolean isIMG = lbl.isIs_image();
+		boolean isBAR = lbl.isIs_bar();
+
+		
 
 		// image and text should be same action
-		if (lbl.isIs_image() || lbl.isIs_bar())
+		if (isIMG || isBAR)
 			lbl = lbl.owner;
 		
 		String id = lbl.getUniqueID();
 		Hierarchy hierarchy = m_view.findHierarchy(id);
 
+		//deal with showing %
+		if(status==3)hierarchy.SetDetailedLabel(true);
+		if(status==4)hierarchy.SetDetailedLabel(false);
+		
 		// perform actions
 		lbl.change_text(false);
 
@@ -1588,7 +1653,7 @@ public class Controller {
 		case 2: // release
 			break;
 		case 3: // enter
-			hierarchy.SetDetailedLabel(true);
+			
 			if(!isIMG){
 				hierarchy.addSearchingItem(lbl, 3);
 				lbl.change_text(true);
@@ -1596,7 +1661,7 @@ public class Controller {
 			}
 			break;
 		case 4: // exit
-			hierarchy.SetDetailedLabel(false);
+			
 			if(!isIMG){
 				hierarchy.removeTempSearchingItem(lbl);
 				perform_connection();
@@ -2264,8 +2329,11 @@ public class Controller {
 
 	public void updateInfo() {
 		String ct = this.count_type.substring(0, count_type.length() - 8);
-		String title = "Intersection of " + ct;
-
+		String title = "Query results";
+		
+		//update result size for two place: top label & flowable pane near mouse cursor
+		m_view.lbl_nResults.setText(incIds.size()+"");
+		m_view.lbl_floating.setText(incIds.size()+"");
 		// not IMDB or carDB
 		if (!(ct.equalsIgnoreCase("films")||ct.equalsIgnoreCase("cars"))) {
 			String msg = "Number of " + ct + " : " + incIds.size() + "\nIDs : ";
@@ -2299,24 +2367,28 @@ public class Controller {
 		public Hierarchy_Mouse_Listener(Hierarchy hir){
 			h=hir;
 		}
-		
-		public void mousePressed(MouseEvent e) {
-		}
-
-		public void mouseReleased(MouseEvent e) {
-
-		}
-
 		public void mouseEntered(MouseEvent e) {
 			h.SetDetailedLabel(true);
 		}
-
 		public void mouseExited(MouseEvent e) {
 			h.SetDetailedLabel(false);
 		}
+	}
+	
+	class MouseMotionListener_For_FloatingWin implements MouseMotionListener{
 
-		public void mouseClicked(MouseEvent e) {
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
 		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			m_view.win_floating.setLocation(e.getXOnScreen()+10, e.getYOnScreen());
+			
+		}
+		
 	}
 	
 	public void update_proportion(Hierarchy h){
@@ -2327,6 +2399,7 @@ public class Controller {
 		for(Integer s : map.values()){
 			AMLabel lbl = (AMLabel) panel.getComponent(s);
 			double v = lbl.getIts_bar().getSub_count()/lbl.getIts_bar().getCount();
+			if(v<0.05&&v>0)v=0.05;
 			int y = lbl.getLocation().y;
 //			System.out.println("TTT:"+lbl.originalText+" :: "+lbl.isVisible()+" v:"+v+ " y:"+y);
 			if(lbl.isVisible())h.pane_proportion.addPair(v, y);

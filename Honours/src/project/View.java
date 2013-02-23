@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -118,9 +119,13 @@ public class View extends JFrame {
 	public JToolBar topPanel;
 	public JButton btn_showInfo;
 	public boolean is_showInfo;
+	public JLabel lbl_nResults;
 	public JLabel lbl_foreColor;
 	public JLabel lbl_backColor;
 	public JLabel lbl_proportionBarColor;
+	public JWindow win_floating;
+	public JLabel lbl_floating;
+	
 
 	/**
 	 * The right padding on all labels and panels
@@ -162,8 +167,8 @@ public class View extends JFrame {
 	 * the object to be used to connect to the database, used here if we want to
 	 * update data on the database
 	 */
-	@SuppressWarnings("unused")
-	private Java_Connector m_model;
+//	@SuppressWarnings("unused")
+//	private Java_Connector m_model;
 
 	/* UTILITIES */
 
@@ -172,6 +177,8 @@ public class View extends JFrame {
 	 */
 	private Robot robot;
 
+	
+	
 	/* CONSTRUCTOR */
 
 	/**
@@ -184,6 +191,21 @@ public class View extends JFrame {
 	public View(Java_Connector model) {
 
 		addContents(model);
+		
+		//init floating window		
+		lbl_floating = new JLabel("0");		
+		lbl_floating.setOpaque(true);		
+		lbl_floating.setBackground(GlobalConstants.floating_Color);		
+		lbl_floating.setPreferredSize(new Dimension(30,20));
+		lbl_floating.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_floating.setHorizontalAlignment(JLabel.CENTER);
+		
+		win_floating = new JWindow();
+		win_floating.setAlwaysOnTop(true);
+		win_floating.add(lbl_floating);		
+//		win_floating.setBackground(GlobalConstants.floating_Color);
+		win_floating.pack();
+		win_floating.setVisible(true);
 	}
 
 	/**
@@ -194,6 +216,15 @@ public class View extends JFrame {
 	 */
 	public void addContents(Java_Connector model) {
 
+		//Set window caption
+		ResultSet rs = model.getMyQuery("select * from dbinfo");
+		try {
+			if(rs.next())this.setTitle("Polyarchy Viewer - "+rs.getString(2));
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		/* THE TOP MOST ELEMENT */
 
 		// window = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -217,7 +248,11 @@ public class View extends JFrame {
 		global_options = new JPanel();
 		global_options
 				.setLayout(new BoxLayout(global_options, BoxLayout.Y_AXIS));
-		global_options.setPreferredSize(new Dimension(1366, 25));
+		
+		//get the screen resolution
+		Dimension screen_size = Toolkit.getDefaultToolkit().getScreenSize();
+		//set size
+		global_options.setPreferredSize(new Dimension(screen_size.width, 25));
 
 		// window.setRightComponent(global_options);
 
@@ -236,7 +271,8 @@ public class View extends JFrame {
 				String hd = main_table.getString(2);
 				hd = hd.toLowerCase().replaceAll("_hierarchy", "");
 				Hierarchy h = new Hierarchy(main_table.getInt(1), hd);
-				h.cbx_visible = new JCheckBox(hd);
+				h.cbx_visible = new JCheckBox(hd+"    ");
+				h.cbx_visible.setToolTipText("Hide "+h.cbx_visible.getText().trim()+ " hierarchy");
 				h.cbx_visible.setSelected(true);
 				h.add_cbx_visible_actionListener();
 				hierarchies.add(h);
@@ -257,39 +293,19 @@ public class View extends JFrame {
 		topPanel = new JToolBar();
 		topPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		btn_showInfo = new JButton("Show element details");
+		btn_showInfo.setOpaque(true);
 		is_showInfo = false;
-
-		// init color items
-		lbl_foreColor = new JLabel("          ");		
-		lbl_foreColor.setOpaque(true);
-		lbl_foreColor.setSize(40, 18);
-		lbl_foreColor.setBorder(BorderFactory.createLineBorder(Color.black));
-		lbl_foreColor.setBackground(GlobalConstants.bar_foreColor);
-		lbl_foreColor.addMouseListener(new ColorMouseListener());
-
-		lbl_backColor = new JLabel("          ");		
-		lbl_backColor.setOpaque(true);
-		lbl_backColor.setSize(40, 18);
-		lbl_backColor.setBorder(BorderFactory.createLineBorder(Color.black));
-		lbl_backColor.setBackground(GlobalConstants.bar_backColor);		
-		lbl_backColor.addMouseListener(new ColorMouseListener());
-		
-		lbl_proportionBarColor = new JLabel("          ");
-		lbl_proportionBarColor.setOpaque(true);
-		lbl_proportionBarColor.setSize(40, 18);
-		lbl_proportionBarColor.setBorder(BorderFactory.createLineBorder(Color.black));
-		lbl_proportionBarColor.setBackground(GlobalConstants.proporion_barColor);		
-		lbl_proportionBarColor.addMouseListener(new ColorMouseListener());
-		
 		topPanel.add(this.btn_showInfo);
-		topPanel.addSeparator(new Dimension(10, 20));
-		topPanel.add(new JLabel(" Bar forecolor:"));
-		topPanel.add(lbl_foreColor);
-		topPanel.add(new JLabel(" Bar backcolor:"));
-		topPanel.add(lbl_backColor);
-		topPanel.add(new JLabel(" Proportion bar color:"));
-		topPanel.add(lbl_proportionBarColor);
 		
+		lbl_nResults = new JLabel("");
+		lbl_nResults.setPreferredSize(new Dimension(40,18));
+		lbl_nResults.setText("0");
+		lbl_nResults.setForeground(Color.yellow);
+		lbl_nResults.setBackground(Color.black);
+		lbl_nResults.setOpaque(true);
+		lbl_nResults.setHorizontalAlignment(JLabel.CENTER);
+		lbl_nResults.setToolTipText("Number of query results");
+		topPanel.add(lbl_nResults);
 		topPanel.addSeparator(new Dimension(10, 20));
 
 		// add hierarchy panels
@@ -351,6 +367,36 @@ public class View extends JFrame {
 		interaction_options.add(bar_options);
 		interaction_options.add(new JLabel(" Look options: "));
 		interaction_options.add(look_options);
+		
+		// init color items
+		lbl_foreColor = new JLabel("          ");		
+		lbl_foreColor.setOpaque(true);
+		lbl_foreColor.setSize(40, 18);
+		lbl_foreColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_foreColor.setBackground(GlobalConstants.bar_foreColor);
+		lbl_foreColor.addMouseListener(new ColorMouseListener());
+
+		lbl_backColor = new JLabel("          ");		
+		lbl_backColor.setOpaque(true);
+		lbl_backColor.setSize(40, 18);
+		lbl_backColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_backColor.setBackground(GlobalConstants.bar_backColor);		
+		lbl_backColor.addMouseListener(new ColorMouseListener());
+		
+		lbl_proportionBarColor = new JLabel("          ");
+		lbl_proportionBarColor.setOpaque(true);
+		lbl_proportionBarColor.setSize(40, 18);
+		lbl_proportionBarColor.setBorder(BorderFactory.createLineBorder(Color.black));
+		lbl_proportionBarColor.setBackground(GlobalConstants.proporion_barColor);		
+		lbl_proportionBarColor.addMouseListener(new ColorMouseListener());
+		
+		interaction_options.add(new JLabel(" Bar forecolor:"));
+		interaction_options.add(lbl_foreColor);
+		interaction_options.add(new JLabel(" Bar backcolor:"));
+		interaction_options.add(lbl_backColor);
+		interaction_options.add(new JLabel(" Proportion bar color:"));
+		interaction_options.add(lbl_proportionBarColor);
+		
 
 		// removed --qiang
 		// interaction_options.add(new JLabel(" Connection options: "));
@@ -362,7 +408,7 @@ public class View extends JFrame {
 		/* DATABASE CONNECTOR */
 
 		// the object to be used to connect to the database
-		m_model = model;
+//		m_model = model;
 
 		/* VISUAL EFFECTS */
 
@@ -373,13 +419,10 @@ public class View extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// Set the size of the panel
-		Dimension screen_size = Toolkit.getDefaultToolkit().getScreenSize();
-		setSize(screen_size.width - 40, screen_size.height - 50);
+		this.setPreferredSize(new Dimension(screen_size.width, screen_size.height - 25));
+		setSize(screen_size.width, screen_size.height - 25);
 
-		// Go and set the size of the hierarchies
-		// hierarchy1.setDimensions(screen_size);
-		// hierarchy2.setDimensions(screen_size);
-		// hierarchy3.setDimensions(screen_size);
+		// Go and set the size of the hierarchies [must do this!otherwise will affect the bar enlarge]
 		for (Hierarchy h : hierarchies)
 			h.setDimensions(screen_size);
 
@@ -388,8 +431,6 @@ public class View extends JFrame {
 		} catch (AWTException e) {
 		}
 
-		// set title --qiang
-		setTitle("Polyarchy Viewer");
 		// The final attributes of the display
 		setVisible(true);
 	}
@@ -456,12 +497,6 @@ public class View extends JFrame {
 
 		/* THE LISTENERS FOR ALL HIERARCHIES */
 
-		// hierarchy1.add_listeners(c_l, scroll_listener, clear_listener,
-		// keypress);
-		// hierarchy2.add_listeners(c_l, scroll_listener, clear_listener,
-		// keypress);
-		// hierarchy3.add_listeners(c_l, scroll_listener, clear_listener,
-		// keypress);
 		for (Hierarchy h : hierarchies)
 			h.add_listeners(c_l, scroll_listener, keypress);
 
@@ -1229,11 +1264,13 @@ public class View extends JFrame {
 
 			// Move the panel
 			move_left_right(label);
-
 		}
 
 		// repack the objects as they have probably moved
-		pack();
+		/**
+		 * Cause re-layout removed by Qiang
+		 */
+//		pack();
 	}
 
 	/**
@@ -1340,12 +1377,11 @@ public class View extends JFrame {
 	 * 
 	 */
 	public class Control_Listener extends MouseAdapter {
-
 		/**
 		 * Change the lock when the label is pressed
 		 */
 		public void mousePressed(MouseEvent e) {
-
+			
 			// Get the label that started the event
 			JLabel label = (JLabel) e.getComponent();
 

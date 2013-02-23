@@ -152,6 +152,7 @@ public class CustomSlider extends JPanel{
 		else {
 			g.setColor(Color.BLACK);
 		}
+		
 		this.max_posx = px;
 		this.max_posy = py;
 		p2.addPoint(px,py);
@@ -196,12 +197,14 @@ public class CustomSlider extends JPanel{
 			if(x>owner.min_posx-10&&x<owner.min_posx
 					&&y<owner.min_posy+5&&y>owner.min_posy-15){
 				owner.isMinPressed = true;
+				owner.setToolTipText("Set the minimum value to filter");
 				owner.repaint();
 			}
 			//in max area
 			if(x>owner.max_posx&&x<owner.max_posx+10
 					&&y<owner.max_posy+5&&y>owner.max_posy-15){
 				owner.isMaxPressed = true;
+				owner.setToolTipText("Set the value to enlarge bars");
 				owner.repaint();
 			}			
 		}
@@ -248,7 +251,21 @@ public class CustomSlider extends JPanel{
 
 		@Override
 		public void mouseMoved(MouseEvent me) {
-
+			int x = me.getX();
+			int y = me.getY();
+			
+			//in min area
+			if(x>owner.min_posx-10&&x<owner.min_posx
+					&&y<owner.min_posy+5&&y>owner.min_posy-15){
+				owner.setToolTipText("Set the minimum value to filter");
+			}
+			//in max area
+			else if(x>owner.max_posx&&x<owner.max_posx+10
+					&&y<owner.max_posy+5&&y>owner.max_posy-15){
+				owner.setToolTipText("Set the value to enlarge bars");
+			}
+			else owner.setToolTipText("Bar controller");
+			
 		}
 		
 	}
