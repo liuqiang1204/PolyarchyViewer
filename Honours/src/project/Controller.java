@@ -2334,15 +2334,15 @@ public class Controller {
 		//update result size for two place: top label & flowable pane near mouse cursor
 		m_view.lbl_nResults.setText(incIds.size()+"");
 		m_view.lbl_floating.setText(incIds.size()+"");
-		// not IMDB or carDB
-		if (!(ct.equalsIgnoreCase("films")||ct.equalsIgnoreCase("cars"))) {
-			String msg = "Number of " + ct + " : " + incIds.size() + "\nIDs : ";
-			for (int i : incIds)
-				msg += i + ", ";
-			msg = msg.substring(0, msg.length() - 1);
-			m_info.setValues(title, msg);
-			return;
-		}
+//		// not IMDB or carDB
+//		if (!(ct.equalsIgnoreCase("films")||ct.equalsIgnoreCase("cars"))) {
+//			String msg = "Number of " + ct + " : " + incIds.size() + "\nIDs : ";
+//			for (int i : incIds)
+//				msg += i + ", ";
+//			msg = msg.substring(0, msg.length() - 1);
+//			m_info.setValues(title, msg);
+//			return;
+//		}
 
 		// IMDB or carDB
 		if (this.incIds.isEmpty()) {

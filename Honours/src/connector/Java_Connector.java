@@ -38,12 +38,13 @@ public class Java_Connector {
 	/**
 	 * The Internet address of the database server
 	 */
-	private final String host = "localhost";
+	private String host = "localhost";
 
 	/**
 	 * The name of the database to connect to
 	 */
 	public String database;
+	public String dbtype;
 
 	/**
 	 * The user name required to login to the database
@@ -70,8 +71,10 @@ public class Java_Connector {
 	/**
 	 * The default constructor Connects to the database
 	 */
-	public Java_Connector(String user, char[] password, String database) {
+	public Java_Connector(String host, String dbtype, String user, char[] password, String database) {
 
+		this.dbtype = dbtype;
+		this.host = host;
 		this.user = user;
 		this.password = new String(password);
 		this.database = database;
@@ -102,11 +105,11 @@ public class Java_Connector {
 	public boolean connect() {
 		// add support to derby --Qiang
 		try {
-			if (this.database.startsWith("Derby:")) {
+			if (this.dbtype.equalsIgnoreCase("Derby")) {
 				// e.g.
 				// jdbc:derby:database/honours;create=true;user=root;password=admin
 				String url = "jdbc:derby:database/"
-						+ this.database.substring(6) + ";user=" + user
+						+ this.database + ";user=" + user
 						+ ";password=" + password;
 //				System.out.println(url);
 
@@ -118,6 +121,7 @@ public class Java_Connector {
 				// Set the url needed to connect to the database
 				String url = "jdbc:mysql://" + host + "/" + database;
 
+//				System.out.println(url);
 				// Try and connect to the database
 				Class.forName(driver).newInstance();
 				connection = DriverManager.getConnection(url, user, password);

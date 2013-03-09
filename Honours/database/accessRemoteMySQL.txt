@@ -1,0 +1,9 @@
+[mysqld]
+
+skip-name-resolve 
+
+-------------------------------
+add this in my.ini /my.cnf
+add a user for remote access or set root for remote access at MySQL workbench.
+
+(GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'admin' WITH GRANT OPTION;)

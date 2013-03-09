@@ -53,6 +53,8 @@ public class converter {
 		System.out.println("4 - " + this.mysqlUrl.replaceAll("honours", "publication_small"));
 		System.out.println("5 - " + this.mysqlUrl.replaceAll("honours", "IMDB"));
 		System.out.println("6 - " + this.mysqlUrl.replaceAll("honours", "CarDB"));
+		System.out.println("7 - " + this.mysqlUrl.replaceAll("honours", "research_data"));
+		System.out.println("8 - " + this.mysqlUrl.replaceAll("honours", "perfume"));
 		
 		String is = br.readLine().trim();
 		if(is.equals("2")){
@@ -74,6 +76,14 @@ public class converter {
 		else if(is.equals("6")){
 			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "CarDB");
 			this.derbyUrl = this.derbyUrl.replaceAll("honours", "CarDB");
+		}
+		else if(is.equals("7")){
+			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "research_data");
+			this.derbyUrl = this.derbyUrl.replaceAll("honours", "research_data");
+		}
+		else if(is.equals("8")){
+			this.mysqlUrl = this.mysqlUrl.replaceAll("honours", "perfume");
+			this.derbyUrl = this.derbyUrl.replaceAll("honours", "perfume");
 		}
 		else if(is.equals("1")||is.equals("")){
 			
