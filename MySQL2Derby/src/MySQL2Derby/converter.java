@@ -115,6 +115,7 @@ public class converter {
 		t = t.replaceAll(" text,", " Varchar(3000),");
 		t = t.replaceAll("TABLE connection ","TABLE d_connection");
 		t = t.replaceAll(" tinyint[(]1[)]", " Integer");
+		t = t.replaceAll("isLeaf Integer DEFAULT '0'", "isLeaf Integer DEFAULT 0");
 		
 //index???here remove it
 //		if(t.contains(",\n  KEY")){
@@ -162,6 +163,7 @@ public class converter {
 			
 			//insert data
 			for(String tn:tables){
+				if(tn.equalsIgnoreCase("TmpTable"))continue;
 				//derby preserve "connection" as keyword
 				if(tn.equalsIgnoreCase("connection"))
 					sql = "select * from d_" + tn;
