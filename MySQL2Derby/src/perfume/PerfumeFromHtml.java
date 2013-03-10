@@ -7,6 +7,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.HashSet;
 
 public class PerfumeFromHtml {
@@ -19,6 +23,132 @@ public class PerfumeFromHtml {
 	public HashSet<String> TopNotesSet = new HashSet<String>();
 	public HashSet<String> MiddleNotesSet = new HashSet<String>();
 	public HashSet<String> BaseNotesSet = new HashSet<String>();
+	
+	String MySQLDriver = "com.mysql.jdbc.Driver";
+	Connection mysqlConn;
+	String mysqlUrl = "jdbc:mysql://localhost:3306/perfume?user=root&password=admin";
+	
+	/**
+	 * insert data after perfume.sql excuted.
+	 */
+	public void insertData(){
+		try {
+			Class.forName(MySQLDriver).newInstance();
+			mysqlConn = DriverManager.getConnection(this.mysqlUrl);			
+			Statement st = mysqlConn.createStatement();
+			int count =0;
+			String sql = "select * from perfumes";
+			ResultSet rs = st.executeQuery(sql);
+			while(rs.next()){
+				int perfumeID = rs.getInt("perfumeID");
+				String perfumer = rs.getString("perfumer");
+				String topNotes = rs.getString("TopNotes");
+				String middleNotes = rs.getString("MiddleNotes");
+				String baseNotes = rs.getString("BaseNotes");
+				
+//				if(!perfumer.trim().equals("")){
+//					//insert perfumers
+//					String [] pers = perfumer.split("/");
+//					for(String str:pers){
+//						Statement st1 = mysqlConn.createStatement();
+//						String sql1 = "Select * from perfumer_hierarchy where Label = '" + str.trim()+"'";
+//						ResultSet rs1 = st1.executeQuery(sql1);
+//						int pid = -1;
+//						if(rs1.next()){
+//							pid = rs1.getInt("idhierarchy");
+//						}
+//						else{
+//							int parid = PerfumeFromHtml.classifyName(str.trim());
+//							sql1 = "insert into perfumer_hierarchy (parentid,Level,Label,isLeaf) values (" +
+//									parid + ",2,'" + str.trim() + "',true)";
+//							st1.execute(sql1);
+//							sql1 = "Select * from perfumer_hierarchy where Label = '" + str.trim()+"'";
+//							rs1 = st1.executeQuery(sql1);
+//							rs1.next();
+//							pid = rs1.getInt("idhierarchy");
+//						}
+//						sql1 = "insert into perfumes_perfumer(perfumeID, perfumerID, weighted_sum) values (" +
+//								perfumeID + "," + pid + ",1.00)";
+//						st1.execute(sql1);
+//						st1.close();
+//					}
+//				}
+				
+				//topnotes
+				String [] tnotes = topNotes.split("/");
+				for(String tn:tnotes){
+					Statement st1 = mysqlConn.createStatement();
+					String sql1 = "Select * from topnotes_hierarchy where Label = '" + tn.trim()+"' and isLeaf=true";
+					ResultSet rs1 = st1.executeQuery(sql1);
+					int tnid = -1;
+					if(rs1.next()) tnid = rs1.getInt("idhierarchy");
+					
+					if(tnid==-1)System.out.println((++count) + " TOP - "+perfumeID+" nid:" + tnid + "  name:"+tn.trim());
+					else{
+						sql1 = "insert into perfumes_topnotes (perfumeID, TopNotesID, Weighted_sum) values (" +
+								perfumeID + "," + tnid + ",1.00)";
+						st1.execute(sql1);
+					}
+					st1.close();
+				}
+				//middlenotes
+				String [] mnotes = middleNotes.split("/");
+				if(!middleNotes.equals(""))
+				for(String mn:mnotes){
+					Statement st1 = mysqlConn.createStatement();
+					String sql1 = "Select * from middlenotes_hierarchy where Label = '" + mn.trim()+"' and isLeaf=true";
+					ResultSet rs1 = st1.executeQuery(sql1);
+					int mnid = -1;
+					if(rs1.next()) mnid = rs1.getInt("idhierarchy");
+					if(mnid==-1)System.out.println((++count) + " MID - "+perfumeID+" nid:" + mnid + "  name:"+mn.trim());
+					else{
+						sql1 = "insert into perfumes_middlenotes (perfumeID, MiddleNotesID, Weighted_sum) values (" +
+								perfumeID + "," + mnid + ",1.00)";
+						st1.execute(sql1);
+					}
+					st1.close();
+				}
+				
+				//basenotes
+				String [] bnotes = baseNotes.split("/");
+				if(!baseNotes.equals(""))
+				for(String bn:bnotes){
+					Statement st1 = mysqlConn.createStatement();
+					String sql1 = "Select * from basenotes_hierarchy where Label = '" + bn.trim()+"' and isLeaf=true";
+					ResultSet rs1 = st1.executeQuery(sql1);
+					int bnid = -1;
+					if(rs1.next()) bnid = rs1.getInt("idhierarchy");
+					if(bnid==-1)System.out.println((++count) + " base - "+perfumeID+" nid:" + bnid + "  name:"+bn.trim());
+					else{
+						sql1 = "insert into perfumes_basenotes (perfumeID, BaseNotesID, Weighted_sum) values (" +
+								perfumeID + "," + bnid + ",1.00)";
+						st1.execute(sql1);
+					}
+					st1.close();
+				}
+			}
+			rs.close();
+			mysqlConn.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+	}
+	
+	public static int classifyName(String name){
+		int x = -1;
+		String [] ns = name.split(" ");
+		String surname = ns[ns.length-1];
+		char c = surname.charAt(0);
+		if((c>='a'&&c<='f')||(c>='A'&&c<='F'))x = 1;
+		else if((c>='g'&&c<='l')||(c>='G'&&c<='L'))x = 2;
+		else if((c>='m'&&c<='r')||(c>='M'&&c<='R'))x = 3;
+		else if((c>='s'&&c<='x')||(c>='S'&&c<='X'))x = 4;
+		else if((c>='y'&&c<='z')||(c>='Y'&&c<='Z'))x = 5;
+		return x;
+	}
+	
 	public void fromHtml2CSV(String listfilepath,String targetfile){	
 		
 		try {
@@ -36,7 +166,7 @@ public class PerfumeFromHtml {
 			String line = "";
 			while ((line = br.readLine()) != null) {
 				count++;
-				System.out.println(count+" : "+line);
+//				System.out.println(count+" : "+line);
 				//Name, Company, Launched, Gender, Perfumer, Top Notes, Middle Notes, Base Notes
 				String Name="", Company="", Launched="", Gender="", 
 						Perfumer="", TopNotes="", MiddleNotes="", BaseNotes="";
@@ -166,17 +296,19 @@ public class PerfumeFromHtml {
 					bw.write(rc);
 					
 					System.out.println(rc);
+					
+					
 				}
 				
 				brhtml.close();
 			}
-			System.out.println(this.CompanySet.size());
-			System.out.println(this.LaunchedSet.size());
-			System.out.println(this.GenderSet.size());
-			System.out.println(this.PerfumerSet.size());
-			System.out.println(this.TopNotesSet.size());
-			System.out.println(this.MiddleNotesSet.size());
-			System.out.println(this.BaseNotesSet.size());
+//			System.out.println(this.CompanySet.size());
+//			System.out.println(this.LaunchedSet.size());
+//			System.out.println(this.GenderSet.size());
+//			System.out.println(this.PerfumerSet.size());
+//			System.out.println(this.TopNotesSet.size());
+//			System.out.println(this.MiddleNotesSet.size());
+//			System.out.println(this.BaseNotesSet.size());
 			br.close();
 			bw.close();
 		} catch (Exception e) {
@@ -185,11 +317,16 @@ public class PerfumeFromHtml {
 		}
 		
 	}
-		
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		new PerfumeFromHtml().fromHtml2CSV("D:/dbtmp/perfume/HTML/list1.txt", "D:/dbtmp/perfume/perfume.csv");
+//		new PerfumeFromHtml().fromHtml2CSV("D:/dbtmp/perfume/HTML/list1.txt", "D:/dbtmp/perfume/perfume.csv");
 //		System.out.println("PARFUM D'HERMÈS (1984) BY HERMÈS");
+//		String aaa = "";
+//		String [] b = aaa.split("/");
+//		System.out.println(b.length);
+//		System.out.println(classifyName("ab z"));
+		new PerfumeFromHtml().insertData();
 	}
 
 }

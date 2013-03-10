@@ -193,6 +193,7 @@ public class AMLabel extends JLabel {
 
 	public AMLabel parent = null;
 	public HashSet<AMLabel> children = new HashSet<AMLabel>();
+	public HashSet<Integer> countIDs = new HashSet<Integer>();
 
 	// public boolean is_checkboxShowed = false;
 
@@ -1233,7 +1234,7 @@ public class AMLabel extends JLabel {
 			double per = sub * 100 / total;
 			if(total==0.0)per=0.00;
 			String s = df.format(sub) + " / " + df.format(total) + "   ("
-					+ df1.format(per) + "%)";
+					+ df1.format(per) + "%)"; // +" NCount=" +this.countIDs;
 			this.setToolTipText(s);
 			this.getIts_bar().setToolTipText(s);
 			if (this.has_image)

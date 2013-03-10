@@ -703,12 +703,12 @@ public class Controller {
 	 * @return - the label that is created
 	 */
 	public AMLabel addLabel(String id, String name, Hierarchy hierarchy,
-			int level, String parent, AMLabel par) {
+			int level,boolean isLeaf, String parent, AMLabel par) {
 
 		// Add the label to the visualisation and save the returned label
 		// Send the hierarchy to which it belongs, the level, the name or
 		// description and the FOR code
-		AMLabel label = m_view.addLabel(hierarchy, level, name, id, parent);
+		AMLabel label = m_view.addLabel(hierarchy, level,isLeaf, name, id, parent);
 		label.parent = par;
 		if(par!=null)par.children.add(label);
 		
@@ -768,7 +768,7 @@ public class Controller {
 
 		//deal with non-weighted values --qiang
 		if(!hierarchy.isWeighted.isSelected()){			
-			this.alpha_count_nonWeighted(0, index, 0, null);
+			this.alpha_count_nonWeighted(0, index, 0, false, null);
 			return;
 		}
 		// First get all of the top level values
@@ -794,11 +794,12 @@ public class Controller {
 					// add the label
 					Integer x = hierarchy.getMap().get(alpha_code);
 					AMLabel label;
-					if(x==null){
+					boolean isLeaf = data.getBoolean("isLeaf");
+					if(x==null){						
 						label = addLabel(alpha_code,
-								data.getString("label"), hierarchy, level, "",null);
+								data.getString("label"), hierarchy, level, isLeaf, "",null);
 					}
-					else{
+					else{						
 						label = (AMLabel) hierarchy.getInnerhierarchy().getComponent(x);
 					}		 
 
@@ -806,7 +807,7 @@ public class Controller {
 					// visualisation
 					double sub_count = 0;
 
-					if (level < tableLevel[index]) {
+					if (!isLeaf) {
 						// if there is another level, call function
 						// alpha_codes_middle to fill the rest of the values
 						sub_count = alpha_codes_middle(hierarchy, level + 1,
@@ -817,6 +818,18 @@ public class Controller {
 						// index);
 						// sub_count = Double.parseDouble(string_sub_count);
 						sub_count = alpha_count(alpha_code, index);
+						
+						/**
+						 * store count ids to labels
+						 */
+//						label.countIDs.clear();
+						String sql = "SELECT * FROM  " + linkTableName[index]
+								+ " WHERE " + columnName[index] + " = " + alpha_code.substring(3);
+						ResultSet rr = m_model.getMyQuery(sql);
+						while(rr.next()){
+							label.countIDs.add(rr.getInt(2));
+						}
+						
 					}
 
 					// go an edit this labels bar
@@ -883,9 +896,10 @@ public class Controller {
 				// add the label
 				Integer x = hierarchy.getMap().get(alpha_code);
 				AMLabel label;
+				boolean isLeaf = data.getBoolean("isLeaf");
 				if(x==null){
 					label = addLabel(alpha_code, data.getString("label"),
-							hierarchy, level, parent_id,par);					
+							hierarchy, level,isLeaf, parent_id,par);					
 				}
 				else{
 					label = (AMLabel) hierarchy.getInnerhierarchy().getComponent(x);
@@ -893,13 +907,25 @@ public class Controller {
 				// now go and add the rest of the hierarchy to the visualisation
 				double sub_count;
 
-				if (level < tableLevel[index]) {
+				if (!isLeaf) {
 					sub_count = alpha_codes_middle(hierarchy, level + 1,
 							alpha_code,label, left_padding + 15, index);
+					par.countIDs.addAll(label.countIDs);
 				} else {
 					// String string_sub_count = alpha_count(alpha_code, index);
 					// sub_count = Double.parseDouble(string_sub_count);
 					sub_count = alpha_count(alpha_code, index);
+					/**
+					 * store count ids to labels
+					 */
+//					label.countIDs.clear();
+					String sql = "SELECT * FROM  " + linkTableName[index]
+							+ " WHERE " + columnName[index] + " = " + alpha_code.substring(3);
+					ResultSet rr = m_model.getMyQuery(sql);
+					while(rr.next()){
+						label.countIDs.add(rr.getInt(2));
+					}
+					par.countIDs.addAll(label.countIDs);
 				}
 
 				// edit the bar now we have the data
@@ -1149,23 +1175,27 @@ public class Controller {
 			}
 		} catch (SQLException e) {
 
-		}
+		}		
 		return count.doubleValue();
 	}
 
-	public HashSet<Integer> alpha_count_nonWeighted(int id, int index,int level,AMLabel par){
+	public HashSet<Integer> alpha_count_nonWeighted(int id, int index,int level,boolean isLeaf, AMLabel par){
 		HashSet<Integer> ids=new HashSet<Integer>();
-		if(level==tableLevel[index]){
+		if(isLeaf){
 			String query = "SELECT " + column + " FROM  " + linkTableName[index]
 					+ " WHERE " + columnName[index] + " = " + id;
 			ResultSet rs = m_model.getMyQuery(query);
 			try {
-				while(rs.next())ids.add(rs.getInt(1));
+				while(rs.next()){
+					ids.add(rs.getInt(1));
+					par.countIDs.add(rs.getInt(1));
+				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			
 		}
-		else if(level<tableLevel[index]){
+		else {
 			Hierarchy hierarchy=m_view.hierarchies.get(index);
 			int hierarchy_num = index+1;
 			String lbl_str = hierarchy_num + "00" + id;
@@ -1181,7 +1211,7 @@ public class Controller {
 					AMLabel label;
 					if(x==null){
 						label = addLabel(alpha_code, rs.getString("label"),
-							hierarchy, level+1, lbl_str,par);
+							hierarchy, level+1,rs.getBoolean("isLeaf"), lbl_str,par);
 					}
 					else{
 						label = (AMLabel) hierarchy.getInnerhierarchy().getComponent(x);
@@ -1191,7 +1221,8 @@ public class Controller {
 
 					double sub_count;
 					
-					cids = this.alpha_count_nonWeighted(rs.getInt(1), index, level+1,label);
+					cids = this.alpha_count_nonWeighted(rs.getInt(1), index, level+1,rs.getBoolean("isLeaf"), label);
+					
 					sub_count = cids.size();
 					
 					// edit the bar now we have the data
@@ -1200,6 +1231,7 @@ public class Controller {
 					label.clearThisSet(false);
 					
 					ids.addAll(cids);
+					if(par!=null)par.countIDs.addAll(cids);
 				}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -1280,67 +1312,67 @@ public class Controller {
 	 *            - index for the correct tableName
 	 * @return - the query to be executed
 	 */
-	public String alpha_code(AMLabel label, int index) {
-
-		index--;
-
-		// get the code
-		String alpha_code = label.getUniqueID();
-		alpha_code = alpha_code.substring(3);
-		String query = "";
-		int c = tableLevel[index] - label.getLevel();
-
-		// changed by qiang
-		if (c == 0)
-			query = "SELECT idhierarchy FROM " + tableName[index]
-					+ " WHERE idhierarchy = " + alpha_code + " ";
-		// else if (c == 1)
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE parentid = " + alpha_code + " ";
-		else if (c > 0) {
-			query = alpha_code;
-			for (int i = 0; i < c; i++) {
-				query = "SELECT idhierarchy FROM " + tableName[index]
-						+ " WHERE parentid in (" + query + ") ";
-			}
-		}
-
-		// compact it --qiang
-		// if (tableLevel[index] == 1) {
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE idhierarchy = " + alpha_code + " ";
-		// }
-		//
-		// else if (tableLevel[index] == 2) {
-		//
-		// if (label.getLevel() == 1)
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE parentid = " + alpha_code + " ";
-		//
-		// else if (label.getLevel() >= 2)
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE idhierarchy = " + alpha_code + " ";
-		// }
-		//
-		// else if (tableLevel[index] == 3) {
-		//
-		// if (label.getLevel() == 1)
-		// // query = "SELECT idhierarchy FROM " + tableName[index] +
-		// // " WHERE parentid in (select idhierarchy from " + tableName[index]
-		// // +
-		// // " where parentid = " +alpha_code+ ") ";
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE parentid = " + alpha_code + " ";
-		// else if (label.getLevel() == 2)
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE parentid = " + alpha_code + " ";
-		//
-		// else if (label.getLevel() == 3)
-		// query = "SELECT idhierarchy FROM " + tableName[index]
-		// + " WHERE idhierarchy = " + alpha_code + " ";
-		// }
-		return query;
-	}
+//	public String alpha_code(AMLabel label, int index) {
+//
+//		index--;
+//
+//		// get the code
+//		String alpha_code = label.getUniqueID();
+//		alpha_code = alpha_code.substring(3);
+//		String query = "";
+//		int c = tableLevel[index] - label.getLevel();
+//
+//		// changed by qiang
+//		if (c == 0)
+//			query = "SELECT idhierarchy FROM " + tableName[index]
+//					+ " WHERE idhierarchy = " + alpha_code + " ";
+//		// else if (c == 1)
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE parentid = " + alpha_code + " ";
+//		else if (c > 0) {
+//			query = alpha_code;
+//			for (int i = 0; i < c; i++) {
+//				query = "SELECT idhierarchy FROM " + tableName[index]
+//						+ " WHERE parentid in (" + query + ") ";
+//			}
+//		}
+//
+//		// compact it --qiang
+//		// if (tableLevel[index] == 1) {
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE idhierarchy = " + alpha_code + " ";
+//		// }
+//		//
+//		// else if (tableLevel[index] == 2) {
+//		//
+//		// if (label.getLevel() == 1)
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE parentid = " + alpha_code + " ";
+//		//
+//		// else if (label.getLevel() >= 2)
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE idhierarchy = " + alpha_code + " ";
+//		// }
+//		//
+//		// else if (tableLevel[index] == 3) {
+//		//
+//		// if (label.getLevel() == 1)
+//		// // query = "SELECT idhierarchy FROM " + tableName[index] +
+//		// // " WHERE parentid in (select idhierarchy from " + tableName[index]
+//		// // +
+//		// // " where parentid = " +alpha_code+ ") ";
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE parentid = " + alpha_code + " ";
+//		// else if (label.getLevel() == 2)
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE parentid = " + alpha_code + " ";
+//		//
+//		// else if (label.getLevel() == 3)
+//		// query = "SELECT idhierarchy FROM " + tableName[index]
+//		// + " WHERE idhierarchy = " + alpha_code + " ";
+//		// }
+//		return query;
+//	}
 
 	/**
 	 * Update the black bars after the count type has been changed for the top
@@ -1350,72 +1382,72 @@ public class Controller {
 	 *            The hierarchy to be updated
 	 */
 
-	public void recount_top(Hierarchy hierarchy) {
-
-		// Specify which level this is
-		int level = 1;
-
-		// Get the hashmap for this hierarchy
-		HashMap<String, Integer> map = hierarchy.getMap();
-
-		int t_index = hierarchy.getId() - 1;
-
-		// First get all of the top level FOR codes
-		ResultSet data = m_model.getTopLevel(tableName[t_index]);
-
-		// Loop through the results
-		try {
-
-			while (data.next()) {
-
-				// Get the data
-				String alpha_code = data.getString(1);
-
-				// adding the substring 100/200/300.. depending on the
-				// hierarchy_num to make
-				// indivdual idhierarchy unique
-				alpha_code = hierarchy.getId() + "00" + alpha_code;
-
-				if (map.containsKey(alpha_code)) {
-
-					if (level < tableLevel[t_index]) {
-						// now go and get the results
-						float count = recount_middle(hierarchy, level + 1,
-								alpha_code, map);
-						Integer index = map.get(alpha_code);
-						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
-								.getComponent(index);
-
-						// edit the bar now we have the count
-						m_view.bar_edit(count, hierarchy, label);
-					}
-
-					else {
-
-						// String string_count = alpha_count(alpha_code,
-						// t_index);
-						// double count = Double.parseDouble(string_count);
-
-						double count = alpha_count(alpha_code, t_index);
-
-						// edit the bar now
-						Integer index = map.get(alpha_code);
-
-						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
-								.getComponent(index);
-
-						m_view.bar_edit(count, hierarchy, label);
-					}
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			Custom_Messages.display_error(m_view, tableName[0],
-					"An error has occured trying to get the data for the top level of the "
-							+ tableName[0]);
-			e.printStackTrace();
-		}
-	}
+//	public void recount_top(Hierarchy hierarchy) {
+//
+//		// Specify which level this is
+//		int level = 1;
+//
+//		// Get the hashmap for this hierarchy
+//		HashMap<String, Integer> map = hierarchy.getMap();
+//
+//		int t_index = hierarchy.getId() - 1;
+//
+//		// First get all of the top level FOR codes
+//		ResultSet data = m_model.getTopLevel(tableName[t_index]);
+//
+//		// Loop through the results
+//		try {
+//
+//			while (data.next()) {
+//
+//				// Get the data
+//				String alpha_code = data.getString(1);
+//
+//				// adding the substring 100/200/300.. depending on the
+//				// hierarchy_num to make
+//				// indivdual idhierarchy unique
+//				alpha_code = hierarchy.getId() + "00" + alpha_code;
+//
+//				if (map.containsKey(alpha_code)) {
+//
+//					if (level < tableLevel[t_index]) {
+//						// now go and get the results
+//						float count = recount_middle(hierarchy, level + 1,
+//								alpha_code, map);
+//						Integer index = map.get(alpha_code);
+//						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
+//								.getComponent(index);
+//
+//						// edit the bar now we have the count
+//						m_view.bar_edit(count, hierarchy, label);
+//					}
+//
+//					else {
+//
+//						// String string_count = alpha_count(alpha_code,
+//						// t_index);
+//						// double count = Double.parseDouble(string_count);
+//
+//						double count = alpha_count(alpha_code, t_index);
+//
+//						// edit the bar now
+//						Integer index = map.get(alpha_code);
+//
+//						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
+//								.getComponent(index);
+//
+//						m_view.bar_edit(count, hierarchy, label);
+//					}
+//				}
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//			Custom_Messages.display_error(m_view, tableName[0],
+//					"An error has occured trying to get the data for the top level of the "
+//							+ tableName[0]);
+//			e.printStackTrace();
+//		}
+//	}
 
 	/**
 	 * Count the middle level hierarchy. If more levels exist, function is
@@ -1431,79 +1463,79 @@ public class Controller {
 	 *            - the Hashmap
 	 * @return - the number of elements counted
 	 */
-	public float recount_middle(Hierarchy hierarchy, int level, String parent,
-			HashMap<String, Integer> map) {
-
-		float summary = 0;
-
-		int t_index = hierarchy.getId() - 1;
-
-		// stripping of the characters 100/200/300 that were added in the code
-		// for the next query
-		// storing it in a temporary variable parent
-		parent = parent.substring(3);
-
-		// First get all of the middle level FOR codes
-		ResultSet data = m_model.getMiddleLevel(tableName[t_index], parent);
-
-		// Loop through the results
-		try {
-
-			while (data.next()) {
-
-				// get the data
-				String alpha_code = data.getString(1);
-
-				// adding the substring 100/200/300.. depending on the
-				// hierarchy_num to make
-				// indivdual idhierarchy unique
-				alpha_code = hierarchy.getId() + "00" + alpha_code;
-
-				if (map.containsKey(alpha_code)) {
-
-					if (level < tableLevel[t_index]) {
-						// now go and get the results
-						float count = recount_middle(hierarchy, level + 1,
-								alpha_code, map);
-
-						Integer index = map.get(alpha_code);
-						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
-								.getComponent(index);
-
-						// edit the bar now we have the count
-						m_view.bar_edit(count, hierarchy, label);
-
-						summary += count;
-					} else {
-
-						// String string_count = alpha_count(alpha_code,
-						// t_index);
-						// double count = Double.parseDouble(string_count);
-
-						double count = alpha_count(alpha_code, t_index);
-
-						// edit the bar now
-						Integer index = map.get(alpha_code);
-
-						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
-								.getComponent(index);
-
-						m_view.bar_edit(count, hierarchy, label);
-						summary += count;
-					}
-				}
-			}
-
-			return summary;
-
-		} catch (SQLException e) {
-			Custom_Messages.display_error(m_view, tableName[0],
-					"An error has occured get the middle level of the "
-							+ tableName[0]);
-			e.printStackTrace();
-		}
-		return summary;
-	}
+//	public float recount_middle(Hierarchy hierarchy, int level, String parent,
+//			HashMap<String, Integer> map) {
+//
+//		float summary = 0;
+//
+//		int t_index = hierarchy.getId() - 1;
+//
+//		// stripping of the characters 100/200/300 that were added in the code
+//		// for the next query
+//		// storing it in a temporary variable parent
+//		parent = parent.substring(3);
+//
+//		// First get all of the middle level FOR codes
+//		ResultSet data = m_model.getMiddleLevel(tableName[t_index], parent);
+//
+//		// Loop through the results
+//		try {
+//
+//			while (data.next()) {
+//
+//				// get the data
+//				String alpha_code = data.getString(1);
+//
+//				// adding the substring 100/200/300.. depending on the
+//				// hierarchy_num to make
+//				// indivdual idhierarchy unique
+//				alpha_code = hierarchy.getId() + "00" + alpha_code;
+//
+//				if (map.containsKey(alpha_code)) {
+//
+//					if (level < tableLevel[t_index]) {
+//						// now go and get the results
+//						float count = recount_middle(hierarchy, level + 1,
+//								alpha_code, map);
+//
+//						Integer index = map.get(alpha_code);
+//						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
+//								.getComponent(index);
+//
+//						// edit the bar now we have the count
+//						m_view.bar_edit(count, hierarchy, label);
+//
+//						summary += count;
+//					} else {
+//
+//						// String string_count = alpha_count(alpha_code,
+//						// t_index);
+//						// double count = Double.parseDouble(string_count);
+//
+//						double count = alpha_count(alpha_code, t_index);
+//
+//						// edit the bar now
+//						Integer index = map.get(alpha_code);
+//
+//						AMLabel label = (AMLabel) hierarchy.getInnerhierarchy()
+//								.getComponent(index);
+//
+//						m_view.bar_edit(count, hierarchy, label);
+//						summary += count;
+//					}
+//				}
+//			}
+//
+//			return summary;
+//
+//		} catch (SQLException e) {
+//			Custom_Messages.display_error(m_view, tableName[0],
+//					"An error has occured get the middle level of the "
+//							+ tableName[0]);
+//			e.printStackTrace();
+//		}
+//		return summary;
+//	}
 
 	/* CHANGE THE COUNTER FUNCTIONS */
 
@@ -1972,66 +2004,69 @@ public class Controller {
 		}
 
 	}
-
 	// Base on the selections of Hierarchy entries,
 	// get the searching string and selected entry ids
 	public HashSet<Integer> getSearchingCountIdsForHierarchy(Hierarchy h,
 			HashSet<Integer> itemids) {
 		HashSet<Integer> cids = new HashSet<Integer>();
 
-		ArrayList<String> lst = new ArrayList<String>();
-		ArrayList<HashSet<Integer>> rowids = new ArrayList<HashSet<Integer>>();
 		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
-//			System.out.println(item.getKey().getText() + " : "
-//					+ item.getValue());
-			if (item.getValue() != 0) {
-				AMLabel lbl = item.getKey();
-				String str = alpha_code(lbl, h.getId());
-				lst.add(str);
-				HashSet<Integer> row = new HashSet<Integer>();
-				rowids.add(row);
-
-				ResultSet trs = m_model.getMyQuery(str);
-				try {
-					while (trs.next()) {
-						itemids.add(trs.getInt(1));
-						row.add(trs.getInt(1));
-					}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			if(cids.size()==0)cids.addAll(item.getKey().countIDs);
+			else cids = intersectionOf(cids,item.getKey().countIDs);
 		}
-
-		String sql = "select " + this.column + " from "
-				+ linkTableName[h.getId() - 1] + " where 1=1 ";
-		boolean has = false;
-
-		for (HashSet<Integer> row : rowids) {
-			if (row.size() == 0)
-				continue;
-			String msql = sql + " and " + columnName[h.getId() - 1] + " in (";
-			for (int i : row) {
-				msql += i + ",";
-			}
-			msql = msql.substring(0, msql.length() - 1) + ")";
-			ResultSet mrs = m_model.getMyQuery(msql);
-			HashSet<Integer> rowcids = new HashSet<Integer>();
-			try {
-				while (mrs.next())
-					rowcids.add(mrs.getInt(1));
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if (has) {
-				cids = intersectionOf(cids, rowcids);
-			} else {
-				cids = rowcids;
-				has = true;
-			}
-		}
+		
+//		ArrayList<String> lst = new ArrayList<String>();
+//		ArrayList<HashSet<Integer>> rowids = new ArrayList<HashSet<Integer>>();
+//		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
+////			System.out.println(item.getKey().getText() + " : "
+////					+ item.getValue());
+//			if (item.getValue() != 0) {
+//				AMLabel lbl = item.getKey();				
+//				HashSet<Integer> row = new HashSet<Integer>();
+//				rowids.add(row);				
+//				String str = alpha_code(lbl, h.getId());
+//				lst.add(str);
+//				ResultSet trs = m_model.getMyQuery(str);
+//				try {
+//					while (trs.next()) {
+//						itemids.add(trs.getInt(1));
+//						row.add(trs.getInt(1));
+//					}
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+////				}
+//			}
+//		}
+//
+//		String sql = "select " + this.column + " from "
+//				+ linkTableName[h.getId() - 1] + " where 1=1 ";
+//		boolean has = false;
+//
+//		for (HashSet<Integer> row : rowids) {
+//			if (row.size() == 0)
+//				continue;
+//			String msql = sql + " and " + columnName[h.getId() - 1] + " in (";
+//			for (int i : row) {
+//				msql += i + ",";
+//			}
+//			msql = msql.substring(0, msql.length() - 1) + ")";
+//			ResultSet mrs = m_model.getMyQuery(msql);
+//			HashSet<Integer> rowcids = new HashSet<Integer>();
+//			try {
+//				while (mrs.next())
+//					rowcids.add(mrs.getInt(1));
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			if (has) {
+//				cids = intersectionOf(cids, rowcids);
+//			} else {
+//				cids = rowcids;
+//				has = true;
+//			}
+//		}
 
 		return cids;
 	}

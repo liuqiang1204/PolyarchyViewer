@@ -1,0 +1,4 @@
+To setup car database in your mysql:
+1. put the carDB_Since2000_20130208.csv to somewhere you know
+2. edit CarDB.sql at line 24 ("LOAD DATA LOCAL INFILE 'd:\\carDB_Since2000_20130208.csv'"), change to your path.
+3. run the CarDB.sql in the MySQL Workbench.

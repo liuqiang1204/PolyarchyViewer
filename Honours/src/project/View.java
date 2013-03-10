@@ -528,7 +528,7 @@ public class View extends JFrame {
 	 *            - the parent id for this label
 	 * @return - the Label that was created
 	 */
-	public AMLabel addLabel(Hierarchy hierarchy, int level, String name,
+	public AMLabel addLabel(Hierarchy hierarchy, int level,boolean isLeaf, String name,
 			String id, String its_parent) {
 
 		// remove any of the white space in the string
@@ -556,7 +556,7 @@ public class View extends JFrame {
 		label.parent(its_parent);
 
 		// add the label to the correct position
-		addLabel(level, label, hierarchy);
+		addLabel(level, isLeaf, label, hierarchy);
 
 		// return the new label
 		return label;
@@ -574,7 +574,7 @@ public class View extends JFrame {
 	 * @param this_hierarchy
 	 *            - The hierarchy that the label will be added to
 	 */
-	public void addLabel(int this_level, AMLabel label, Hierarchy this_hierarchy) {
+	public void addLabel(int this_level, boolean isLeaf, AMLabel label, Hierarchy this_hierarchy) {
 
 		// The padding required externally for the label
 		int padding = 0;
@@ -643,15 +643,16 @@ public class View extends JFrame {
 		// set image parent
 		image.parent(label.getParent_id());
 
-		// The bottom level is a bullet, the others are normal roll images
-		if (this_level != this_hierarchy.getMaxlevels()) {
-
-			image.setBullet(false);
-
-		} else {
-			image.setBullet(true);
-//			padding += 5;
-		}
+//		// The bottom level is a bullet, the others are normal roll images
+//		if (this_level != this_hierarchy.getMaxlevels()) {
+//
+//			image.setBullet(false);
+//
+//		} else {
+//			image.setBullet(true);
+////			padding += 5;
+//		}
+		image.setBullet(isLeaf);
 
 		// insert some padding on the side so make it consistent
 		constraint.insets = new Insets(0, padding, 0, panel.getWidth()
