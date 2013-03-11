@@ -218,7 +218,7 @@ public class Java_Connector {
 		ResultSet result_set = null;
 
 //		long st = System.currentTimeMillis();
-		System.out.println("getMyQuery:: " + query);
+//		System.out.println("getMyQuery:: " + query);
 
 		// Try and execute the query
 		try {

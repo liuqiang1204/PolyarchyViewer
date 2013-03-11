@@ -652,7 +652,7 @@ public class View extends JFrame {
 //			image.setBullet(true);
 ////			padding += 5;
 //		}
-		image.setBullet(isLeaf);
+		
 
 		// insert some padding on the side so make it consistent
 		constraint.insets = new Insets(0, padding, 0, panel.getWidth()
@@ -726,6 +726,11 @@ public class View extends JFrame {
 		// Set the padding for the other to labels
 		label.setLeft_padding(padding);
 		bar.setLeft_padding(padding);
+		
+		//set bullet
+		image.setBullet(isLeaf);
+		label.setBullet(isLeaf);
+		bar.setBullet(isLeaf);
 	}
 
 	/**

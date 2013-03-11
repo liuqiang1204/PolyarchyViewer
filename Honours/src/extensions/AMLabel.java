@@ -193,6 +193,7 @@ public class AMLabel extends JLabel {
 
 	public AMLabel parent = null;
 	public HashSet<AMLabel> children = new HashSet<AMLabel>();
+	public HashSet<AMLabel> leaves = new HashSet<AMLabel>();
 	public HashSet<Integer> countIDs = new HashSet<Integer>();
 
 	// public boolean is_checkboxShowed = false;

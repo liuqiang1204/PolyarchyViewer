@@ -16,5 +16,5 @@ public class GlobalConstants {
 	public static Color proporion_barColor = Color.black;
 	public static Color font_nonResultColor = Color.LIGHT_GRAY;
 	public static Color font_resultColor = Color.black;
-	public static Color floating_Color = new Color(150,150,255,255);
+	public static Color floating_Color = new Color(255,0,0,255);
 }

@@ -721,10 +721,10 @@ public class Controller {
 		label.getIts_image().addMouseMotionListener(ml_floating);
 
 		// If we have an image then add the listener to that to
-		if (label.isHas_image()) {
-			label.getIts_image().addMouseListener(
-					new Interaction_Mouse_Listener());
-		}
+//		if (label.isHas_image()) {
+//			label.getIts_image().addMouseListener(
+//					new Interaction_Mouse_Listener());
+//		}
 
 		// the label that was created
 		return label;
@@ -1610,8 +1610,8 @@ public class Controller {
 	 */
 	class Interaction_Mouse_Listener extends MouseAdapter {
 		public void mousePressed(MouseEvent e) {
-			AMLabel lbl = (AMLabel) e.getComponent();
-			AMLabelInteractions(1, lbl);
+//			AMLabel lbl = (AMLabel) e.getComponent();
+//			AMLabelInteractions(1, lbl);
 		}
 
 		public void mouseReleased(MouseEvent e) {
@@ -1637,7 +1637,7 @@ public class Controller {
 				if (SwingUtilities.isLeftMouseButton(e))
 					AMLabelInteractions(5, lbl);
 				// right click
-				if (SwingUtilities.isRightMouseButton(e))
+				else if (SwingUtilities.isRightMouseButton(e))
 					AMLabelInteractions(6, lbl);
 			}
 			// double click
@@ -1681,6 +1681,7 @@ public class Controller {
 
 		switch (status) {
 		case 1: // press
+//			System.out.println("Press:"+lbl.originalText);
 			break;
 		case 2: // release
 			break;
@@ -1700,6 +1701,7 @@ public class Controller {
 			}
 			break;
 		case 5: // left clicked
+//			System.out.println("Clicked:"+lbl.originalText);
 			if (lbl.is_expanded) {
 				lbl.is_expanded = false;
 			} else {
@@ -1823,6 +1825,7 @@ public class Controller {
 		}
 	}
 	public void perform_connection() {
+//		long st = System.currentTimeMillis();
 		// step 0:clear count, reserved ids, etc.
 		for (Hierarchy h : m_view.hierarchies) {
 			h.intersectionOfCountIds.clear();
@@ -1831,13 +1834,13 @@ public class Controller {
 			h.clearCount();
 			h.pane_proportion.clearAll();
 		}
+//		System.out.println("-----Cleaning time(ms):"+(System.currentTimeMillis()-st));
 		// step 1: get the intersection of publictions and ids
 		boolean has = false;
 		HashSet<Integer> intersectionOfCountIds = new HashSet<Integer>();
 		for (Hierarchy h : m_view.hierarchies) {
 			if (h.isVisible() && !h.searchingItems.isEmpty()) {
-				h.intersectionOfCountIds = getSearchingCountIdsForHierarchy(h,
-						h.selectedItemIds);
+				h.intersectionOfCountIds = getSearchingCountIdsForHierarchy(h);
 				if (!has) {
 					intersectionOfCountIds.addAll(h.intersectionOfCountIds);
 					has = true;
@@ -1847,12 +1850,12 @@ public class Controller {
 				}
 			}
 		}
-
+//		System.out.println("Getting intersections time(ms):"+(System.currentTimeMillis()-st));
 		// store the ids
 		this.incIds.clear();
 		this.incIds.addAll(intersectionOfCountIds);
 		this.updateInfo();
-
+//		System.out.println("Update info time(ms):"+(System.currentTimeMillis()-st));
 		// none intersection ids
 		if (intersectionOfCountIds.isEmpty())
 			return;
@@ -1866,30 +1869,39 @@ public class Controller {
 		}
 		if (allempty)
 			return;
-
+//		System.out.println("Total weighted 0 time(ms):"+(System.currentTimeMillis()-st));
 		// step 2: compute total weighted value for each hierarchy and each
 		// count
 		String idStr = "";
+		
 		if (!intersectionOfCountIds.isEmpty()) {
-			idStr += " and " + this.column + " in (";
-			for (Integer i : intersectionOfCountIds)
-				idStr += i + ",";
-			idStr = idStr.substring(0, idStr.length() - 1) + ")";
+			
+			String ss = intersectionOfCountIds.toString();
+			ss=ss.substring(1, ss.length()-1);
+			
+			idStr += " and " + this.column + " in (" + ss +")";
+//			for (Integer i : intersectionOfCountIds)
+//				idStr += i + ",";
+//			idStr = idStr.substring(0, idStr.length() - 1) + ")";
 		}
-
+//		System.out.println("Total weighted 1 time(ms):"+(System.currentTimeMillis()-st));
 		for (Hierarchy h : m_view.hierarchies) {
-			if (h.isVisible() && !h.selectedItemIds.isEmpty())
+			if (h.isVisible() && !h.selectedItemIds.isEmpty()){
 				h.totalWeightedValue = getTotalWeightedValue(h, idStr,
 						h.selectedItemIds);
+			}
 		}
 
+//		System.out.println("Total weighted 2 time(ms):"+(System.currentTimeMillis()-st));
+		
 		// compute and display each entry
 		for (Hierarchy h : m_view.hierarchies)
 			if(h.isVisible())computeEntry(h, idStr, m_view.hierarchies);
-		
+//		System.out.println("Computing entry time(ms):"+(System.currentTimeMillis()-st));
 		//update the proportion panel
 		for (Hierarchy h : m_view.hierarchies)
 			if(h.isVisible())this.update_proportion(h);
+//		System.out.println("Update proportion time(ms):"+(System.currentTimeMillis()-st));
 		
 	}
 
@@ -2004,15 +2016,35 @@ public class Controller {
 		}
 
 	}
+	
+	public void getAllLabelLeaves(AMLabel lbl){
+		lbl.leaves.clear();
+		if(lbl.isBullet())lbl.leaves.add(lbl);
+		else{
+			for(AMLabel l:lbl.children){
+				if(l.isBullet())lbl.leaves.add(l);
+				else{
+					getAllLabelLeaves(l);
+					lbl.leaves.addAll(l.leaves);
+				}
+			}
+		}
+	}
 	// Base on the selections of Hierarchy entries,
 	// get the searching string and selected entry ids
-	public HashSet<Integer> getSearchingCountIdsForHierarchy(Hierarchy h,
-			HashSet<Integer> itemids) {
+	public HashSet<Integer> getSearchingCountIdsForHierarchy(Hierarchy h) {
 		HashSet<Integer> cids = new HashSet<Integer>();
 
 		for (Entry<AMLabel, Integer> item : h.searchingItems.entrySet()) {
-			if(cids.size()==0)cids.addAll(item.getKey().countIDs);
+			AMLabel lbl = item.getKey();
+			if(cids.size()==0)cids.addAll(lbl.countIDs);
 			else cids = intersectionOf(cids,item.getKey().countIDs);
+			
+			this.getAllLabelLeaves(lbl);
+//			System.out.println("--Leaves:"+lbl.originalText+" : "+lbl.leaves.size());
+			for(AMLabel l:lbl.leaves){
+				h.selectedItemIds.add(Integer.parseInt(l.getUniqueID().substring(3)));
+			}
 		}
 		
 //		ArrayList<String> lst = new ArrayList<String>();
@@ -2074,12 +2106,14 @@ public class Controller {
 	public HashMap<Integer, Double> getTotalWeightedValue(Hierarchy h,
 			String idstr, HashSet<Integer> itemids) {
 		HashMap<Integer, Double> r = new HashMap<Integer, Double>();
-		int index = h.getId() - 1;
+//		System.out.println("---11111--");
+
 		// if it is not weighted then return. use 1.0 for the later computing.
 		if (!h.isWeighted.isSelected())
 			return r;
-
+//		System.out.println("---22222--");
 		// weighted
+		int index = h.getId() - 1;
 		String inputs = "where 1=1 ";
 		if (idstr.equals(""))
 			return r;
@@ -2368,7 +2402,11 @@ public class Controller {
 		
 		//update result size for two place: top label & flowable pane near mouse cursor
 		m_view.lbl_nResults.setText(incIds.size()+"");
-		m_view.lbl_floating.setText(incIds.size()+"");
+		if(incIds.isEmpty()){
+			m_view.win_floating.setVisible(true);
+			m_view.lbl_floating.setText(incIds.size()+"");
+		}else
+			m_view.win_floating.setVisible(false);
 //		// not IMDB or carDB
 //		if (!(ct.equalsIgnoreCase("films")||ct.equalsIgnoreCase("cars"))) {
 //			String msg = "Number of " + ct + " : " + incIds.size() + "\nIDs : ";
@@ -2379,20 +2417,22 @@ public class Controller {
 //			return;
 //		}
 
-		// IMDB or carDB
-		if (this.incIds.isEmpty()) {
-			m_info.setValues(title, "None!");
-			return;
+		
+		if(m_info.isVisible()){
+			if (this.incIds.isEmpty()) {
+				m_info.setValues(title, "None!");
+				return;
+			}
+	
+			String sql = "select * from " + ct + " where " + this.column + " in (";
+			for (int id : this.incIds) {
+				sql += id + ",";
+			}
+			sql = sql.substring(0, sql.length() - 1) + ")";
+	
+			ResultSet rs = m_model.getMyQuery(sql);
+			m_info.setValues(title + " : " + incIds.size(), rs);
 		}
-
-		String sql = "select * from " + ct + " where " + this.column + " in (";
-		for (int id : this.incIds) {
-			sql += id + ",";
-		}
-		sql = sql.substring(0, sql.length() - 1) + ")";
-
-		ResultSet rs = m_model.getMyQuery(sql);
-		m_info.setValues(title + " : " + incIds.size(), rs);
 	}
 	
 	class Hierarchy_Mouse_Listener extends MouseAdapter {
