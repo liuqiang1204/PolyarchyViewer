@@ -226,7 +226,7 @@ public class Controller {
 				tableLevel[i] = rs.getInt(3);
 				i++;
 			}
-
+			rs.close();
 			// based on the count type selected, creating the name of the
 			// linking table
 			count_type = (String) m_view.getCount_options().getSelectedItem();
@@ -239,7 +239,7 @@ public class Controller {
 			rs = m_model.getMyQuery(query1);
 			rs.next();
 			column = rs.getString(3);
-
+			rs.close();
 			// creating query to fetch the linking tables for the selected count
 			// type
 			query1 = "select * from " + count_type;
@@ -262,7 +262,7 @@ public class Controller {
 				columnName[i] = rs.getString(3);
 				i++;
 			}
-
+			rs.close();
 		} catch (SQLException se) {
 			se.printStackTrace();
 		}
@@ -829,7 +829,7 @@ public class Controller {
 						while(rr.next()){
 							label.countIDs.add(rr.getInt(2));
 						}
-						
+						rr.close();
 					}
 
 					// go an edit this labels bar
@@ -838,13 +838,14 @@ public class Controller {
 					// the overall count needs to be updated
 					// overal_count += sub_count;
 				}
+				data.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 				Custom_Messages.display_error(m_view, tableName[0],
 						"An error has occured trying to get the data for the top level of the "
 								+ tableName[0]);
 				e.printStackTrace();
-			}
+			}			
 		}
 		// return overal_count;
 	}
@@ -925,6 +926,7 @@ public class Controller {
 					while(rr.next()){
 						label.countIDs.add(rr.getInt(2));
 					}
+					rr.close();
 					par.countIDs.addAll(label.countIDs);
 				}
 
@@ -935,7 +937,7 @@ public class Controller {
 
 				label.clearThisSet(false);
 			}
-
+			data.close();
 		} catch (SQLException e) {
 			Custom_Messages.display_error(m_view, tableName[0],
 					"An error has occured get the middle level of the "
@@ -1005,6 +1007,7 @@ public class Controller {
 							largest_top = count;
 						}
 					}
+					top_data.close();
 				}
 
 				// if level=2, first find the parent, and for each parent find
@@ -1023,6 +1026,8 @@ public class Controller {
 						// get the columns we need
 						middle_query += top_data.getString(1) + ",";
 					}
+					top_data.close();
+					
 					middle_query = middle_query.substring(0,
 							middle_query.length() - 1)
 							+ ") group by parentid";
@@ -1041,7 +1046,6 @@ public class Controller {
 				// the
 				// child and for them find the max of sum(weighted_sum)
 				else if (tableLevel[index] == 3) {
-
 					String top_query = "select * from " + tableName[index]
 							+ " where parentid = 0";
 					ResultSet top_data = m_model.getMyQuery(top_query);
@@ -1078,6 +1082,7 @@ public class Controller {
 						}
 						end_sum.close();
 					}
+					top_data.close();
 
 				}
 			} else {
@@ -1116,12 +1121,6 @@ public class Controller {
 						rs1.close();
 						if(end_ids.length()>0){
 							end_ids = end_ids.substring(0, end_ids.length() - 1);
-//							for(String s:this.tableName){
-//								System.out.println(s);
-//							}
-//							for(String s:this.linkTableName){
-//								System.out.println(s);
-//							}
 							
 							sql = "select count(distinct " + column + ") from "
 									+ linkTableName[index] + " where "
@@ -1942,6 +1941,8 @@ public class Controller {
 					}
 				}
 
+				
+				
 				String lblid = idpre + eid;
 				if (map.containsKey(lblid)) {
 					// find the index for this unique ID
@@ -1955,6 +1956,7 @@ public class Controller {
 								false, cid);
 				}
 			}
+			rs.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2139,11 +2141,12 @@ public class Controller {
 			while (rs.next()) {
 				r.put(rs.getInt(1), rs.getDouble(2));
 			}
+			rs.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		return r;
 
 	}
@@ -2469,7 +2472,7 @@ public class Controller {
 	public void update_proportion(Hierarchy h){
 		HashMap<String, Integer> map = h.getMap();
 		JPanel panel = h.getInnerhierarchy();
-//		h.pane_proportion.clearAll();
+		h.pane_proportion.clearAll();
 		
 		for(Integer s : map.values()){
 			AMLabel lbl = (AMLabel) panel.getComponent(s);
