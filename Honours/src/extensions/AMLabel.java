@@ -559,32 +559,37 @@ public class AMLabel extends JLabel {
 			//active, use bold font
 			if(active)font=selectableFonts.getMediumFontClick();
 			else font=selectableFonts.getMediumFont();
-			
-			//is search result or not
-			if(is_searchingResult){
-				this.setForeground(GlobalConstants.font_resultColor);
-			}
-			else
-			{
-				this.setForeground(GlobalConstants.font_nonResultColor);
-			}
-			
-			
-			// set label color by different status			
-			if (is_checked){
-				setBackground(GlobalConstants.bar_checkedColor);
-				setForeground(GlobalConstants.font_checkedColor);
-			}
-			else{
-				setBackground(new Color(0,true));
-				setForeground(GlobalConstants.font_normalColor);
-			}			
-
-			
 
 			// set the font for the label
 			setFont(font);
 
+			// set label color by different status			
+			if (is_checked){
+				setBackground(GlobalConstants.bar_checkedColor);
+				if(is_searchingResult) setForeground(GlobalConstants.font_checkedColor);				
+				else setForeground(GlobalConstants.font_nonResultColor);
+			}
+			else{
+				setBackground(new Color(0,true));
+				if(is_searchingResult) setForeground(GlobalConstants.font_normalColor);
+				else setForeground(GlobalConstants.font_nonResultColor);
+			}		
+			
+//			//is search result or not
+//			if(is_searchingResult){
+//				this.setForeground(GlobalConstants.font_resultColor);
+//			}
+//			else
+//			{
+//				this.setForeground(GlobalConstants.font_nonResultColor);
+//			}
+			
+			
+	
+
+			
+
+			
 //			// If it has been counted set the colour -- not used now --Qiang
 //			if (isCounted()) {
 //				setForeground(selectableColours.getOtherColor());

@@ -23,14 +23,14 @@ public class VisualisationMVC {
      * @param args - command line arguments have no effect on the program, yet
      */
     public static void main(String[] args) {
-    	System.out.println("Polyarchy Viewer 0.39\n" +
+    	System.out.println("Polyarchy Viewer 0.40\n" +
     			"Source code is available at https://github.com/liuqiang1204/PolyarchyViewer\n" +
     			"If you have any suggestion, please send email to liuqiang1204@gmail.com\n");
     	
     	//call the login screen
         new LoginScreen("database/databases.ini");
        
-        System.out.println("Thanks for using Polyarchy Viewer 0.39.");
+        System.out.println("Thanks for using Polyarchy Viewer 0.40.");
 
     }
 }

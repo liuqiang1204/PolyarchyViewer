@@ -154,6 +154,9 @@ public class Controller {
 	MouseMotionListener_For_FloatingWin ml_floating = new MouseMotionListener_For_FloatingWin();
 	
 	Interaction_Mouse_Listener lbl_mouselistener = new Interaction_Mouse_Listener();
+	
+	boolean isInHierarchy = false;
+	boolean showingFloatingWin = false;
 
 	// ALTER TABLE `grants_researcher_link` ADD INDEX (`researcher_id`)
 	// ALTER TABLE publications_researcher_link ENGINE = MyISAM
@@ -2405,11 +2408,24 @@ public class Controller {
 		
 		//update result size for two place: top label & flowable pane near mouse cursor
 		m_view.lbl_nResults.setText(incIds.size()+"");
-		if(incIds.isEmpty()){
-			m_view.win_floating.setVisible(true);
-			m_view.lbl_floating.setText(incIds.size()+"");
-		}else
+		boolean f = false;
+		for(Hierarchy h:m_view.hierarchies){
+			if(!h.searchingItems.isEmpty()){
+				f=true;
+				break;
+			}
+		}
+		if(incIds.isEmpty()&&f){
+			this.showingFloatingWin = true;
+			if(this.isInHierarchy){
+				m_view.lbl_floating.setText(incIds.size()+"");
+				m_view.win_floating.setVisible(true);
+			}
+		}else{
+			this.showingFloatingWin = false;
 			m_view.win_floating.setVisible(false);
+		}
+			
 //		// not IMDB or carDB
 //		if (!(ct.equalsIgnoreCase("films")||ct.equalsIgnoreCase("cars"))) {
 //			String msg = "Number of " + ct + " : " + incIds.size() + "\nIDs : ";
@@ -2447,9 +2463,13 @@ public class Controller {
 		}
 		public void mouseEntered(MouseEvent e) {
 			h.SetDetailedLabel(true);
+			isInHierarchy = true;
+			if(showingFloatingWin)m_view.win_floating.setVisible(true);
 		}
 		public void mouseExited(MouseEvent e) {
 			h.SetDetailedLabel(false);
+			isInHierarchy = false;
+			m_view.win_floating.setVisible(false);
 		}
 	}
 	
